@@ -1,0 +1,3377 @@
+import type { Express } from "express";
+import { createServer, type Server } from "http";
+import { storage } from "./storage";
+import { aiService } from "./ai-backup";
+import { generateDefaultBuilderElements } from "./defaultLandingPage";
+import { db } from "./db";
+import { purchaseHistory, users, whiteLabels, referralTracking } from "@shared/schema";
+import { eq, and, desc } from "drizzle-orm";
+
+// Helper function to extract domain from request
+function extractDomainFromRequest(req: any): string {
+  const urlPath = req.originalUrl || req.url;
+  const referer = req.headers.referer || '';
+  
+  console.log(`Domain extraction - URL: ${urlPath}, Referer: ${referer}`);
+  
+  // For API calls, prioritize referer header over URL path
+  let domainPath = null;
+  if (urlPath.startsWith('/api/')) {
+    // For API calls, extract domain from referer
+    const refererMatch = referer.match(/\/([^\/]+)\/affiliate/) || referer.match(/\/([^\/]+)\/user/);
+    domainPath = refererMatch ? refererMatch[1] : null;
+    
+    // If still no match, try broader patterns
+    if (!domainPath) {
+      const broadMatch = referer.match(/https?:\/\/[^\/]+\/([^\/\?]+)/);
+      if (broadMatch && broadMatch[1] !== 'api') {
+        domainPath = broadMatch[1];
+      }
+    }
+  } else {
+    // For regular pages, extract from URL path
+    const urlMatch = urlPath.match(/^\/([^\/]+)\//);
+    domainPath = urlMatch ? urlMatch[1] : null;
+  }
+  
+  console.log(`Extracted domain: "${domainPath}"`);
+  return domainPath || '';
+}
+
+// Authentication middleware with domain context
+function isAuthenticated(req: any, res: any, next: any) {
+  if (req.isAuthenticated()) {
+    const user = req.user;
+    
+    // Special handling for end-users: they need domain-specific authentication
+    if (user?.role === 'end_user' && user?.requiresDomainAuth) {
+      // End-users with domain auth requirements cannot access main app routes
+      return res.status(401).json({ error: "Domain-specific authentication required" });
+    }
+    
+    return next();
+  }
+  res.status(401).json({ error: "Not authenticated" });
+}
+
+// Enhanced authentication middleware that handles both regular and domain-specific authentication
+async function isAuthenticatedWithDomainSupport(req: any, res: any, next: any) {
+  if (req.isAuthenticated()) {
+    const user = req.user;
+    
+    // Extract domain from URL path or referer - prioritize referer for API calls
+    const urlPath = req.originalUrl || req.url;
+    const referer = req.headers.referer || '';
+    
+    // For API calls, prioritize referer header over URL path
+    let domainPath = null;
+    if (urlPath.startsWith('/api/')) {
+      // For API calls, extract domain from referer
+      const refererMatch = referer.match(/\/([^\/]+)\/affiliate/) || referer.match(/\/([^\/]+)\/user/) || referer.match(/\/([^\/]+)$/);
+      domainPath = refererMatch ? refererMatch[1] : null;
+      
+      // Also check for domain-specific API calls (e.g., /api/affiliate/plans/shoot)
+      const apiDomainMatch = urlPath.match(/\/api\/affiliate\/plans\/([^\/]+)/) || urlPath.match(/\/api\/.*\/([^\/]+)$/);
+      if (!domainPath && apiDomainMatch) {
+        domainPath = apiDomainMatch[1];
+      }
+    } else {
+      // For regular pages, extract from URL path
+      const urlMatch = urlPath.match(/^\/([^\/]+)\//);
+      domainPath = urlMatch ? urlMatch[1] : null;
+    }
+    
+    console.log('Domain auth check - URL path:', urlPath, 'Referer:', referer, 'Domain:', domainPath, 'User role:', user?.role);
+    
+    // For white-label clients, allow access regardless of domain
+    if (user?.role === 'white_label_client') {
+      console.log('White-label client access granted');
+      return next();
+    }
+    
+    // For end-users accessing domain-specific routes, validate domain access
+    if (user?.role === 'end_user' && domainPath) {
+      try {
+        const domainSession = await storage.getDomainUserSession(user.id, domainPath);
+        console.log('Domain session check:', domainSession);
+        
+        if (!domainSession || !domainSession.isActive) {
+          console.log('Domain session not found or inactive');
+          return res.status(401).json({ error: 'Not authenticated for this domain' });
+        }
+        
+        // Add domain context to request
+        req.domainContext = {
+          domainPath,
+          whiteLabelId: domainSession.whiteLabelId
+        };
+        console.log('Domain authentication successful');
+        return next();
+      } catch (error) {
+        console.error('Error checking domain authentication:', error);
+        return res.status(401).json({ error: 'Authentication error' });
+      }
+    }
+    
+    // For end-users without domain context, require domain-specific authentication
+    if (user?.role === 'end_user' && user?.requiresDomainAuth) {
+      console.log('Domain authentication required but not provided');
+      return res.status(401).json({ error: "Domain-specific authentication required" });
+    }
+    
+    console.log('Regular authentication successful');
+    return next();
+  }
+  console.log('User not authenticated');
+  res.status(401).json({ error: "Not authenticated" });
+}
+
+// Domain-specific authentication middleware for end-users
+async function isDomainAuthenticated(req: any, res: any, next: any) {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+  
+  const user = req.user;
+  
+  // Extract domain from URL path
+  const urlPath = req.originalUrl || req.url;
+  const domainMatch = urlPath.match(/^\/([^\/]+)\//);
+  const domainPath = domainMatch ? domainMatch[1] : null;
+  
+  // If this is an end-user on a domain-specific route, validate domain access
+  if (user?.role === 'end_user' && domainPath) {
+    try {
+      const domainSession = await storage.getDomainUserSession(user.id, domainPath);
+      if (!domainSession || !domainSession.isActive) {
+        return res.status(401).json({ error: 'Not authenticated for this domain' });
+      }
+      // Add domain context to request
+      req.domainContext = {
+        domainPath,
+        whiteLabelId: domainSession.whiteLabelId
+      };
+    } catch (error) {
+      console.error('Error checking domain authentication:', error);
+      return res.status(401).json({ error: 'Authentication error' });
+    }
+  }
+  
+  next();
+}
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  const server = createServer(app);
+  
+  // REMOVED: Middleware that prevented end-users from accessing main URL
+  // End-users should be able to access the main page freely
+  
+  // Test page for domain registration
+  app.get('/test-shoot-registration', (req, res) => {
+    res.sendFile(process.cwd() + '/test_shoot_registration.html');
+  });
+  
+  // Authentication routes with domain context
+  app.get('/api/auth/user', async (req, res) => {
+    console.log('Auth check - isAuthenticated:', req.isAuthenticated(), 'user:', req.user?.claims?.sub, 'sessionID:', req.sessionID);
+    
+    if (req.isAuthenticated()) {
+      const user = req.user;
+      const domainPath = req.query.domain as string;
+      
+      // For end-users, STRICTLY check domain-specific authentication
+      if (user.role === 'end_user') {
+        // If no domain path provided, deny access
+        if (!domainPath) {
+          return res.status(401).json({ error: 'Domain context required for end-user authentication' });
+        }
+        
+        try {
+          let domainSession = await storage.getDomainUserSession(user.id, domainPath);
+          
+          // Only allow access if user has an active domain session for THIS specific domain
+          if (!domainSession || !domainSession.isActive) {
+            console.log(`End-user ${user.id} denied access to domain ${domainPath} - no active domain session`);
+            return res.status(401).json({ error: 'Not authenticated for this domain' });
+          }
+          
+          // Verify that the domain session matches the user's white-label association
+          const dbUser = await storage.getUserById(user.id);
+          if (!dbUser || !dbUser.whiteLabelId) {
+            return res.status(401).json({ error: 'User not associated with any domain' });
+          }
+          
+          const whiteLabel = await storage.getWhiteLabelById(dbUser.whiteLabelId);
+          if (!whiteLabel || whiteLabel.domainPath !== domainPath) {
+            console.log(`End-user ${user.id} denied access to domain ${domainPath} - domain mismatch`);
+            return res.status(401).json({ error: 'Not authorized for this domain' });
+          }
+          
+          // Add domain context to user response
+          res.json({
+            ...user,
+            domainContext: {
+              domainPath,
+              whiteLabelId: domainSession.whiteLabelId
+            }
+          });
+        } catch (error) {
+          console.error('Error checking domain authentication:', error);
+          return res.status(401).json({ error: 'Authentication error' });
+        }
+      } else {
+        // For non-end-users, return user normally
+        res.json(user);
+      }
+    } else {
+      res.status(401).json({ error: 'Not authenticated' });
+    }
+  });
+
+  // User access permissions endpoint
+  app.get('/api/user/access', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const userId = user?.claims?.sub || user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const dbUser = await storage.getUserById(userId);
+      if (!dbUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Super admins have access to everything
+      if (dbUser.role === 'super_admin') {
+        return res.json({
+          hasCategories: true,
+          hasAffiliates: true,
+          hasLandingPageBuilder: true,
+          planName: 'Super Admin'
+        });
+      }
+
+      // For white-label clients, check their purchased plans for access
+      if (dbUser.role === 'white_label_client') {
+        // Get user's purchased plans and check their accesses
+        const purchasedPlans = await storage.getUserPurchasedPlans(userId);
+        
+        // Collect all accesses from purchased plans
+        const allAccesses = new Set<string>();
+        
+        // Get plan details for all purchased plans
+        for (const plan of purchasedPlans) {
+          if (plan.id) {
+            try {
+              const planDetails = await storage.getPlanById(plan.id);
+              if (planDetails?.accesses) {
+                planDetails.accesses.forEach((access: string) => allAccesses.add(access));
+              }
+            } catch (error) {
+              console.error(`Error fetching plan details for plan ${plan.id}:`, error);
+            }
+          }
+        }
+
+        // If no purchased plans or empty accesses, deny access
+        const hasCategories = allAccesses.has('categories');
+        const hasAffiliates = allAccesses.has('affiliates');
+        const hasLandingPageBuilder = allAccesses.has('landing_page_builder');
+        
+        return res.json({
+          hasCategories,
+          hasAffiliates,
+          hasLandingPageBuilder,
+          planName: purchasedPlans.length > 0 ? purchasedPlans[0].name : 'No Plan'
+        });
+      }
+
+      // Other roles get basic access
+      return res.json({
+        hasCategories: false,
+        hasAffiliates: false,
+        hasLandingPageBuilder: false,
+        planName: null
+      });
+    } catch (error) {
+      console.error('Error checking user access:', error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Domain-specific login route
+  app.get('/api/login', (req, res) => {
+    const { domain } = req.query;
+    
+    // Store domain context in session before authentication
+    if (domain) {
+      req.session.endUserDomainPath = domain as string;
+      console.log('Storing domain context for login:', domain);
+      
+      // Find the white-label client associated with this domain
+      storage.getWhiteLabelByDomainPath(domain as string)
+        .then(whiteLabel => {
+          if (whiteLabel) {
+            req.session.whiteLabelId = whiteLabel.id;
+            console.log('Storing white-label ID for login context:', whiteLabel.id);
+          }
+        })
+        .catch(error => {
+          console.error('Error finding white-label for domain:', error);
+        });
+    }
+    
+    // Store return URL for domain-specific redirect
+    const returnUrl = req.headers.referer || `${req.protocol}://${req.get('host')}/`;
+    req.session.returnUrl = returnUrl;
+    console.log('Storing return URL in session:', returnUrl);
+    
+    // Redirect to authentication
+    res.redirect('/api/auth/login');
+  });
+
+  // Domain-specific logout route
+  app.post('/api/logout', async (req, res) => {
+    const { domain } = req.body;
+    
+    if (req.isAuthenticated()) {
+      const user = req.user;
+      
+      // If logging out from specific domain and user is an end-user
+      if (domain && user.role === 'end_user') {
+        try {
+          // Remove domain-specific session
+          await storage.removeDomainUserSession(user.id, domain);
+          console.log(`Removed domain session for user ${user.id} on domain: ${domain}`);
+          
+          // Don't destroy the main session, just the domain session
+          return res.json({ success: true, message: `Logged out from ${domain}` });
+        } catch (error) {
+          console.error('Error removing domain session:', error);
+          return res.status(500).json({ error: 'Domain logout failed' });
+        }
+      }
+    }
+    
+    // Traditional logout - clear entire session
+    req.logout((err) => {
+      if (err) {
+        console.error('Logout error:', err);
+        return res.status(500).json({ error: 'Logout failed' });
+      }
+      
+      // Clear session
+      req.session.destroy((err) => {
+        if (err) {
+          console.error('Session destruction error:', err);
+          return res.status(500).json({ error: 'Session cleanup failed' });
+        }
+        
+        res.clearCookie('connect.sid');
+        res.json({ message: 'Logged out successfully' });
+      });
+    });
+  });
+
+
+
+  // Global announcements (public)
+  app.get('/api/announcements', async (req, res) => {
+    try {
+      // Get public announcements directly from database without user filtering
+      const publicAnnouncements = await storage.getPublicAnnouncements();
+      res.json(publicAnnouncements);
+    } catch (error) {
+      console.error('Error fetching announcements:', error);
+      res.status(500).json({ error: 'Failed to fetch announcements' });
+    }
+  });
+
+  // Affiliate announcements - only from their white-label client
+  app.get('/api/affiliate/announcements', isAuthenticatedWithDomainSupport, async (req, res) => {
+    try {
+      const user = req.user;
+      let domain = req.query.domain as string;
+      
+      // Extract domain from referer if not provided in query
+      if (!domain) {
+        const referer = req.get('referer');
+        if (referer) {
+          const match = referer.match(/\/([^\/]+)\/affiliate/);
+          if (match) {
+            domain = match[1];
+          }
+        }
+      }
+      
+      if (!domain) {
+        return res.status(400).json({ error: 'Domain parameter required' });
+      }
+      
+      console.log('Fetching announcements for domain:', domain);
+      
+      // Get white-label client for this domain
+      const whiteLabel = await storage.getWhiteLabelByDomain(domain);
+      if (!whiteLabel) {
+        return res.status(404).json({ error: 'White-label client not found for domain' });
+      }
+      
+      console.log('Found white-label client:', whiteLabel.userId, 'for domain:', domain);
+      
+      // Get announcements only from this white-label client
+      const announcements = await storage.getAnnouncementsByUserId(whiteLabel.userId);
+      console.log('Found announcements:', announcements.length);
+      
+      res.json(announcements);
+    } catch (error) {
+      console.error('Error fetching affiliate announcements:', error);
+      res.status(500).json({ error: 'Failed to fetch announcements' });
+    }
+  });
+
+  // Affiliate notifications - announcements, signups, purchases
+  app.get('/api/affiliate/notifications', isAuthenticatedWithDomainSupport, async (req, res) => {
+    try {
+      const user = req.user;
+      let domain = req.query.domain as string;
+      
+      // Extract domain from referer if not provided in query
+      if (!domain) {
+        const referer = req.get('referer');
+        if (referer) {
+          const match = referer.match(/\/([^\/]+)\/affiliate/);
+          if (match) {
+            domain = match[1];
+          }
+        }
+      }
+      
+      if (!domain) {
+        return res.status(400).json({ error: 'Domain parameter required' });
+      }
+      
+      console.log('Fetching notifications for domain:', domain);
+      
+      // Get white-label client for this domain
+      const whiteLabel = await storage.getWhiteLabelByDomain(domain);
+      if (!whiteLabel) {
+        return res.status(404).json({ error: 'White-label client not found for domain' });
+      }
+      
+      console.log('Found white-label client:', whiteLabel.userId, 'for domain:', domain);
+      
+      // Get notifications for this affiliate
+      const notifications = await storage.getAffiliateNotifications(whiteLabel.userId, domain);
+      console.log('Found notifications:', notifications.length);
+      
+      res.json(notifications);
+    } catch (error) {
+      console.error('Error fetching affiliate notifications:', error);
+      res.status(500).json({ error: 'Failed to fetch notifications' });
+    }
+  });
+
+  // Real affiliate data endpoints
+  app.get('/api/top-affiliates', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Get user's white-label client
+      const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
+      if (!whiteLabel) {
+        return res.status(404).json({ error: 'White-label client not found' });
+      }
+
+      // Get top 3 affiliates with lifetime sales data
+      const topAffiliates = await storage.getTopAffiliatesByWhiteLabel(whiteLabel.id, 3);
+      
+      res.json(topAffiliates);
+    } catch (error) {
+      console.error('Error fetching top affiliates:', error);
+      res.status(500).json({ error: 'Failed to fetch top affiliates' });
+    }
+  });
+
+  app.get('/api/affiliate-details/:affiliateId', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      const { affiliateId } = req.params;
+      
+      if (!user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Get affiliate details with lifetime metrics
+      const affiliateDetails = await storage.getAffiliateDetails(affiliateId);
+      
+      if (!affiliateDetails) {
+        return res.status(404).json({ error: 'Affiliate not found' });
+      }
+
+      res.json(affiliateDetails);
+    } catch (error) {
+      console.error('Error fetching affiliate details:', error);
+      res.status(500).json({ error: 'Failed to fetch affiliate details' });
+    }
+  });
+
+  // Commission data endpoint for white-label clients
+  app.get('/api/commissions', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Get user's white-label client
+      const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
+      if (!whiteLabel) {
+        return res.status(404).json({ error: 'White-label client not found' });
+      }
+
+      // Get commission data for all affiliates under this white-label client
+      const commissionData = await storage.getCommissionDataByWhiteLabel(whiteLabel.id);
+      
+      res.json(commissionData);
+    } catch (error) {
+      console.error('Error fetching commission data:', error);
+      res.status(500).json({ error: 'Failed to fetch commission data' });
+    }
+  });
+
+  // Legacy affiliates endpoint - redirect to top-affiliates for compatibility
+  app.get('/api/affiliates', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Get user's white-label client
+      const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
+      if (!whiteLabel) {
+        return res.status(404).json({ error: 'White-label client not found' });
+      }
+
+      // Get all affiliates with lifetime sales data (not just top 3)
+      const allAffiliates = await storage.getTopAffiliatesByWhiteLabel(whiteLabel.id, 100);
+      
+      res.json(allAffiliates);
+    } catch (error) {
+      console.error('Error fetching affiliates:', error);
+      res.status(500).json({ error: 'Failed to fetch affiliates' });
+    }
+  });
+
+  // Super Admin specific endpoints for platform overview
+  app.get('/api/super-admin/white-labels', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Super Admin access required' });
+      }
+
+      // Get all white-label clients with their activity
+      const whiteLabelClients = await storage.getAllWhiteLabelClients();
+      
+      res.json(whiteLabelClients);
+    } catch (error) {
+      console.error('Error fetching white-label clients:', error);
+      res.status(500).json({ error: 'Failed to fetch white-label clients' });
+    }
+  });
+
+  app.get('/api/super-admin/main-site-plans', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Super Admin access required' });
+      }
+
+      // Get only main site plans (created by Super Admin)
+      const mainSitePlans = await storage.getMainSitePlans();
+      
+      res.json(mainSitePlans);
+    } catch (error) {
+      console.error('Error fetching main site plans:', error);
+      res.status(500).json({ error: 'Failed to fetch main site plans' });
+    }
+  });
+
+  app.get('/api/super-admin/plan-analytics', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Super Admin access required' });
+      }
+
+      // Get analytics for main site plans only
+      const planAnalytics = await storage.getMainSitePlanAnalytics();
+      
+      res.json(planAnalytics);
+    } catch (error) {
+      console.error('Error fetching plan analytics:', error);
+      res.status(500).json({ error: 'Failed to fetch plan analytics' });
+    }
+  });
+
+  app.get('/api/super-admin/purchase-history', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Super Admin access required' });
+      }
+
+      // Get purchase history for main site plans only
+      const purchaseHistory = await storage.getMainSitePurchaseHistory();
+      
+      res.json(purchaseHistory);
+    } catch (error) {
+      console.error('Error fetching purchase history:', error);
+      res.status(500).json({ error: 'Failed to fetch purchase history' });
+    }
+  });
+
+  app.get('/api/super-admin/plan-purchasers/:planId', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Super Admin access required' });
+      }
+
+      const { planId } = req.params;
+      const purchasers = await storage.getPlanPurchasers(parseInt(planId));
+      
+      res.json(purchasers);
+    } catch (error) {
+      console.error('Error fetching plan purchasers:', error);
+      res.status(500).json({ error: 'Failed to fetch plan purchasers' });
+    }
+  });
+
+  app.get('/api/super-admin/white-label-tracking', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Super Admin access required' });
+      }
+
+      // Get tracking data for all white-label clients
+      const trackingData = await storage.getWhiteLabelTrackingData();
+      
+      res.json(trackingData);
+    } catch (error) {
+      console.error('Error fetching white-label tracking data:', error);
+      res.status(500).json({ error: 'Failed to fetch white-label tracking data' });
+    }
+  });
+
+  // Create announcement (authenticated)
+  app.post('/api/announcements', isAuthenticated, async (req, res) => {
+    try {
+      const { title, content, isPublic } = req.body;
+      const user = req.user;
+      
+      if (!user || (user.role !== 'super_admin' && user.role !== 'super_admin_affiliate' && user.role !== 'white_label_client')) {
+        return res.status(403).json({ error: 'Unauthorized' });
+      }
+
+      const announcement = await storage.createAnnouncement({
+        title,
+        content,
+        visibility: isPublic !== false ? 'public' : 'private', // Default to public unless explicitly set to false
+        userId: user.id
+      });
+
+      res.json(announcement);
+    } catch (error) {
+      console.error('Error creating announcement:', error);
+      res.status(500).json({ error: 'Failed to create announcement' });
+    }
+  });
+
+  // Like announcement
+  app.post('/api/announcements/:id/like', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const user = req.user;
+      
+      if (!user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+      
+      const result = await storage.toggleAnnouncementLike(parseInt(id), user.id);
+      res.json(result);
+    } catch (error) {
+      console.error('Error liking announcement:', error);
+      res.status(500).json({ error: 'Failed to like announcement' });
+    }
+  });
+
+  // Get comments for announcement
+  app.get('/api/announcements/:id/comments', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const comments = await storage.getAnnouncementComments(parseInt(id));
+      res.json(comments);
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+      res.status(500).json({ error: 'Failed to fetch comments' });
+    }
+  });
+
+  // Add comment to announcement
+  app.post('/api/announcements/:id/comments', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { content } = req.body;
+      const user = req.user;
+      
+      if (!user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+      
+      const comment = await storage.createAnnouncementComment({
+        announcementId: parseInt(id),
+        userId: user.id,
+        content: content
+      });
+      res.json(comment);
+    } catch (error) {
+      console.error('Error adding comment:', error);
+      res.status(500).json({ error: 'Failed to add comment' });
+    }
+  });
+
+  // Plans endpoints
+  app.get('/api/plans', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      let plans = [];
+      
+      if (user.role === 'super_admin') {
+        // Super Admin sees only main site plans (created by Super Admin)
+        const allPlans = await storage.getPlans();
+        plans = allPlans.filter(plan => plan.isMainSitePlan === true);
+      } else {
+        // White-label clients see their own plans
+        plans = await storage.getPlansByUser(user.id);
+      }
+      
+      res.json(plans);
+    } catch (error) {
+      console.error('Error fetching plans:', error);
+      res.status(500).json({ error: 'Failed to fetch plans' });
+    }
+  });
+
+  // Get plan content with categories and products
+  app.get('/api/plans/:id/content', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const planWithContent = await storage.getPlanWithContent(parseInt(id));
+      res.json(planWithContent);
+    } catch (error) {
+      console.error('Error fetching plan content:', error);
+      res.status(500).json({ error: 'Failed to fetch plan content' });
+    }
+  });
+
+  // Public plans endpoint for pricing page
+  app.get('/api/plans/public', async (req, res) => {
+    try {
+      // Show main site plans on homepage pricing section
+      const allPlans = await storage.getPlans();
+      const mainSitePlans = allPlans.filter(plan => plan.isMainSitePlan === true);
+      res.json(mainSitePlans);
+    } catch (error) {
+      console.error('Error fetching public plans:', error);
+      res.status(500).json({ error: 'Failed to fetch plans' });
+    }
+  });
+
+  // Toggle plan visibility endpoint
+  app.post('/api/plans/:id/toggle-visibility', isAuthenticatedWithDomainSupport, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const planId = parseInt(id);
+      
+      // Check if user has permission to toggle this plan
+      const user = req.user;
+      console.log(`Toggle visibility request for plan ${planId} by user:`, {
+        userId: user.id,
+        role: user.role,
+        whiteLabelId: user.whiteLabelId,
+        referer: req.headers.referer,
+        domainContext: req.domainContext
+      });
+      
+      const plan = await storage.getPlan(planId);
+      
+      if (!plan) {
+        console.log(`Plan ${planId} not found`);
+        return res.status(404).json({ error: 'Plan not found' });
+      }
+      
+      console.log(`Plan ${planId} found, created by: ${plan.createdBy}`);
+      
+      // Allow super admins, plan creators, and affiliates to toggle visibility
+      // For affiliates, they can only toggle plans from their associated white-label client
+      if (user.role === 'super_admin' || plan.createdBy === user.id) {
+        console.log('Access granted: Super admin or plan creator');
+        // Full access for super admins and plan creators
+      } else if (user.role === 'end_user' && user.whiteLabelId) {
+        console.log(`Checking affiliate permissions for whiteLabelId: ${user.whiteLabelId}`);
+        // For affiliates (end_users with whiteLabelId), check if plan belongs to their white-label client
+        const whiteLabel = await storage.getWhiteLabelById(user.whiteLabelId);
+        console.log(`White label found:`, whiteLabel ? { id: whiteLabel.id, userId: whiteLabel.userId } : null);
+        
+        if (!whiteLabel || plan.createdBy !== whiteLabel.userId) {
+          console.log(`Access denied: Plan createdBy (${plan.createdBy}) does not match whiteLabel userId (${whiteLabel?.userId})`);
+          return res.status(403).json({ error: 'Unauthorized to modify this plan' });
+        }
+        console.log('Access granted: Affiliate can modify this plan');
+      } else {
+        console.log(`Access denied: Invalid role (${user.role}) or missing whiteLabelId`);
+        return res.status(403).json({ error: 'Unauthorized to modify this plan' });
+      }
+      
+      const updatedPlan = await storage.togglePlanVisibility(planId);
+      console.log(`Plan ${planId} visibility toggled to: ${updatedPlan.isPublic}`);
+      res.json(updatedPlan);
+    } catch (error) {
+      console.error('Error toggling plan visibility:', error);
+      res.status(500).json({ error: 'Failed to toggle plan visibility' });
+    }
+  });
+
+  // Plans analytics endpoint - shows ALL purchases for plan owners
+  app.get('/api/plans/analytics', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      
+      // For white-label clients, show ALL purchases of their plans (including affiliate referrals)
+      if (user.role === 'white_label_client') {
+        const userPlans = await storage.getPlansByUser(user.id);
+        
+        // Create analytics based on ALL purchases of user's plans
+        const planAnalytics = await Promise.all(
+          userPlans.map(async (plan) => {
+            // Get ALL purchases for this plan (not filtered by white-label ID)
+            const allPlanPurchases = await db
+              .select({
+                id: purchaseHistory.id,
+                userId: purchaseHistory.userId,
+                planId: purchaseHistory.planId,
+                amount: purchaseHistory.amount,
+                transactionId: purchaseHistory.transactionId,
+                status: purchaseHistory.status,
+                createdAt: purchaseHistory.createdAt,
+                whiteLabelId: purchaseHistory.whiteLabelId,
+                userEmail: users.email,
+                businessName: whiteLabels.businessName,
+              })
+              .from(purchaseHistory)
+              .leftJoin(users, eq(purchaseHistory.userId, users.id))
+              .leftJoin(whiteLabels, eq(purchaseHistory.whiteLabelId, whiteLabels.id))
+              .where(
+                and(
+                  eq(purchaseHistory.planId, plan.id),
+                  eq(purchaseHistory.status, 'completed')
+                )
+              )
+              .orderBy(desc(purchaseHistory.createdAt));
+
+            const totalSales = allPlanPurchases.length;
+            const totalRevenue = allPlanPurchases.reduce((sum, p) => sum + parseFloat(p.amount || '0'), 0);
+            
+            return {
+              planId: plan.id,
+              planName: plan.name,
+              totalSales,
+              totalRevenue,
+              purchasers: allPlanPurchases.map(p => ({ 
+                userId: p.userId, 
+                email: p.userEmail || p.userId,
+                amount: parseFloat(p.amount || '0'),
+                purchaseDate: p.createdAt,
+                transactionId: p.transactionId || 'N/A',
+                status: p.status || 'completed',
+                businessName: p.businessName || 'Direct Purchase',
+                whiteLabelId: p.whiteLabelId || 0
+              })),
+              recentPurchases: allPlanPurchases.slice(-5).map(p => ({
+                userId: p.userId,
+                email: p.userEmail || p.userId,
+                amount: parseFloat(p.amount || '0'),
+                purchaseDate: p.createdAt,
+                transactionId: p.transactionId || 'N/A',
+                businessName: p.businessName || 'Direct Purchase'
+              }))
+            };
+          })
+        );
+        
+        return res.json(planAnalytics);
+      }
+      
+      // Default behavior for super admins and other users
+      const planAnalytics = await storage.getPlanAnalytics(user.id);
+      res.json(planAnalytics);
+    } catch (error) {
+      console.error('Error fetching plan analytics:', error);
+      res.status(500).json({ error: 'Failed to fetch analytics' });
+    }
+  });
+
+  // Products API endpoints
+  app.get('/api/products', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      const products = await storage.getProductsByUser(user.id);
+      res.json(products);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      res.status(500).json({ error: 'Failed to fetch products' });
+    }
+  });
+
+  app.post('/api/products', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
+      if (!whiteLabel) {
+        return res.status(404).json({ error: 'White label not found' });
+      }
+      
+      const productData = { ...req.body, whiteLabelId: whiteLabel.id, createdBy: user.id };
+      const product = await storage.createProduct(productData);
+      res.json(product);
+    } catch (error) {
+      console.error('Error creating product:', error);
+      res.status(500).json({ error: 'Failed to create product' });
+    }
+  });
+
+  app.put('/api/products/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const product = await storage.updateProduct(parseInt(id), req.body);
+      res.json(product);
+    } catch (error) {
+      console.error('Error updating product:', error);
+      res.status(500).json({ error: 'Failed to update product' });
+    }
+  });
+
+  app.delete('/api/products/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteProduct(parseInt(id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      res.status(500).json({ error: 'Failed to delete product' });
+    }
+  });
+
+  // Categories API endpoints
+  app.get('/api/categories', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      const categories = await storage.getCategories(user.id);
+      res.json(categories);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      res.status(500).json({ error: 'Failed to fetch categories' });
+    }
+  });
+
+  app.post('/api/categories', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
+      if (!whiteLabel) {
+        return res.status(404).json({ error: 'White label not found' });
+      }
+      
+      const categoryData = { ...req.body, whiteLabelId: whiteLabel.id, createdBy: user.id };
+      const category = await storage.createCategory(categoryData);
+      res.json(category);
+    } catch (error) {
+      console.error('Error creating category:', error);
+      res.status(500).json({ error: 'Failed to create category' });
+    }
+  });
+
+  app.put('/api/categories/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const category = await storage.updateCategory(parseInt(id), req.body);
+      res.json(category);
+    } catch (error) {
+      console.error('Error updating category:', error);
+      res.status(500).json({ error: 'Failed to update category' });
+    }
+  });
+
+  app.delete('/api/categories/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteCategory(parseInt(id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting category:', error);
+      res.status(500).json({ error: 'Failed to delete category' });
+    }
+  });
+
+  app.post('/api/plans', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      
+      // For Super Admin, create main site plans with access controls
+      const planData = { 
+        ...req.body, 
+        createdBy: user.id,
+        // Super Admin plans become main site plans with access controls
+        isMainSitePlan: user.role === 'super_admin',
+        // Handle accesses array for Super Admin
+        accesses: user.role === 'super_admin' && req.body.accesses ? req.body.accesses : undefined
+      };
+      
+      const plan = await storage.createPlan(planData);
+      res.json(plan);
+    } catch (error) {
+      console.error('Error creating plan:', error);
+      res.status(500).json({ error: 'Failed to create plan' });
+    }
+  });
+
+  app.put('/api/plans/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const user = req.user;
+      
+      // Check if user owns this plan or is super admin
+      if (user.role !== 'super_admin') {
+        const plan = await storage.getPlanById(parseInt(id));
+        if (!plan || plan.createdBy !== user.id) {
+          return res.status(403).json({ error: 'Unauthorized' });
+        }
+      }
+      
+      const updatedPlan = await storage.updatePlan(parseInt(id), req.body);
+      res.json(updatedPlan);
+    } catch (error) {
+      console.error('Error updating plan:', error);
+      res.status(500).json({ error: 'Failed to update plan' });
+    }
+  });
+
+  app.delete('/api/plans/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const user = req.user;
+      
+      // Check if user owns this plan or is super admin
+      if (user.role !== 'super_admin') {
+        const plan = await storage.getPlanById(parseInt(id));
+        if (!plan || plan.createdBy !== user.id) {
+          return res.status(403).json({ error: 'Unauthorized' });
+        }
+      }
+      
+      await storage.deletePlan(parseInt(id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting plan:', error);
+      res.status(500).json({ error: 'Failed to delete plan' });
+    }
+  });
+
+
+
+  // White-label endpoints
+  app.get('/api/white-labels', isAuthenticated, async (req, res) => {
+    try {
+      const whiteLabels = await storage.getWhiteLabels();
+      res.json(whiteLabels);
+    } catch (error) {
+      console.error('Error fetching white labels:', error);
+      res.status(500).json({ error: 'Failed to fetch white labels' });
+    }
+  });
+
+  app.post('/api/white-labels', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      const whiteLabelData = { ...req.body, userId: user.id };
+      const whiteLabel = await storage.createWhiteLabel(whiteLabelData);
+      res.json(whiteLabel);
+    } catch (error) {
+      console.error('Error creating white label:', error);
+      res.status(500).json({ error: 'Failed to create white label' });
+    }
+  });
+
+  // Landing pages endpoints
+  // Domain path validation endpoint
+  app.post('/api/domain-paths/validate', isAuthenticatedWithDomainSupport, async (req, res) => {
+    try {
+      const { domainPath, excludeId } = req.body;
+      
+      if (!domainPath) {
+        return res.status(400).json({ error: 'Domain path is required' });
+      }
+      
+      // Check if domain path is already taken by white-label client
+      const existingWhiteLabel = await storage.getWhiteLabelByDomainPath(domainPath);
+      if (existingWhiteLabel) {
+        return res.json({
+          available: false,
+          message: 'Domain path already taken by white-label client'
+        });
+      }
+      
+      // Domain path is available
+      // Note: Only white-label clients can have domain paths in this system
+      
+      res.json({
+        available: true,
+        message: 'Domain path is available'
+      });
+    } catch (error) {
+      console.error('Error validating domain path:', error);
+      res.status(500).json({ error: 'Failed to validate domain path' });
+    }
+  });
+
+  app.get('/api/landing-pages', isAuthenticatedWithDomainSupport, async (req, res) => {
+    try {
+      const user = req.user;
+      const landingPages = await storage.getLandingPages(user.id);
+      res.json(landingPages);
+    } catch (error) {
+      console.error('Error fetching landing pages:', error);
+      res.status(500).json({ error: 'Failed to fetch landing pages' });
+    }
+  });
+
+  app.post('/api/landing-pages', isAuthenticatedWithDomainSupport, async (req, res) => {
+    try {
+      const user = req.user;
+      const landingPageData = { ...req.body, userId: user.id };
+      const landingPage = await storage.createLandingPage(landingPageData);
+      res.json(landingPage);
+    } catch (error) {
+      console.error('Error creating landing page:', error);
+      res.status(500).json({ error: 'Failed to create landing page' });
+    }
+  });
+
+  // Set landing page as default - shows amazing default page ON USER'S PERSONAL DOMAIN
+  app.post('/api/landing-pages/:id/set-default', isAuthenticatedWithDomainSupport, async (req, res) => {
+    try {
+      const user = req.user;
+      const landingPageId = parseInt(req.params.id);
+      
+      // Verify the landing page belongs to the user
+      const landingPage = await storage.getLandingPage(landingPageId);
+      if (!landingPage || landingPage.userId !== user.id) {
+        return res.status(403).json({ error: 'Not authorized to modify this landing page' });
+      }
+      
+      // Check if user has a white-label client account
+      const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
+      if (whiteLabel && whiteLabel.domainPath) {
+        // White-label client - deploy to their domain
+        const defaultElements = generateDefaultBuilderElements(whiteLabel.businessName || 'Your Business');
+        await storage.updateLandingPage(landingPageId, {
+          elements: defaultElements,
+          isPublished: true,
+          publishedAt: new Date()
+        });
+        
+        res.json({
+          success: true,
+          message: 'Amazing default page set successfully on your domain',
+          landingPageId: landingPageId,
+          domainPath: whiteLabel.domainPath,
+          domainUrl: `${req.protocol}://${req.get('host')}/${whiteLabel.domainPath}`,
+          elementsPopulated: true
+        });
+      } else {
+        // Regular user - they need to set up domain first
+        return res.status(404).json({ error: 'No domain found. Please set up your domain first in Custom Domains.' });
+      }
+    } catch (error) {
+      console.error('Error setting landing page as default:', error);
+      res.status(500).json({ error: 'Failed to set landing page as default' });
+    }
+  });
+
+  // Set as domain page - shows white-label client's landing page
+  app.post('/api/landing-pages/:id/set-domain-page', isAuthenticatedWithDomainSupport, async (req, res) => {
+    try {
+      const user = req.user;
+      const landingPageId = parseInt(req.params.id);
+      
+      // Verify the landing page belongs to the user
+      const landingPage = await storage.getLandingPage(landingPageId);
+      if (!landingPage || landingPage.userId !== user.id) {
+        return res.status(403).json({ error: 'Not authorized to modify this landing page' });
+      }
+      
+      // Get the white-label client for this domain
+      const domainPath = req.domainContext?.domainPath;
+      if (!domainPath) {
+        return res.status(400).json({ error: 'Domain context not found' });
+      }
+      
+      const whiteLabel = await storage.getWhiteLabelByDomainPath(domainPath);
+      if (!whiteLabel) {
+        return res.status(404).json({ error: 'White-label client not found' });
+      }
+      
+      // Get the white-label client's existing landing page elements
+      let clientElements = [];
+      if (whiteLabel.defaultLandingPageId) {
+        const clientLandingPage = await storage.getLandingPage(whiteLabel.defaultLandingPageId);
+        if (clientLandingPage && clientLandingPage.elements) {
+          clientElements = clientLandingPage.elements;
+        }
+      }
+      
+      // If no client elements exist, create default ones
+      if (clientElements.length === 0) {
+        clientElements = generateDefaultBuilderElements(whiteLabel.businessName);
+      }
+      
+      // Update the landing page with client's elements
+      await storage.updateLandingPage(landingPageId, {
+        elements: clientElements,
+        isPublished: true,
+        publishedAt: new Date()
+      });
+      
+      // Check if user has a white-label client account
+      const userWhiteLabel = await storage.getWhiteLabelByUserId(user.id);
+      if (userWhiteLabel && userWhiteLabel.domainPath) {
+        // White-label client - deploy to their domain
+        res.json({
+          success: true,
+          message: `${whiteLabel.businessName} Page Set! Your landing page now becomes just like ${whiteLabel.businessName}`,
+          landingPageId: landingPageId,
+          domainPath: userWhiteLabel.domainPath,
+          domainUrl: `${req.protocol}://${req.get('host')}/${userWhiteLabel.domainPath}`,
+          elementsPopulated: true
+        });
+      } else {
+        // Regular user - they need to set up domain first
+        return res.status(404).json({ error: 'No domain found. Please set up your domain first in Custom Domains.' });
+      }
+    } catch (error) {
+      console.error('Error setting domain page:', error);
+      res.status(500).json({ error: 'Failed to set domain page' });
+    }
+  });
+
+  // Set page - saves current built page ON USER'S PERSONAL DOMAIN
+  app.post('/api/landing-pages/:id/set-page', isAuthenticatedWithDomainSupport, async (req, res) => {
+    try {
+      const user = req.user;
+      const landingPageId = parseInt(req.params.id);
+      
+      // Verify the landing page belongs to the user
+      const landingPage = await storage.getLandingPage(landingPageId);
+      if (!landingPage || landingPage.userId !== user.id) {
+        return res.status(403).json({ error: 'Not authorized to modify this landing page' });
+      }
+      
+      // Check if user has a white-label client account
+      const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
+      if (whiteLabel && whiteLabel.domainPath) {
+        // White-label client - deploy to their domain
+        await storage.updateLandingPage(landingPageId, {
+          isPublished: true,
+          publishedAt: new Date()
+        });
+        
+        res.json({
+          success: true,
+          message: 'Your custom page has been set as the landing page on your domain',
+          landingPageId: landingPageId,
+          domainPath: whiteLabel.domainPath,
+          domainUrl: `${req.protocol}://${req.get('host')}/${whiteLabel.domainPath}`,
+          elementsPopulated: false
+        });
+      } else {
+        // Regular user - they need to set up domain first
+        return res.status(404).json({ error: 'No domain found. Please set up your domain first in Custom Domains.' });
+      }
+    } catch (error) {
+      console.error('Error setting page:', error);
+      res.status(500).json({ error: 'Failed to set page' });
+    }
+  });
+
+  // Payment intent endpoint
+  app.post('/api/create-payment-intent', async (req, res) => {
+    try {
+      const { amount } = req.body;
+      const returnUrl = req.headers.referer || `${req.protocol}://${req.get('host')}/pricing`;
+      
+      // Extract domain path from URL parameters if present
+      const urlParams = new URLSearchParams(returnUrl.split('?')[1] || '');
+      const domainPath = urlParams.get('domain');
+      
+      console.log('Storing return URL in session:', returnUrl);
+      req.session.returnUrl = returnUrl;
+      
+      // Store domain context for authentication
+      if (domainPath) {
+        req.session.endUserDomainPath = domainPath;
+        console.log('Storing domain path for end-user context:', domainPath);
+        
+        // Find the white-label client associated with this domain
+        try {
+          const whiteLabel = await storage.getWhiteLabelByDomainPath(domainPath);
+          if (whiteLabel) {
+            req.session.whiteLabelId = whiteLabel.id;
+            console.log('Storing white-label ID for context:', whiteLabel.id);
+          }
+        } catch (error) {
+          console.error('Error finding white-label for domain:', error);
+        }
+      }
+      
+      const intentData = {
+        amount: amount * 100, // Convert to cents
+        currency: 'usd',
+        automatic_payment_methods: {
+          enabled: true,
+        },
+      };
+      
+      res.json({ clientSecret: 'mock_client_secret_' + Date.now() });
+    } catch (error: any) {
+      console.error('Payment intent creation error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Process payment endpoint
+  app.post('/api/process-payment', isAuthenticated, async (req, res) => {
+    try {
+      const { planId, amount, paymentToken, ...formData } = req.body;
+      const user = req.user;
+      
+      console.log('Processing payment for plan:', planId, 'amount:', amount, 'user:', user.id);
+      
+      // Get the plan details
+      const plan = await storage.getPlan(planId);
+      if (!plan) {
+        return res.status(404).json({ error: 'Plan not found' });
+      }
+      
+      // Validate payment token (in production, you'd validate with actual payment processor)
+      if (!paymentToken || !paymentToken.startsWith('mock_client_secret_')) {
+        return res.status(400).json({ error: 'Invalid payment token' });
+      }
+      
+      // Get white label context from session
+      let whiteLabelId = req.session?.whiteLabelId;
+      
+      // For white-label clients purchasing from main site, associate with their own white label
+      if (!whiteLabelId && user.role === 'white_label_client') {
+        const userWhiteLabel = await storage.getWhiteLabelByUserId(user.id);
+        if (userWhiteLabel) {
+          whiteLabelId = userWhiteLabel.id;
+        }
+      }
+      
+      // Cancel any existing active subscriptions to prevent duplicates
+      try {
+        await storage.cancelExistingSubscriptions(user.id);
+        console.log('Cancelled existing subscriptions for user:', user.id);
+      } catch (error) {
+        console.error('Error cancelling existing subscriptions:', error);
+      }
+      
+      // Create subscription
+      const subscription = await storage.createSubscription({
+        userId: user.id,
+        planId: planId,
+        whiteLabelId: whiteLabelId,
+        status: 'active',
+        startDate: new Date(),
+        paymentIntentId: paymentToken,
+        amount: parseFloat(amount) || parseFloat(plan.monthlyPrice) || 0
+      });
+      
+      // Create purchase history record
+      await storage.createPurchaseHistory({
+        userId: user.id,
+        planId: planId,
+        whiteLabelId: whiteLabelId,
+        purchaseDate: new Date(),
+        amount: parseFloat(amount) || parseFloat(plan.monthlyPrice) || 0,
+        status: 'completed',
+        paymentMethod: 'credit_card'
+      });
+      
+      // Track activity for white-label analytics
+      if (whiteLabelId) {
+        try {
+          await storage.trackEndUserActivity({
+            userId: user.id,
+            whiteLabelId: whiteLabelId,
+            activityType: 'purchase',
+            metadata: {
+              planId: planId,
+              planName: plan.name,
+              amount: amount
+            }
+          });
+        } catch (error) {
+          console.error('Error tracking purchase activity:', error);
+        }
+      }
+      
+      res.json({
+        success: true,
+        message: 'Payment processed successfully',
+        subscriptionId: subscription.id,
+        userId: user.id,
+        whiteLabelId: whiteLabelId
+      });
+      
+    } catch (error) {
+      console.error('Payment processing error:', error);
+      res.status(500).json({ 
+        success: false,
+        error: 'Payment processing failed. Please try again.' 
+      });
+    }
+  });
+
+  // End-user statistics - simplified to prevent errors
+  app.get('/api/end-users/stats', isAuthenticated, async (req, res) => {
+    try {
+      // Return default stats for now
+      res.json({
+        totalSignups: '0',
+        totalLogins: '0',
+        totalPurchases: '0',
+        totalRevenue: '0'
+      });
+    } catch (error) {
+      console.error('Error fetching end-user stats:', error);
+      res.status(500).json({ error: 'Failed to fetch stats' });
+    }
+  });
+
+  // API endpoints for end-users with domain-specific filtering
+  app.get('/api/purchases', async (req, res) => {
+    try {
+      // Check authentication first
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+      
+      const user = req.user;
+      const domainPath = req.query.domain as string || req.session.endUserDomainPath;
+      
+      // If this is an end-user and domain context is available, filter by domain
+      if (user.role === 'end_user' && domainPath) {
+        // Validate domain-specific authentication
+        let domainSession = await storage.getDomainUserSession(user.id, domainPath);
+        
+        // If no domain session, try to create one if user belongs to this domain
+        if (!domainSession || !domainSession.isActive) {
+          const dbUser = await storage.getUserById(user.id);
+          if (dbUser && dbUser.whiteLabelId) {
+            const whiteLabel = await storage.getWhiteLabelById(dbUser.whiteLabelId);
+            if (whiteLabel && whiteLabel.domainPath === domainPath) {
+              // Create domain session for end-user
+              await storage.createDomainUserSession(user.id, domainPath, req.sessionID);
+              console.log(`Created domain session for purchases endpoint: user ${user.id} on domain ${domainPath}`);
+              domainSession = await storage.getDomainUserSession(user.id, domainPath);
+            }
+          }
+        }
+        
+        if (!domainSession || !domainSession.isActive) {
+          return res.status(401).json({ error: 'Not authenticated for this domain' });
+        }
+        
+        const whiteLabel = await storage.getWhiteLabelByDomainPath(domainPath);
+        if (whiteLabel) {
+          const domainPurchases = await storage.getPurchasesByWhiteLabel(whiteLabel.id);
+          // Filter to only show purchases by this specific user on this domain
+          const userDomainPurchases = domainPurchases.filter(p => p.userId === user.id);
+          return res.json(userDomainPurchases);
+        }
+      }
+      
+      // Default behavior for other users
+      const purchases = await storage.getPurchasesByUser(user.id);
+      res.json(purchases);
+    } catch (error) {
+      console.error('Error fetching user purchases:', error);
+      res.status(500).json({ error: 'Failed to fetch purchases' });
+    }
+  });
+
+  // Get purchased plans for end-user (filtered by domain)
+  app.get('/api/user/plans', async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+      
+      const domain = req.query.domain as string;
+      
+      if (domain) {
+        // Filter plans by domain - only show plans purchased from specific domain
+        const plans = await storage.getUserPurchasedPlansByDomain(user.id, domain);
+        res.json(plans);
+      } else {
+        // Fallback to all plans if no domain specified
+        const plans = await storage.getUserPurchasedPlans(user.id);
+        res.json(plans);
+      }
+    } catch (error) {
+      console.error('Error fetching user plans:', error);
+      res.status(500).json({ error: 'Failed to fetch plans' });
+    }
+  });
+
+  // Get plan products
+  app.get('/api/plans/:planId/products', async (req, res) => {
+    try {
+      const { planId } = req.params;
+      const user = req.user;
+      
+      if (!user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+      
+      const products = await storage.getPlanProducts(parseInt(planId));
+      res.json(products);
+    } catch (error) {
+      console.error('Error fetching plan products:', error);
+      res.status(500).json({ error: 'Failed to fetch plan products' });
+    }
+  });
+
+  // Get plan categories
+  app.get('/api/plans/:planId/categories', async (req, res) => {
+    try {
+      const { planId } = req.params;
+      const user = req.user;
+      
+      if (!user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+      
+      const categories = await storage.getPlanCategories(parseInt(planId));
+      res.json(categories);
+    } catch (error) {
+      console.error('Error fetching plan categories:', error);
+      res.status(500).json({ error: 'Failed to fetch plan categories' });
+    }
+  });
+
+  // Link plan to product (admin/white-label client only)
+  app.post('/api/plans/:planId/products/:productId', async (req, res) => {
+    try {
+      const { planId, productId } = req.params;
+      const user = req.user;
+      
+      if (!user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+      
+      // Check if user can manage this plan
+      if (user.role !== 'super_admin' && user.role !== 'white_label_client') {
+        return res.status(403).json({ error: 'Insufficient permissions' });
+      }
+      
+      await storage.linkPlanToProduct(parseInt(planId), parseInt(productId));
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error linking plan to product:', error);
+      res.status(500).json({ error: 'Failed to link plan to product' });
+    }
+  });
+
+  // Link plan to category (admin/white-label client only)
+  app.post('/api/plans/:planId/categories/:categoryId', async (req, res) => {
+    try {
+      const { planId, categoryId } = req.params;
+      const user = req.user;
+      
+      if (!user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+      
+      // Check if user can manage this plan
+      if (user.role !== 'super_admin' && user.role !== 'white_label_client') {
+        return res.status(403).json({ error: 'Insufficient permissions' });
+      }
+      
+      await storage.linkPlanToCategory(parseInt(planId), parseInt(categoryId));
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error linking plan to category:', error);
+      res.status(500).json({ error: 'Failed to link plan to category' });
+    }
+  });
+
+  app.get('/api/end-users', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      
+      // Only white-label clients can see their end-users
+      if (user.role === 'white_label_client') {
+        const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
+        if (whiteLabel) {
+          const endUsers = await storage.getEndUsersByWhiteLabel(whiteLabel.id);
+          return res.json(endUsers);
+        }
+      }
+      
+      // Super admins can see all end-users
+      if (user.role === 'super_admin') {
+        const allEndUsers = await storage.getUsers();
+        const endUsers = allEndUsers.filter(u => u.role === 'end_user');
+        return res.json(endUsers);
+      }
+      
+      res.json([]);
+    } catch (error) {
+      console.error('Error fetching end users:', error);
+      res.status(500).json({ error: 'Failed to fetch end users' });
+    }
+  });
+
+  app.get('/api/end-users/activities', isAuthenticated, async (req, res) => {
+    try {
+      // Return empty array for now
+      res.json([]);
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+      res.status(500).json({ error: 'Failed to fetch activities' });
+    }
+  });
+
+  // Referral link generation
+  app.post('/api/referral-link', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      const { customSlug } = req.body;
+      
+      if (!user || user.role !== 'white_label_affiliate') {
+        return res.status(403).json({ error: 'Unauthorized' });
+      }
+
+      const link = await storage.createReferralLink({
+        userId: user.id,
+        customSlug,
+        isActive: true
+      });
+
+      res.json(link);
+    } catch (error) {
+      console.error('Error creating referral link:', error);
+      res.status(500).json({ error: 'Failed to create referral link' });
+    }
+  });
+
+  // Remove affiliate login endpoint - users now access both dashboards with same authentication
+
+  // Affiliate signup endpoint
+  app.post('/api/affiliate/signup', async (req, res) => {
+    try {
+      const { name, email, phone, company, reason, password, whiteLabelId } = req.body;
+      
+      console.log('Affiliate signup request:', { name, email, phone, company, reason, whiteLabelId });
+      
+      // Validate required fields
+      if (!name || !email || !phone || !password) {
+        return res.status(400).json({ error: 'Name, email, phone, and password are required' });
+      }
+      
+      // Validate password strength
+      if (password.length < 6) {
+        return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+      }
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(409).json({ error: 'User with this email already exists' });
+      }
+      
+      // Create new user with white_label_affiliate role
+      const newUser = await storage.createUser({
+        id: `affiliate_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`, // Generate unique ID for affiliate users
+        email,
+        username: email,
+        name,
+        phone,
+        company,
+        password, // Store password (in real app, this would be hashed)
+        role: 'white_label_affiliate',
+        whiteLabelId: whiteLabelId || null,
+        isActive: true
+      });
+      
+      console.log('Created new affiliate user:', newUser);
+      
+      res.json({
+        success: true,
+        message: 'Affiliate signup successful! Please check your email for next steps.',
+        userId: newUser.id
+      });
+      
+    } catch (error) {
+      console.error('Error in affiliate signup:', error);
+      res.status(500).json({ error: 'Failed to process affiliate signup' });
+    }
+  });
+
+  // Affiliate dashboard API endpoint
+  app.get('/api/affiliate/dashboard', async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+      
+      const domain = req.query.domain as string;
+      
+      // For now, return basic affiliate dashboard data
+      // In a full implementation, this would fetch real affiliate stats
+      const dashboardData = {
+        stats: {
+          totalReferrals: 0,
+          activeReferrals: 0,
+          totalCommissions: 0,
+          pendingCommissions: 0
+        },
+        recentActivity: [],
+        commissionHistory: []
+      };
+      
+      res.json(dashboardData);
+    } catch (error) {
+      console.error('Error fetching affiliate dashboard data:', error);
+      res.status(500).json({ error: 'Failed to fetch affiliate dashboard data' });
+    }
+  });
+
+  // API endpoint for affiliates to get their white-label client's plans
+  app.get('/api/affiliate/plans', async (req, res) => {
+    try {
+      const domain = req.query.domain as string;
+      
+      if (!domain) {
+        return res.status(400).json({ error: 'Domain parameter is required' });
+      }
+
+      // Get white-label client by domain
+      const whiteLabel = await storage.getWhiteLabelByDomainPath(domain);
+      if (!whiteLabel) {
+        return res.status(404).json({ error: 'White label client not found for this domain' });
+      }
+
+      // Get all plans created by this white-label client
+      const plans = await storage.getPlansByUser(whiteLabel.userId);
+      
+      // Add category and product counts to each plan
+      const plansWithCounts = await Promise.all(plans.map(async (plan) => {
+        const categories = await storage.getPlanCategories(plan.id);
+        const products = await storage.getPlanProducts(plan.id);
+        
+        return {
+          ...plan,
+          _count: {
+            categories: categories.length,
+            products: products.length
+          }
+        };
+      }));
+
+      res.json(plansWithCounts);
+    } catch (error) {
+      console.error('Error fetching affiliate plans:', error);
+      res.status(500).json({ error: 'Failed to fetch plans' });
+    }
+  });
+
+  // API endpoint to get white-label client info by domain
+  app.get('/api/white-labels/by-domain/:domain', async (req, res) => {
+    try {
+      const domain = req.params.domain;
+      
+      if (!domain) {
+        return res.status(400).json({ error: 'Domain parameter is required' });
+      }
+
+      // Get white-label client by domain
+      const whiteLabel = await storage.getWhiteLabelByDomainPath(domain);
+      if (!whiteLabel) {
+        return res.status(404).json({ error: 'White label client not found for this domain' });
+      }
+
+      // Get user info for the white-label client
+      const user = await storage.getUser(whiteLabel.userId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found for this white-label client' });
+      }
+
+      res.json({
+        ...whiteLabel,
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          name: user.name
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching white-label info by domain:', error);
+      res.status(500).json({ error: 'Failed to fetch white-label info' });
+    }
+  });
+
+  // API endpoint for affiliates to view their referrals
+  app.get('/api/affiliate/referrals', isAuthenticatedWithDomainSupport, async (req, res) => {
+    try {
+      const user = req.user;
+      
+      if (!user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Get referrals for this affiliate
+      const referrals = await storage.getReferralsByAffiliate(user.id);
+      
+      res.json(referrals);
+    } catch (error) {
+      console.error('Error fetching affiliate referrals:', error);
+      res.status(500).json({ error: 'Failed to fetch referrals' });
+    }
+  });
+
+  // API endpoint for white-label clients to view referrals for their affiliates
+  app.get('/api/white-label/referrals', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      
+      if (!user || user.role !== 'white_label_client') {
+        return res.status(403).json({ error: 'Only white-label clients can view referral data' });
+      }
+
+      // Get white-label client's ID
+      const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
+      if (!whiteLabel) {
+        return res.status(404).json({ error: 'White-label client not found' });
+      }
+
+      // Get all referrals for this white-label client
+      const referrals = await storage.getReferralsByWhiteLabel(whiteLabel.id);
+      
+      res.json(referrals);
+    } catch (error) {
+      console.error('Error fetching white-label referrals:', error);
+      res.status(500).json({ error: 'Failed to fetch referrals' });
+    }
+  });
+
+  // API endpoint for affiliates to view commission data for their visible plans
+  app.get('/api/affiliate/commissions', isAuthenticatedWithDomainSupport, async (req, res) => {
+    try {
+      const user = req.user;
+      
+      if (!user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Extract domain from referer
+      const domain = extractDomainFromRequest(req);
+      console.log('Domain extraction - URL:', req.url, 'Referer:', req.get('Referer'));
+      console.log('Extracted domain:', JSON.stringify(domain));
+      
+      // Use the storage method that properly calculates commissions with correct percentages
+      const commissionData = await storage.getCommissionDataForAffiliate(user.id, domain);
+      
+      res.json(commissionData);
+    } catch (error) {
+      console.error('Error fetching commission data:', error);
+      res.status(500).json({ error: 'Failed to fetch commission data' });
+    }
+  });
+
+  // API endpoint for affiliates to view purchasers for a specific plan
+  app.get('/api/affiliate/plan-purchasers/:planId', isAuthenticatedWithDomainSupport, async (req, res) => {
+    try {
+      const user = req.user;
+      const { planId } = req.params;
+      
+      if (!user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Get all purchasers for this plan
+      const purchasers = await storage.getPlanPurchasers(parseInt(planId));
+      
+      res.json(purchasers);
+    } catch (error) {
+      console.error('Error fetching plan purchasers:', error);
+      res.status(500).json({ error: 'Failed to fetch plan purchasers' });
+    }
+  });
+
+  // API endpoints for affiliate plan visibility management
+  app.get('/api/affiliate/plans', isAuthenticatedWithDomainSupport, async (req, res) => {
+    try {
+      const user = req.user;
+      
+      if (!user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Extract domain from referer to get white-label context
+      const domain = extractDomainFromRequest(req);
+      console.log(`Extracted domain from request: "${domain}"`);
+      
+      if (!domain) {
+        return res.status(400).json({ error: 'Domain parameter is required' });
+      }
+      
+      const whiteLabel = await storage.getWhiteLabelByDomainPath(domain);
+      
+      if (!whiteLabel) {
+        return res.status(404).json({ error: 'White-label client not found for this domain' });
+      }
+
+      // Get all plans created by this white-label client
+      const allPlans = await storage.getPlansByUser(whiteLabel.userId);
+      
+      // Get this affiliate's visibility settings
+      const visibilitySettings = await storage.getAffiliatePlanVisibility(user.id);
+      const visibilityMap = new Map(visibilitySettings.map(v => [v.planId, v.isVisible]));
+      
+      // Combine plan data with visibility settings
+      const plansWithVisibility = allPlans.map(plan => ({
+        id: plan.id,
+        name: plan.name,
+        description: plan.description,
+        monthlyPrice: plan.monthlyPrice,
+        isVisible: visibilityMap.get(plan.id) || false
+      }));
+      
+      res.json(plansWithVisibility);
+    } catch (error) {
+      console.error('Error fetching affiliate plans:', error);
+      res.status(500).json({ error: 'Failed to fetch plans' });
+    }
+  });
+
+  app.post('/api/affiliate/plans/:planId/toggle-visibility', isAuthenticatedWithDomainSupport, async (req, res) => {
+    try {
+      const user = req.user;
+      const { planId } = req.params;
+      const { isVisible } = req.body;
+      
+      console.log('Toggle visibility request:', { 
+        userId: user?.id, 
+        planId, 
+        isVisible, 
+        body: req.body,
+        params: req.params 
+      });
+      
+      if (!user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Set the plan visibility for this affiliate
+      const result = await storage.setAffiliatePlanVisibility(user.id, parseInt(planId), isVisible);
+      
+      console.log('Toggle visibility result:', result);
+      
+      res.json({ 
+        success: true, 
+        planId: parseInt(planId), 
+        isVisible: result.isVisible 
+      });
+    } catch (error) {
+      console.error('Error toggling plan visibility:', error);
+      res.status(500).json({ error: 'Failed to update plan visibility' });
+    }
+  });
+
+  // Domain-specific user dashboard routes - REQUIRE AUTHENTICATION
+  app.get('/:domainPath/user', async (req, res, next) => {
+    try {
+      const { domainPath } = req.params;
+      
+      console.log(`Domain user route accessed: ${domainPath}/user`);
+      console.log(`User authenticated: ${req.isAuthenticated()}`);
+      console.log(`User:`, req.user);
+      
+      // Check if user is authenticated
+      if (!req.isAuthenticated()) {
+        console.log(`Redirecting unauthenticated user to login for domain: ${domainPath}`);
+        // Redirect to login with domain context
+        return res.redirect(`/api/login?domain=${domainPath}&returnTo=${encodeURIComponent(req.originalUrl)}`);
+      }
+      
+      const user = req.user;
+      
+      // STRICT domain-specific authentication for end-users
+      if (user.role === 'end_user') {
+        try {
+          let domainSession = await storage.getDomainUserSession(user.id, domainPath);
+          
+          // If no domain session exists, try to create one if this user can access this domain
+          if (!domainSession || !domainSession.isActive) {
+            const dbUser = await storage.getUserById(user.id);
+            const whiteLabel = await storage.getWhiteLabelByDomainPath(domainPath);
+            
+            // If this is a new end-user trying to access this domain, create a session
+            if (dbUser && whiteLabel && (dbUser.whiteLabelId === whiteLabel.id || !dbUser.whiteLabelId)) {
+              console.log(`Creating new domain session for user ${user.id} on domain ${domainPath}`);
+              
+              // If user has no white-label association, assign them to this domain
+              if (!dbUser.whiteLabelId) {
+                await storage.updateUser(user.id, { whiteLabelId: whiteLabel.id });
+                console.log(`Assigned user ${user.id} to white-label ${whiteLabel.id} (${domainPath})`);
+              }
+              
+              // Create domain session
+              await storage.createDomainUserSession(user.id, domainPath, req.sessionID);
+              console.log(`Created domain session for user ${user.id} on domain: ${domainPath}`);
+              
+              // Refresh domain session after creating it
+              domainSession = await storage.getDomainUserSession(user.id, domainPath);
+            }
+          }
+          
+          // Check if user now has a valid domain session
+          if (!domainSession || !domainSession.isActive) {
+            console.log(`End-user ${user.id} denied access to domain ${domainPath} - no active domain session`);
+            return res.redirect(`/api/login?domain=${domainPath}&returnTo=${encodeURIComponent(req.originalUrl)}`);
+          }
+          
+          // Verify that the domain session matches the user's white-label association
+          const dbUser = await storage.getUserById(user.id);
+          if (!dbUser || !dbUser.whiteLabelId) {
+            return res.redirect(`/api/login?domain=${domainPath}&returnTo=${encodeURIComponent(req.originalUrl)}`);
+          }
+          
+          const whiteLabel = await storage.getWhiteLabelById(dbUser.whiteLabelId);
+          if (!whiteLabel || whiteLabel.domainPath !== domainPath) {
+            console.log(`End-user ${user.id} denied access to domain ${domainPath} - domain mismatch`);
+            return res.redirect(`/api/login?domain=${domainPath}&returnTo=${encodeURIComponent(req.originalUrl)}`);
+          }
+          
+          console.log(`End-user ${user.id} authorized for domain ${domainPath}`);
+        } catch (error) {
+          console.error('Error checking domain authentication:', error);
+          return res.redirect(`/api/login?domain=${domainPath}&returnTo=${encodeURIComponent(req.originalUrl)}`);
+        }
+      }
+      
+      // User is authenticated - let React router handle the page
+      return next();
+    } catch (error) {
+      console.error('Error in domain user route:', error);
+      return res.status(500).send('Internal server error');
+    }
+  });
+
+  // Domain-specific affiliate dashboard routes - REQUIRE AUTHENTICATION
+  app.get('/:domainPath/affiliate', async (req, res, next) => {
+    try {
+      const { domainPath } = req.params;
+      
+      console.log(`Domain affiliate route accessed: ${domainPath}/affiliate`);
+      console.log(`User authenticated: ${req.isAuthenticated()}`);
+      console.log(`User:`, req.user);
+      
+      // Check if user is authenticated
+      if (!req.isAuthenticated()) {
+        console.log(`Redirecting unauthenticated user to login for domain: ${domainPath}`);
+        // Redirect to login with domain context
+        return res.redirect(`/api/login?domain=${domainPath}&returnTo=${encodeURIComponent(req.originalUrl)}`);
+      }
+      
+      const user = req.user;
+      
+      // For affiliate dashboard, we allow any authenticated user to access
+      // Store domain context for affiliate dashboard functionality
+      try {
+        const whiteLabel = await storage.getWhiteLabelByDomainPath(domainPath);
+        if (!whiteLabel) {
+          console.log(`No white label found for domain: ${domainPath}`);
+          return res.status(404).send('Domain not found');
+        }
+        
+        // Store affiliate domain context in session
+        req.session.affiliateDomainContext = {
+          whiteLabelId: whiteLabel.id,
+          domainPath: domainPath,
+          businessName: whiteLabel.businessName
+        };
+        
+        console.log(`Stored affiliate domain context for ${user.id} on domain: ${domainPath}`);
+        
+        // User is authenticated - let React router handle the page
+        return next();
+      } catch (error) {
+        console.error('Error setting up affiliate domain context:', error);
+        return res.status(500).send('Error setting up domain access');
+      }
+    } catch (error) {
+      console.error('Error in domain affiliate route:', error);
+      return res.status(500).send('Internal server error');
+    }
+  });
+
+  // Domain route handler - clean paths without /domain/ prefix
+  // File upload endpoint for handling file uploads
+  app.post('/api/upload', async (req, res) => {
+    try {
+      const multer = await import('multer');
+      const path = await import('path');
+      
+      // Configure multer for file upload
+      const storage = multer.diskStorage({
+        destination: (req, file, cb) => {
+          cb(null, './uploads/');
+        },
+        filename: (req, file, cb) => {
+          // Generate unique filename
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+          const ext = path.extname(file.originalname);
+          const name = path.basename(file.originalname, ext);
+          cb(null, `${name}_${uniqueSuffix}${ext}`);
+        }
+      });
+      
+      const upload = multer.default({ storage }).single('file');
+      
+      upload(req, res, (err) => {
+        if (err) {
+          console.error('Upload error:', err);
+          return res.status(500).json({ error: 'File upload failed' });
+        }
+        
+        if (!req.file) {
+          return res.status(400).json({ error: 'No file uploaded' });
+        }
+        
+        // Return the filename for database storage
+        res.json({ filename: req.file.filename });
+      });
+    } catch (error) {
+      console.error('Error setting up file upload:', error);
+      res.status(500).json({ error: 'Failed to setup file upload' });
+    }
+  });
+
+  // File download endpoint for serving document files
+  app.get('/api/files/:filename', async (req, res) => {
+    try {
+      const { filename } = req.params;
+      const filePath = `./uploads/${filename}`;
+      
+      // Check if file exists using ES modules
+      const fs = await import('fs');
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ error: 'File not found' });
+      }
+      
+      // Set appropriate headers for file download
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Type', 'application/octet-stream');
+      
+      // Send file using absolute path
+      const path = await import('path');
+      const absolutePath = path.resolve(process.cwd(), filePath);
+      res.sendFile(absolutePath);
+    } catch (error) {
+      console.error('Error serving file:', error);
+      res.status(500).json({ error: 'Failed to serve file' });
+    }
+  });
+
+  app.get('/:domainPath', async (req, res, next) => {
+    try {
+      const { domainPath } = req.params;
+      
+      // Skip if this looks like an API route, Vite dev server file, static file, or main app route
+      if (domainPath.startsWith('api') || 
+          domainPath.startsWith('src') ||
+          domainPath.startsWith('@') ||
+          domainPath.startsWith('node_modules') ||
+          domainPath.includes('.') || 
+          domainPath === 'favicon.ico' ||
+          domainPath === 'robots.txt' ||
+          domainPath === 'sitemap.xml' ||
+          domainPath === 'login' ||
+          domainPath === 'signup' ||
+          domainPath === 'dashboard' ||
+          domainPath === 'super-admin-login' ||
+          domainPath === 'super-admin' ||
+          domainPath === 'white-label' ||
+          domainPath === 'affiliate' ||
+          domainPath === 'white-label-affiliate' ||
+          domainPath === 'clients' ||
+          domainPath === 'plans' ||
+          domainPath === 'products' ||
+          domainPath === 'categories' ||
+          domainPath === 'affiliates' ||
+          domainPath === 'revenue' ||
+          domainPath === 'ai-studio' ||
+          domainPath === 'templates' ||
+          domainPath === 'integrations' ||
+          domainPath === 'settings' ||
+          domainPath === 'landing-builder' ||
+          domainPath === 'announcements' ||
+          domainPath === 'analytics' ||
+          domainPath === 'notifications' ||
+          domainPath === 'profile' ||
+          domainPath === 'billing' ||
+          domainPath === 'support' ||
+          domainPath === 'help' ||
+          domainPath === 'admin' ||
+          domainPath === 'pricing' ||
+          domainPath === 'become-affiliate' ||
+          domainPath === 'checkout' ||
+          domainPath === 'purchase-success' ||
+          domainPath === 'contact' ||
+          domainPath === 'contact' ||
+          domainPath === 'commissions' ||
+          domainPath === 'referrals' ||
+          domainPath === 'links' ||
+          domainPath === 'ai-content' ||
+          domainPath === 'landing-page' ||
+          domainPath === '') {
+        // Skip this route - let Vite handle it
+        return next();
+      }
+
+      // Check if this domain path belongs to a white label client
+      const whiteLabel = await storage.getWhiteLabelByDomainPath(domainPath);
+      
+      let landingPage = null;
+      
+      if (whiteLabel) {
+        // Store white label ID in session for future purchases
+        req.session.whiteLabelId = whiteLabel.id;
+        req.session.whiteLabelDomain = domainPath;
+        console.log(`Stored white label ID ${whiteLabel.id} for domain ${domainPath} in session`);
+        
+        // Also store domain context for end-user purchases
+        req.session.domainContext = {
+          whiteLabelId: whiteLabel.id,
+          domainPath: domainPath,
+          businessName: whiteLabel.businessName
+        };
+        // If white label has a custom default landing page, use it
+        if (whiteLabel.defaultLandingPageId) {
+          const customLandingPage = await storage.getLandingPage(whiteLabel.defaultLandingPageId);
+          
+          // Only use custom landing page if it has meaningful content
+          if (customLandingPage && customLandingPage.elements && Array.isArray(customLandingPage.elements) && customLandingPage.elements.length > 0) {
+            landingPage = customLandingPage;
+          }
+        }
+        
+        // If no custom default or custom page is empty, fall back to automatic landing page by domain path
+        if (!landingPage) {
+          landingPage = await storage.getLandingPageByDomainPath(domainPath);
+        }
+      } else {
+        // No white label found for this domain path, try direct lookup
+        landingPage = await storage.getLandingPageByDomainPath(domainPath);
+      }
+      
+      // If no landing page exists for this domain path, show not found
+      if (!landingPage) {
+        return res.status(404).send(`
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Domain Not Found</title>
+            <style>
+              body { font-family: 'Inter', sans-serif; text-align: center; padding: 50px; background: #f8fafc; }
+              .container { max-width: 500px; margin: 0 auto; }
+              h1 { color: #1a202c; margin-bottom: 20px; }
+              p { color: #4a5568; margin-bottom: 30px; }
+              .btn { 
+                background: #667eea; 
+                color: white; 
+                padding: 12px 24px; 
+                border: none; 
+                border-radius: 6px; 
+                text-decoration: none; 
+                display: inline-block; 
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <h1>Domain Not Available</h1>
+              <p>The domain path "${domainPath}" is not currently set up or is no longer available.</p>
+              <a href="/" class="btn">Go to Homepage</a>
+            </div>
+          </body>
+          </html>
+        `);
+      }
+
+      // Get the white-label client's actual plans for dynamic pricing display
+      let clientPlans = [];
+     
+      // Use existing whiteLabel if available, otherwise find by domain path
+      let currentWhiteLabel = whiteLabel;
+      if (!currentWhiteLabel) {
+        try {
+          currentWhiteLabel = await storage.getWhiteLabelByDomainPath(domainPath);
+        } catch (error) {
+          console.error('Error finding white label:', error);
+        }
+      }
+      
+      try {
+        if (currentWhiteLabel) {
+          // Get the domain owner user to check if they're a white-label client or affiliate
+          const domainOwnerUser = await storage.getUserById(currentWhiteLabel.userId);
+          
+          // Check if this domain owner is an affiliate (has whiteLabelId) or a white-label client (creates plans)
+          const isAffiliateDomain = domainOwnerUser && domainOwnerUser.whiteLabelId;
+          
+          if (isAffiliateDomain) {
+            // This is an affiliate's domain - show only plans that this specific affiliate has marked as visible
+            const associatedWhiteLabel = await storage.getWhiteLabelById(domainOwnerUser.whiteLabelId);
+            if (associatedWhiteLabel) {
+              // Get plans that this specific affiliate has marked as visible
+              const visiblePlans = await storage.getVisiblePlansForAffiliate(domainOwnerUser.id);
+              clientPlans = visiblePlans || [];
+              console.log(`Domain ${domainPath}: Affiliate domain - showing ${clientPlans.length} visible plans for affiliate ${domainOwnerUser.id} from white-label client ${associatedWhiteLabel.userId}`);
+            }
+          } else {
+            // This is a white-label client's own domain - show ALL their plans
+            const plans = await storage.getPlansByUser(currentWhiteLabel.userId);
+            clientPlans = plans || [];
+            console.log(`Domain ${domainPath}: White-label client's own domain - showing all ${clientPlans.length} plans from user ${currentWhiteLabel.userId}`);
+          }
+        } else {
+          console.log(`Domain ${domainPath}: No white-label client found`);
+        }
+      } catch (error) {
+        console.error('Error fetching client plans:', error);
+      }
+
+      // Determine if this is an affiliate domain or white-label client domain
+      const domainOwnerUser = currentWhiteLabel ? await storage.getUserById(currentWhiteLabel.userId) : null;
+      const isAffiliateDomain = domainOwnerUser && domainOwnerUser.whiteLabelId;
+      
+      // Generate HTML content with domain type information
+      const htmlContent = generateLandingPageHTML(landingPage, clientPlans, currentWhiteLabel, isAffiliateDomain);
+      
+      return res.send(htmlContent);
+    } catch (error: any) {
+      console.error('Error serving domain page:', error);
+      res.status(500).send('Internal server error');
+    }
+  });
+
+  // Add missing subscription endpoint for modal checkout
+  app.post('/api/subscriptions', async (req, res) => {
+    try {
+      const { planId, status, planPrice } = req.body;
+      
+      console.log('Creating subscription for plan:', planId, 'status:', status, 'price:', planPrice);
+      console.log('Session whiteLabelId:', req.session?.whiteLabelId);
+      console.log('Session domainContext:', req.session?.domainContext);
+      
+      // Get the plan details to get the price
+      const plan = await storage.getPlan(planId);
+      if (!plan) {
+        return res.status(404).json({ error: 'Plan not found' });
+      }
+      
+      // Use the price from the request (from frontend) or fall back to plan price
+      const actualPrice = planPrice || plan.monthlyPrice || '0';
+      
+      // Get white label ID from session (stored when user visited domain-specific URL)
+      let whiteLabelId = req.session?.whiteLabelId;
+      
+      // If no white label ID in session, try to get it from domain context
+      if (!whiteLabelId && req.session?.domainContext) {
+        whiteLabelId = req.session.domainContext.whiteLabelId;
+      }
+      
+      // If still no white label ID, this might be a direct purchase from main site
+      if (!whiteLabelId) {
+        // For direct purchases, we need to handle differently
+        console.log('No white label ID found - this might be a direct purchase from main site');
+        
+        // If user is a white-label client, associate with their own white label
+        if (req.user?.role === 'white_label_client') {
+          const userWhiteLabel = await storage.getWhiteLabelByUserId(req.user.id);
+          if (userWhiteLabel) {
+            whiteLabelId = userWhiteLabel.id;
+            console.log('Associated purchase with user own white label:', whiteLabelId);
+          }
+        }
+        
+        // If still no white label ID, use default (this shouldn't happen in normal flow)
+        if (!whiteLabelId) {
+          whiteLabelId = 1; // Default fallback
+          console.log('Using default white label ID as fallback');
+        }
+      }
+      
+      // IMPORTANT: Cancel any existing active subscriptions for this white-label client
+      // to prevent duplicate billing issues
+      console.log('Checking for existing active subscriptions for white-label ID:', whiteLabelId);
+      try {
+        // Cancel existing active subscriptions to prevent duplicates
+        await storage.cancelExistingSubscriptions(whiteLabelId);
+        console.log('Successfully cancelled existing active subscriptions');
+      } catch (error) {
+        console.error('Error cancelling existing subscriptions:', error);
+        // Continue anyway - we still want to create the new subscription
+      }
+      
+      // Create subscription
+      const subscription = await storage.createSubscription({
+        whiteLabelId: whiteLabelId, // Corrected field name to match schema
+        planId,
+        status: status || 'active',
+        amount: actualPrice,
+        billingCycle: 'monthly',
+        nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+      });
+      
+      // Also create purchase history record for analytics
+      const purchaseHistory = await storage.createPurchaseHistory({
+        userId: req.user?.id || 'anonymous_user',
+        whiteLabelId: whiteLabelId,
+        planId,
+        amount: actualPrice,
+        transactionId: `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        paymentMethod: 'modal_checkout',
+        status: 'completed',
+        metadata: {
+          planName: plan.name,
+          source: 'modal_checkout',
+          domainPath: req.session?.domainContext?.domainPath || 'direct'
+        }
+      });
+      
+      console.log('Subscription created:', subscription);
+      console.log('Purchase history created:', purchaseHistory);
+      
+      res.json({ 
+        success: true, 
+        subscription,
+        purchaseHistory,
+        message: 'Subscription created successfully' 
+      });
+    } catch (error) {
+      console.error('Error creating subscription:', error);
+      res.status(500).json({ error: 'Failed to create subscription' });
+    }
+  });
+
+  // Get user subscriptions (filtered by domain)
+  app.get('/api/subscriptions', async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+      
+      const domain = req.query.domain as string;
+      
+      if (domain) {
+        // Filter subscriptions by domain
+        const subscriptions = await storage.getSubscriptionsByDomain(user.id, domain);
+        res.json(subscriptions);
+      } else {
+        // Fallback to all subscriptions
+        const subscriptions = await storage.getSubscriptions(user.id);
+        res.json(subscriptions);
+      }
+    } catch (error) {
+      console.error('Error fetching subscriptions:', error);
+      res.status(500).json({ error: 'Failed to fetch subscriptions' });
+    }
+  });
+
+  const httpServer = createServer(app);
+  return httpServer;
+}
+
+function generateLandingPageHTML(landingPage: any, clientPlans: any[], whiteLabel: any, isAffiliateDomain: boolean = false) {
+  const originalElements = landingPage.elements || [];
+  const companyName = whiteLabel?.businessName || 'Our Company';
+  const domainPath = whiteLabel?.domainPath || 'domain';
+  
+  // Always ensure pricing section is included
+  const hasPricingSection = originalElements.some(element => element.type === 'pricing');
+  
+  // Create a new array to avoid mutating the original
+  const elements = [...originalElements];
+  
+  // If no pricing section exists in elements, add it manually
+  if (!hasPricingSection) {
+    console.log(`Domain ${domainPath}: No pricing section found in elements, adding fallback with ${clientPlans.length} plans`);
+    elements.push({
+      type: 'pricing',
+      content: { title: 'Our Pricing Plans' }
+    });
+  } else {
+    console.log(`Domain ${domainPath}: Pricing section found in elements`);
+  }
+  
+  const elementsHtml = elements.map((element: any) => {
+    if (element.type === 'hero') {
+      return `
+        <section style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 100px 0; text-align: center;">
+          <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+            <h1 style="font-size: 3.5rem; font-weight: 700; margin-bottom: 1.5rem;">
+              ${element.content?.title || `Transform Your Business ${companyName}`}
+            </h1>
+            <p style="font-size: 1.25rem; margin-bottom: 2rem; opacity: 0.9;">
+              ${element.content?.subtitle || `${companyName} helps businesses grow with cutting-edge strategies and proven results.`}
+            </p>
+            <a href="#pricing" style="background: #ffffff; color: #667eea; padding: 16px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1.1rem;">
+              View Our Plans
+            </a>
+          </div>
+        </section>
+      `;
+    } else if (element.type === 'pricing') {
+      if (clientPlans.length === 0) {
+        return `
+          <section id="pricing" style="padding: 80px 0; background: #f8fafc;">
+            <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+              <h2 style="text-align: center; font-size: 2.5rem; font-weight: 700; margin-bottom: 3rem; color: #1a202c;">
+                Our Pricing Plans
+              </h2>
+              <div style="text-align: center; padding: 40px;">
+                <p style="font-size: 1.1rem; color: #4a5568;">
+                  Contact us for custom pricing options tailored to your business needs.
+                </p>
+              </div>
+            </div>
+          </section>
+        `;
+      }
+      
+      const plansHtml = clientPlans.map(plan => {
+        const price = plan.monthlyPrice || plan.monthly_price || plan.price;
+        const displayPrice = price ? `$${price}` : 'Contact for Pricing';
+        
+        return `
+        <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: center;">
+          <h3 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; color: #1a202c;">${plan.name}</h3>
+          <div style="font-size: 2.5rem; font-weight: 700; color: #667eea; margin-bottom: 1rem;">
+            ${displayPrice}
+          </div>
+          <p style="color: #4a5568; margin-bottom: 2rem;">${plan.description || 'Professional solution for your business needs.'}</p>
+          <button onclick="navigateToCheckout('${plan.id}', '${plan.name}', '${price || 0}')" 
+                  style="width: 100%; background: #667eea; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">
+            Purchase Now
+          </button>
+        </div>
+      `;
+      }).join('');
+      
+      return `
+        <section id="pricing" style="padding: 80px 0; background: #f8fafc;">
+          <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+            <h2 style="text-align: center; font-size: 2.5rem; font-weight: 700; margin-bottom: 3rem; color: #1a202c;">
+              Our Pricing Plans
+            </h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+              ${plansHtml}
+            </div>
+          </div>
+        </section>
+      `;
+    } else if (element.type === 'affiliate-signup') {
+      const features = element.content?.features || [
+        "💰 Earn up to 30% commission on all referrals",
+        "🚀 Access to exclusive marketing materials",
+        "📊 Real-time dashboard with analytics",
+        "🎯 Dedicated affiliate support team",
+        "🔄 Monthly commission payouts"
+      ];
+      
+      const featuresHtml = features.map(feature => `
+        <div style="margin-bottom: 15px; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 10px;">
+          ${feature}
+        </div>
+      `).join('');
+      
+      return `
+        <section id="affiliate-signup" style="padding: 100px 0; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; text-align: center;">
+          <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+            <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 1.5rem;">
+              ${element.content?.title || 'Join Our Affiliate Program'}
+            </h2>
+            <p style="font-size: 1.25rem; margin-bottom: 3rem; opacity: 0.95;">
+              ${element.content?.subtitle || `Partner with ${companyName} and earn commissions by promoting our services to your network`}
+            </p>
+            <div style="margin-bottom: 3rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+              ${featuresHtml}
+            </div>
+            <button onclick="openAffiliateSignupModal()" 
+                    style="background: white; color: #f59e0b; padding: 16px 32px; border: none; border-radius: 8px; font-weight: 600; font-size: 1.1rem; cursor: pointer; transition: all 0.3s ease;">
+              ${element.content?.buttonText || 'Start as White Label Affiliate'}
+            </button>
+          </div>
+        </section>
+      `;
+    }
+    return '';
+  }).join('');
+
+  return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${companyName} - Professional Solutions</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        
+        /* Modal Styles */
+        .modal {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.5);
+          z-index: 1000;
+        }
+        
+        .modal.active {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .modal-content {
+          background: white;
+          border-radius: 12px;
+          padding: 30px;
+          max-width: 500px;
+          width: 90%;
+          max-height: 90vh;
+          overflow-y: auto;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+        }
+        
+        .modal-title {
+          font-size: 1.5rem;
+          font-weight: 600;
+          color: #1a202c;
+        }
+        
+        .close-btn {
+          background: none;
+          border: none;
+          font-size: 1.5rem;
+          cursor: pointer;
+          color: #666;
+        }
+        
+        .close-btn:hover {
+          color: #333;
+        }
+        
+        .form-group {
+          margin-bottom: 20px;
+        }
+        
+        .form-label {
+          display: block;
+          margin-bottom: 5px;
+          font-weight: 500;
+          color: #374151;
+        }
+        
+        .form-input {
+          width: 100%;
+          padding: 12px;
+          border: 1px solid #d1d5db;
+          border-radius: 6px;
+          font-size: 14px;
+        }
+        
+        .form-input:focus {
+          outline: none;
+          border-color: #667eea;
+          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 15px;
+        }
+        
+        .form-row-3 {
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          gap: 15px;
+        }
+        
+        .btn {
+          padding: 12px 24px;
+          border: none;
+          border-radius: 6px;
+          font-weight: 600;
+          cursor: pointer;
+          font-size: 14px;
+        }
+        
+        .btn-primary {
+          background: #667eea;
+          color: white;
+        }
+        
+        .btn-primary:hover {
+          background: #5a67d8;
+        }
+        
+        .btn-secondary {
+          background: #e2e8f0;
+          color: #4a5568;
+        }
+        
+        .btn-secondary:hover {
+          background: #cbd5e0;
+        }
+        
+        .plan-summary {
+          background: #f8fafc;
+          border-radius: 8px;
+          padding: 20px;
+          margin-bottom: 20px;
+        }
+        
+        .plan-name {
+          font-size: 1.25rem;
+          font-weight: 600;
+          margin-bottom: 10px;
+        }
+        
+        .plan-price {
+          font-size: 2rem;
+          font-weight: 700;
+          color: #667eea;
+          margin-bottom: 10px;
+        }
+        
+        .plan-description {
+          color: #4a5568;
+          margin-bottom: 15px;
+        }
+        
+        .security-note {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 12px;
+          background: #f0fff4;
+          border: 1px solid #9ae6b4;
+          border-radius: 6px;
+          margin-bottom: 20px;
+          font-size: 14px;
+          color: #22543d;
+        }
+        
+        .btn-actions {
+          display: flex;
+          gap: 15px;
+        }
+        
+        .btn-actions .btn {
+          flex: 1;
+        }
+        
+        .loading {
+          display: inline-block;
+          width: 16px;
+          height: 16px;
+          border: 2px solid #ffffff;
+          border-radius: 50%;
+          border-top-color: transparent;
+          animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      </style>
+    </head>
+    <body>
+      ${elementsHtml}
+      
+      <!-- Checkout Modal -->
+      <div id="checkoutModal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 class="modal-title">Complete Your Purchase</h2>
+            <button class="close-btn" onclick="closeCheckoutModal()">&times;</button>
+          </div>
+          
+          <div class="plan-summary">
+            <div class="plan-name" id="modalPlanName">Plan Name</div>
+            <div class="plan-price" id="modalPlanPrice">$0.00</div>
+            <div class="plan-description" id="modalPlanDescription">Professional solution for your business needs.</div>
+          </div>
+          
+          <form id="checkoutForm">
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input type="email" class="form-input" id="email" required>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Name on Card</label>
+              <input type="text" class="form-input" id="nameOnCard" required>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Card Number</label>
+              <input type="text" class="form-input" id="cardNumber" placeholder="1234 5678 9012 3456" required>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Expiry Date</label>
+                <input type="text" class="form-input" id="expiryDate" placeholder="MM/YY" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">CVV</label>
+                <input type="text" class="form-input" id="cvv" placeholder="123" required>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Address</label>
+              <input type="text" class="form-input" id="address" required>
+            </div>
+            
+            <div class="form-row-3">
+              <div class="form-group">
+                <label class="form-label">City</label>
+                <input type="text" class="form-input" id="city" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">State</label>
+                <input type="text" class="form-input" id="state" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">ZIP Code</label>
+                <input type="text" class="form-input" id="zip" required>
+              </div>
+            </div>
+            
+            <div class="security-note">
+              <span>🔒</span>
+              <span>Your payment information is secure and encrypted</span>
+            </div>
+            
+            <div class="btn-actions">
+              <button type="button" class="btn btn-secondary" onclick="closeCheckoutModal()">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="submitBtn">
+                Complete Purchase
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      <!-- Dashboard Access Buttons -->
+      <div style="position: fixed; top: 20px; right: 20px; z-index: 999; display: flex; gap: 10px;">
+        <button onclick="window.location.href='/${domainPath}/user'" 
+                style="background: #3b82f6; color: white; padding: 12px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          Start
+        </button>
+        ${!isAffiliateDomain ? `
+        <button onclick="window.location.href='/${domainPath}/affiliate'" 
+                style="background: #10b981; color: white; padding: 12px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          Start As Affiliate
+        </button>
+        ` : ''}
+      </div>
+
+      <!-- Affiliate modals removed - users now access both dashboards with same authentication -->
+      
+      <script>
+        // Define all functions in global scope for accessibility
+        window.navigateToCheckout = function(planId, planName, planPrice) {
+          console.log('navigateToCheckout called with:', { planId, planName, planPrice });
+          console.log('Type of planPrice:', typeof planPrice, 'Value:', planPrice);
+          
+          // Show checkout modal
+          const modal = document.getElementById('checkoutModal');
+          modal.classList.add('active');
+          
+          // Update modal content
+          document.getElementById('modalPlanName').textContent = planName;
+          
+          // Handle price display correctly
+          let displayPrice = 'Contact for Pricing';
+          const priceValue = parseFloat(planPrice);
+          
+          if (planPrice && planPrice !== 'null' && planPrice !== 'undefined' && planPrice !== '0' && !isNaN(priceValue) && priceValue > 0) {
+            displayPrice = \`$\${priceValue}\`;
+          } else if (planPrice === '0' || planPrice === 0 || priceValue === 0) {
+            displayPrice = 'Free';
+          }
+          
+          console.log('Display price set to:', displayPrice);
+          document.getElementById('modalPlanPrice').textContent = displayPrice;
+          document.getElementById('modalPlanDescription').textContent = planName + ' - Professional solution for your business needs.';
+          
+          // Store plan data for form submission
+          window.currentPlan = {
+            id: planId,
+            name: planName,
+            price: planPrice,
+            monthlyPrice: planPrice // Store both for compatibility
+          };
+        };
+        
+        window.closeCheckoutModal = function() {
+          const modal = document.getElementById('checkoutModal');
+          modal.classList.remove('active');
+        };
+        
+        // Affiliate modal functions removed - users now access dashboards directly
+        
+        window.formatCardNumber = function(input) {
+          let value = input.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+          let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+          if (formattedValue.length > 19) formattedValue = formattedValue.substr(0, 19);
+          input.value = formattedValue;
+        };
+        
+        window.formatExpiryDate = function(input) {
+          let value = input.value.replace(/\D/g, '');
+          if (value.length >= 2) {
+            value = value.substring(0, 2) + '/' + value.substring(2, 4);
+          }
+          input.value = value;
+        };
+        
+        window.openLoginModal = function() {
+          console.log('Opening login modal...');
+          // Implementation for login modal
+        };
+        
+        window.openSignupModal = function() {
+          console.log('Opening signup modal...');
+          // Implementation for signup modal
+        };
+        
+        window.continueAsGuest = function(planId, planName, planPrice) {
+          console.log('Continuing as guest...');
+          window.navigateToCheckout(planId, planName, planPrice);
+        };
+        
+        window.logout = function() {
+          fetch('/api/logout', { method: 'POST' })
+            .then(() => {
+              window.location.reload();
+            })
+            .catch(console.error);
+        };
+        
+        // Authentication status check
+        window.checkAuthStatus = function() {
+          return fetch('/api/auth/user', { credentials: 'include' })
+            .then(response => {
+              if (response.ok) {
+                return response.json();
+              }
+              return null;
+            })
+            .catch(() => null);
+        };
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+          console.log('Domain landing page loaded successfully');
+          
+          // Initialize checkout modal functionality
+          window.initializeCheckoutModal = function() {
+            // This will be called by React app when it mounts
+            console.log('Checkout modal functionality initialized');
+          };
+          
+          // Setup modal functionality
+          const modal = document.getElementById('checkoutModal');
+          const checkoutForm = document.getElementById('checkoutForm');
+          
+          // Setup card number formatting
+          document.getElementById('cardNumber').addEventListener('input', function(e) {
+            window.formatCardNumber(e.target);
+          });
+          
+          // Setup expiry date formatting
+          document.getElementById('expiryDate').addEventListener('input', function(e) {
+            window.formatExpiryDate(e.target);
+          });
+          
+          // Affiliate form handlers removed - users now access dashboards directly
+          
+          // Setup form submission
+          checkoutForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!window.currentPlan) {
+              alert('No plan selected');
+              return;
+            }
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
+            submitBtn.innerHTML = '<span class="loading"></span> Processing...';
+            submitBtn.disabled = true;
+            
+            try {
+              // Simulate payment processing
+              await new Promise(resolve => setTimeout(resolve, 2000));
+              
+              // Create subscription
+              const response = await fetch('/api/subscriptions', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  planId: parseInt(window.currentPlan.id),
+                  status: 'active',
+                  planPrice: window.currentPlan.monthlyPrice // Pass the price for purchase history
+                })
+              });
+              
+              if (response.ok) {
+                alert('Purchase completed successfully!');
+                window.closeCheckoutModal();
+                
+                // Reset form
+                checkoutForm.reset();
+              } else {
+                throw new Error('Failed to create subscription');
+              }
+            } catch (error) {
+              console.error('Payment error:', error);
+              alert('Payment failed. Please try again.');
+            } finally {
+              submitBtn.textContent = originalText;
+              submitBtn.disabled = false;
+            }
+          });
+          
+          // Close modal when clicking outside
+          modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+              window.closeCheckoutModal();
+            }
+          });
+          
+          // Check authentication status
+          window.checkAuthStatus().then(user => {
+            if (user) {
+              console.log('User authenticated:', user);
+            } else {
+              console.log('User not authenticated');
+            }
+          });
+        });
+      </script>
+    </body>
+    </html>
+  `;
+}
+
+function generatePricingSection(clientPlans: any[]) {
+  if (clientPlans.length === 0) {
+    return `
+      <section id="pricing" style="padding: 80px 0; background: #f8fafc;">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+          <h2 style="text-align: center; font-size: 2.5rem; font-weight: 700; margin-bottom: 3rem; color: #1a202c;">
+            Our Pricing Plans
+          </h2>
+          <div style="text-align: center; padding: 40px;">
+            <p style="font-size: 1.1rem; color: #4a5568;">
+              Contact us for custom pricing options tailored to your business needs.
+            </p>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+  
+  const plansHtml = clientPlans.map(plan => {
+    const price = plan.monthlyPrice || plan.monthly_price || plan.price;
+    const displayPrice = price ? `$${price}` : 'Contact for Pricing';
+    
+    return `
+    <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: center;">
+      <h3 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; color: #1a202c;">${plan.name}</h3>
+      <div style="font-size: 2.5rem; font-weight: 700; color: #667eea; margin-bottom: 1rem;">
+        ${displayPrice}
+      </div>
+      <p style="color: #4a5568; margin-bottom: 2rem;">${plan.description || 'Professional solution for your business needs.'}</p>
+      <button onclick="navigateToCheckout('${plan.id}', '${plan.name}', '${price || 0}')" 
+              style="width: 100%; background: #667eea; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">
+        Purchase Now
+      </button>
+    </div>
+  `;
+  }).join('');
+  
+  return `
+    <section id="pricing" style="padding: 80px 0; background: #f8fafc;">
+      <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+        <h2 style="text-align: center; font-size: 2.5rem; font-weight: 700; margin-bottom: 3rem; color: #1a202c;">
+          Our Pricing Plans
+        </h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+          ${plansHtml}
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+  // ===== SUPER ADMIN AFFILIATE API ENDPOINTS =====
+  
+  // Get main site plans for Super Admin Affiliates (isMainSitePlan = true)
+  app.get('/api/super-admin-affiliate/plans', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      
+      if (!user || user.role !== 'super_admin_affiliate') {
+        return res.status(403).json({ error: 'Access denied. Super Admin Affiliate role required.' });
+      }
+      
+      // Get all plans where isMainSitePlan = true
+      const allPlans = await storage.getPlans();
+      const mainSitePlans = allPlans.filter(plan => plan.isMainSitePlan === true);
+      
+      res.json(mainSitePlans);
+    } catch (error) {
+      console.error('Error fetching main site plans for Super Admin Affiliate:', error);
+      res.status(500).json({ error: 'Failed to fetch main site plans' });
+    }
+  });
+
+  // Toggle main site plan visibility for Super Admin Affiliates
+  app.post('/api/super-admin-affiliate/plans/:id/toggle-visibility', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      const { id } = req.params;
+      const { isVisible } = req.body;
+      
+      if (!user || user.role !== 'super_admin_affiliate') {
+        return res.status(403).json({ error: 'Access denied. Super Admin Affiliate role required.' });
+      }
+      
+      // Update plan visibility - this should update the affiliatePlanVisibility table
+      await storage.updateAffiliatePlanVisibility(parseInt(id), user.id, isVisible);
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error toggling plan visibility:', error);
+      res.status(500).json({ error: 'Failed to toggle plan visibility' });
+    }
+  });
+
+  // Get Super Admin announcements only for Super Admin Affiliates
+  app.get('/api/super-admin-affiliate/announcements', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      
+      if (!user || user.role !== 'super_admin_affiliate') {
+        return res.status(403).json({ error: 'Access denied. Super Admin Affiliate role required.' });
+      }
+      
+      // Get announcements created by Super Admin users only
+      const allAnnouncements = await storage.getAnnouncements();
+      const superAdminUsers = await storage.getUsers();
+      const superAdminIds = superAdminUsers
+        .filter(u => u.role === 'super_admin')
+        .map(u => u.id);
+      
+      const superAdminAnnouncements = allAnnouncements.filter(announcement => 
+        superAdminIds.includes(announcement.authorId) && 
+        (announcement.isPublic || announcement.visibility === 'public')
+      );
+      
+      res.json(superAdminAnnouncements);
+    } catch (error) {
+      console.error('Error fetching Super Admin announcements:', error);
+      res.status(500).json({ error: 'Failed to fetch announcements' });
+    }
+  });
+
+  // Like announcement for Super Admin Affiliates
+  app.post('/api/super-admin-affiliate/announcements/:id/like', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      const { id } = req.params;
+      
+      if (!user || user.role !== 'super_admin_affiliate') {
+        return res.status(403).json({ error: 'Access denied. Super Admin Affiliate role required.' });
+      }
+      
+      await storage.likeAnnouncement(parseInt(id), user.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error liking announcement:', error);
+      res.status(500).json({ error: 'Failed to like announcement' });
+    }
+  });
+
+  // Add comment to announcement for Super Admin Affiliates
+  app.post('/api/super-admin-affiliate/announcements/:id/comment', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      const { id } = req.params;
+      const { comment } = req.body;
+      
+      if (!user || user.role !== 'super_admin_affiliate') {
+        return res.status(403).json({ error: 'Access denied. Super Admin Affiliate role required.' });
+      }
+      
+      await storage.createAnnouncementComment({
+        announcementId: parseInt(id),
+        userId: user.id,
+        content: comment
+      });
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error adding comment:', error);
+      res.status(500).json({ error: 'Failed to add comment' });
+    }
+  });
+
+  // Get referrals for Super Admin Affiliates
+  app.get('/api/super-admin-affiliate/referrals', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      
+      if (!user || user.role !== 'super_admin_affiliate') {
+        return res.status(403).json({ error: 'Access denied. Super Admin Affiliate role required.' });
+      }
+      
+      // Get referrals by this Super Admin Affiliate
+      const referrals = await storage.getReferralsByUser(user.id);
+      
+      res.json(referrals);
+    } catch (error) {
+      console.error('Error fetching referrals for Super Admin Affiliate:', error);
+      res.status(500).json({ error: 'Failed to fetch referrals' });
+    }
+  });
+
+  // Get commission data for Super Admin Affiliates on main site plans
+  app.get('/api/super-admin-affiliate/commissions', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      
+      if (!user || user.role !== 'super_admin_affiliate') {
+        return res.status(403).json({ error: 'Access denied. Super Admin Affiliate role required.' });
+      }
+      
+      // Get commission data for main site plans only
+      const allPlans = await storage.getPlans();
+      const mainSitePlans = allPlans.filter(plan => plan.isMainSitePlan === true);
+      
+      const commissionData = await Promise.all(
+        mainSitePlans.map(async (plan) => {
+          // Get purchases for this plan where referral was from this affiliate
+          const planPurchases = await db
+            .select({
+              amount: purchaseHistory.amount,
+              userId: purchaseHistory.userId,
+              createdAt: purchaseHistory.createdAt,
+            })
+            .from(purchaseHistory)
+            .leftJoin(referralTracking, eq(purchaseHistory.userId, referralTracking.referredUserId))
+            .where(
+              and(
+                eq(purchaseHistory.planId, plan.id),
+                eq(purchaseHistory.status, 'completed'),
+                eq(referralTracking.affiliateId, user.id)
+              )
+            );
+
+          const totalPurchases = planPurchases.length;
+          const totalRevenue = planPurchases.reduce((sum, p) => sum + parseFloat(p.amount || '0'), 0);
+          const affiliateCommission = totalRevenue * (plan.affiliateCommissionPercentage || 0) / 100;
+
+          return {
+            plan,
+            metrics: {
+              totalPurchases,
+              totalRevenue,
+              affiliateCommission
+            }
+          };
+        })
+      );
+      
+      res.json(commissionData);
+    } catch (error) {
+      console.error('Error fetching commission data for Super Admin Affiliate:', error);
+      res.status(500).json({ error: 'Failed to fetch commission data' });
+    }
+  });
+
+  return server;
+}
