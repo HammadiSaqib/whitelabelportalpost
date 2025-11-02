@@ -42,6 +42,9 @@ export class VerificationStorage {
   static verify(email: string, inputCode: string): { valid: boolean; message: string; attempts: number } {
     const key = email.toLowerCase();
     console.log(`🔍 VERIFY DEBUG - Looking for verification entry for: ${key}`);
+    
+
+    
     const entry = verificationCodes.get(key);
     
     if (!entry) {

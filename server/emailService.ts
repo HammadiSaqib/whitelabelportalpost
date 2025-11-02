@@ -1,5 +1,8 @@
 import nodemailer from 'nodemailer';
 import { LoginMetadata, formatDeviceInfo, formatLocationInfo } from './deviceDetection';
+import { db } from './db';
+import { whiteLabels } from '../shared/schema';
+import { eq } from 'drizzle-orm';
 
 // HTML escape function to prevent HTML injection attacks
 export function escapeHtml(unsafe: string | null | undefined): string {
@@ -18,13 +21,13 @@ if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
   console.warn("EMAIL_USER or EMAIL_PASS environment variables not set - email functionality disabled");
 }
 
-// Create Gmail transporter with SSL configuration
-const transporter = nodemailer.createTransport({
+// Default Gmail transporter with SSL configuration (Super Admin)
+const defaultTransporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 465,
   secure: true, // use SSL
   auth: {
-    user: process.env.EMAIL_USER,
+    user: process.env.EMAIL_USER || 'teamwhitelabelportal@gmail.com',
     pass: process.env.EMAIL_PASS
   },
   debug: true, // Enable debug output
@@ -34,12 +37,53 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+// Create transporter for white-label client
+async function createWhiteLabelTransporter(whiteLabelId: number) {
+  try {
+    const whiteLabelData = await db.select().from(whiteLabels).where(eq(whiteLabels.id, whiteLabelId)).limit(1);
+    
+    if (whiteLabelData.length === 0) {
+      console.log(`White label ${whiteLabelId} not found, using default transporter`);
+      return defaultTransporter;
+    }
+
+    const emailSettings = whiteLabelData[0].emailSettings;
+    
+    // If no custom SMTP settings or useCustomSmtp is false, use super admin settings
+    if (!emailSettings || !emailSettings.useCustomSmtp) {
+      console.log(`Using super admin email settings for white label ${whiteLabelId}`);
+      return defaultTransporter;
+    }
+
+    // Create custom transporter for white-label client
+    console.log(`Creating custom email transporter for white label ${whiteLabelId}`);
+    return nodemailer.createTransport({
+      host: emailSettings.smtpHost || 'smtp.gmail.com',
+      port: emailSettings.smtpPort || 465,
+      secure: emailSettings.smtpSecure !== false, // default to true
+      auth: {
+        user: emailSettings.smtpUser,
+        pass: emailSettings.smtpPass
+      },
+      debug: true,
+      logger: true,
+      tls: {
+        rejectUnauthorized: false
+      }
+    });
+  } catch (error) {
+    console.error(`Error creating white label transporter for ${whiteLabelId}:`, error);
+    return defaultTransporter;
+  }
+}
+
 interface EmailParams {
   to: string;
   from: string;
   subject: string;
   text?: string;
   html?: string;
+  whiteLabelId?: number; // Optional white label ID for custom email settings
 }
 
 export async function sendEmail(params: EmailParams): Promise<boolean> {
@@ -49,8 +93,36 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
   }
 
   try {
+    // Get appropriate transporter based on white label settings
+    const transporter = params.whiteLabelId 
+      ? await createWhiteLabelTransporter(params.whiteLabelId)
+      : defaultTransporter;
+
+    // Get white label email settings for from address
+    let fromEmail = params.from;
+    let fromName = "WhiteLabel Portal";
+    
+    if (params.whiteLabelId) {
+      try {
+        const whiteLabelData = await db.select().from(whiteLabels).where(eq(whiteLabels.id, params.whiteLabelId)).limit(1);
+        if (whiteLabelData.length > 0) {
+          const emailSettings = whiteLabelData[0].emailSettings;
+          if (emailSettings && emailSettings.useCustomSmtp) {
+            fromEmail = emailSettings.fromEmail || params.from;
+            fromName = emailSettings.fromName || whiteLabelData[0].businessName || "WhiteLabel Portal";
+          } else {
+            // Use super admin settings but with white label business name
+            fromEmail = process.env.EMAIL_USER || 'teamwhitelabelportal@gmail.com';
+            fromName = whiteLabelData[0].businessName || "WhiteLabel Portal";
+          }
+        }
+      } catch (error) {
+        console.error('Error getting white label email settings:', error);
+      }
+    }
+
     const info = await transporter.sendMail({
-      from: `"WhiteLabel Portal" <${params.from}>`,
+      from: `"${fromName}" <${fromEmail}>`,
       to: params.to,
       subject: params.subject,
       text: params.text,
@@ -66,7 +138,7 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
     console.log(`Email sent successfully to ${params.to} - Message ID: ${info.messageId}`);
     return true;
   } catch (error) {
-    console.error('Gmail SMTP email error:', error);
+    console.error('Email sending error:', error);
     return false;
   }
 }
@@ -176,7 +248,8 @@ export async function sendVerificationEmail(email: string, code: string): Promis
     from: 'info@whitelabelportal.com',
     subject,
     text,
-    html
+    html,
+    whiteLabelId: undefined
   });
 }
 
@@ -289,6 +362,153 @@ export async function sendPurchaseConfirmationEmail(
                 <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #374151;">
                     <p style="color: #6b7280; margin: 0; font-size: 11px;">
                         © 2025 WhiteLabel Portal. All rights reserved.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+  `;
+
+  return await sendEmail({
+    to: email,
+    from: 'info@whitelabelportal.com',
+    subject,
+    text,
+    html,
+    whiteLabelId
+  });
+}
+
+// Send user invitation email (for end users)
+export async function sendUserInvitation(
+  email: string,
+  firstName: string,
+  lastName: string,
+  inviterName: string,
+  inviterWhiteLabelId?: number
+): Promise<boolean> {
+  console.log('DEBUG - sendUserInvitation called with:', {
+    email,
+    firstName,
+    lastName,
+    inviterName,
+    inviterWhiteLabelId,
+    inviterWhiteLabelIdType: typeof inviterWhiteLabelId
+  });
+
+  const subject = `🎉 You're Invited to Join ${inviterName}'s Platform!`;
+  const safeFirstName = escapeHtml(firstName);
+  const safeLastName = escapeHtml(lastName);
+  const safeInviterName = escapeHtml(inviterName);
+  
+  // Create the invitation URL with the inviter's white label ID
+  const invitationUrl = inviterWhiteLabelId 
+    ? `https://whitelabelportal.com/login?whitelabel_id=${inviterWhiteLabelId}`
+    : `https://whitelabelportal.com/login`;
+  
+  console.log('DEBUG - Generated invitation URL:', invitationUrl);
+  
+  const text = `Hello ${firstName} ${lastName}, You have been invited by ${inviterName} to join their platform. Get started now and discover all the amazing features waiting for you!`;
+  
+  const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>You're Invited!</title>
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+            <!-- Header with Logo -->
+            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px 20px; text-align: center;">
+                <img src="cid:logo" alt="Platform" style="max-width: 200px; height: auto; margin-bottom: 20px;" />
+                <h1 style="color: #ffffff; margin: 0; font-size: 32px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    You're Invited! 🎉
+                </h1>
+                <p style="color: #d1fae5; margin: 10px 0 0 0; font-size: 18px; font-weight: 500;">
+                    Join ${safeInviterName}'s platform
+                </p>
+            </div>
+            
+            <!-- Main Content -->
+            <div style="padding: 40px 20px;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h2 style="color: #1f2937; margin: 0 0 15px 0; font-size: 24px; font-weight: 600;">
+                        Hello ${safeFirstName} ${safeLastName}!
+                    </h2>
+                    <p style="color: #4b5563; margin: 0; font-size: 16px; line-height: 1.6;">
+                        <strong>${safeInviterName}</strong> has invited you to join their platform. Get started now and discover all the amazing features waiting for you!
+                    </p>
+                </div>
+                
+                <!-- Call to Action -->
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="${invitationUrl}" 
+                       style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3); transition: all 0.3s ease;">
+                        Get Started Now →
+                    </a>
+                </div>
+                
+                <!-- Features -->
+                <div style="background: #f0fdf4; border-radius: 12px; padding: 30px; margin: 30px 0;">
+                    <h3 style="color: #1f2937; margin: 0 0 20px 0; font-size: 20px; font-weight: 600; text-align: center;">
+                        What's waiting for you:
+                    </h3>
+                    <div style="display: grid; gap: 15px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; flex-shrink: 0;"></div>
+                            <p style="color: #4b5563; margin: 0; font-size: 14px; line-height: 1.5;">
+                                Instant access to premium features
+                            </p>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; flex-shrink: 0;"></div>
+                            <p style="color: #4b5563; margin: 0; font-size: 14px; line-height: 1.5;">
+                                Personalized user experience
+                            </p>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; flex-shrink: 0;"></div>
+                            <p style="color: #4b5563; margin: 0; font-size: 14px; line-height: 1.5;">
+                                Direct support from ${safeInviterName}
+                            </p>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; flex-shrink: 0;"></div>
+                            <p style="color: #4b5563; margin: 0; font-size: 14px; line-height: 1.5;">
+                                Easy setup - no technical knowledge required
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Getting Started Section -->
+                <div style="background: #ecfdf5; border-radius: 8px; padding: 20px; margin: 20px 0; border-left: 4px solid #10b981;">
+                    <h4 style="color: #059669; margin: 0 0 10px 0; font-size: 16px; font-weight: 600;">
+                        🚀 Ready to Get Started?
+                    </h4>
+                    <p style="color: #059669; margin: 0; font-size: 14px; line-height: 1.5;">
+                        Click the "Get Started Now" button above to create your account and begin your journey with ${safeInviterName}'s platform!
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div style="background: #1f2937; padding: 30px 20px; text-align: center;">
+                <div style="margin-bottom: 20px;">
+                    <img src="cid:logo" alt="Platform" style="max-width: 120px; height: auto; opacity: 0.8;" />
+                </div>
+                <p style="color: #9ca3af; margin: 0 0 10px 0; font-size: 14px;">
+                    Personal Invitation from ${safeInviterName}
+                </p>
+                <p style="color: #6b7280; margin: 0; font-size: 12px;">
+                    Join thousands of users already enjoying the platform
+                </p>
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #374151;">
+                    <p style="color: #6b7280; margin: 0; font-size: 11px;">
+                        This invitation was sent by ${safeInviterName}. If you didn't expect this invitation, you can safely ignore this email.
                     </p>
                 </div>
             </div>
@@ -440,7 +660,7 @@ export async function sendPlanOwnerNotificationEmail(
 }
 
 // Send welcome email for new signups
-export async function sendWelcomeEmail(email: string, userName: string, userRole: string): Promise<boolean> {
+export async function sendWelcomeEmail(email: string, userName: string, userRole: string, whiteLabelId?: number): Promise<boolean> {
   const subject = "🎉 Welcome to WhiteLabel Portal - Your Business Platform Awaits!";
   const safeUserName = escapeHtml(userName);
   const safeUserRole = escapeHtml(userRole);
@@ -692,7 +912,8 @@ export async function sendWhiteLabelInvitation(
   firstName: string,
   lastName: string,
   businessName: string,
-  inviterName: string
+  inviterName: string,
+  whiteLabelId?: number
 ): Promise<boolean> {
   const subject = `🚀 You're Invited to Join WhiteLabel Portal - ${businessName}`;
   const safeFirstName = escapeHtml(firstName);

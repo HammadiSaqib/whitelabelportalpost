@@ -715,8 +715,8 @@ export default function ProductManager() {
           {/* Create/Edit Form - Neutral background with primary header */}
           {(showCreateForm || editingProduct) && (
             <Card className="mb-8 backdrop-blur-md bg-white/90 dark:bg-gray-800/90 border-gray-200/70 dark:border-gray-700/70 shadow-xl">
-              <CardHeader className="rounded-t-lg border-b border-gray-200/50 dark:border-gray-700/50" style={createSolidStyle(false, 0.1)}>
-                <CardTitle className="text-xl font-semibold text-white">
+              <CardHeader className="rounded-t-lg border-b border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-slate-50 to-gray-50 dark:from-gray-800 dark:to-gray-900">
+                <CardTitle className="text-2xl text-gray">
                   {editingProduct ? 'Edit Product' : 'Create New Product'}
                 </CardTitle>
               </CardHeader>

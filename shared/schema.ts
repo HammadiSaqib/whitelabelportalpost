@@ -81,6 +81,7 @@ export const users = pgTable("users", {
   company: varchar("company", { length: 255 }), // Company for affiliates
   referralCode: varchar("referral_code", { length: 255 }), // Unique referral code for Super Admin Affiliates
   affiliateOfWhiteLabelId: integer("affiliate_of_white_label_id").references(() => whiteLabels.id), // Tracks which white label the affiliate signed up through
+  userOfWhiteLabelId: integer("user_of_white_label_id").references(() => whiteLabels.id), // Tracks which white label the user belongs to
 
   createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow(),
@@ -150,6 +151,16 @@ export const whiteLabels = pgTable("white_labels", {
   secondaryColor: varchar("secondary_color", { length: 255 }).default("#64748B"),
   defaultLandingPageId: integer("default_landing_page_id").references(() => landingPages.id), // Default landing page for domain
   landingPageCode: varchar("landing_page_code", { length: 50 }), // Controls which landing page template to use (e.g., "default")
+  emailSettings: jsonb("email_settings").$type<{
+    smtpHost?: string;
+    smtpPort?: number;
+    smtpSecure?: boolean;
+    smtpUser?: string;
+    smtpPass?: string;
+    fromEmail?: string;
+    fromName?: string;
+    useCustomSmtp?: boolean;
+  }>().default({}), // Custom email configuration for white-label clients
   isActive: boolean("is_active").default(true),
   invitedBy: varchar("invited_by", { length: 255 }).references(() => users.id), // Super Admin Affiliate who invited them
   createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),

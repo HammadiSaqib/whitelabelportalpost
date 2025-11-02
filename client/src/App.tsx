@@ -23,6 +23,7 @@ import Analytics from "@/pages/analytics";
 import ProductManager from "@/pages/ProductManager";
 import CategoryManager from "@/pages/CategoryManager";
 import CategoriesPage from "@/pages/CategoriesPage";
+import UsersPage from "@/pages/UsersPage";
 import LandingPageBuilderPage from "@/pages/LandingPageBuilderPage";
 
 import Settings from "./pages/settings";
@@ -223,6 +224,7 @@ function Router() {
           <Route path="/analytics" component={Analytics} />
           <Route path="/products" component={ProductManager} />
           <Route path="/categories" component={CategoriesPage} />
+          <Route path="/users" component={UsersPage} />
 
           <Route path="/settings" component={Settings} />
           <Route path="/integrations" component={Integrations} />

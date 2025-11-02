@@ -8,6 +8,1187 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
+// shared/schema.ts
+var schema_exports = {};
+__export(schema_exports, {
+  activities: () => activities,
+  activitiesRelations: () => activitiesRelations,
+  affiliatePayments: () => affiliatePayments,
+  affiliatePlanVisibility: () => affiliatePlanVisibility,
+  affiliates: () => affiliates,
+  affiliatesRelations: () => affiliatesRelations,
+  aiContentOptimizations: () => aiContentOptimizations,
+  aiGeneratedContent: () => aiGeneratedContent,
+  aiRecommendations: () => aiRecommendations,
+  analyticsEvents: () => analyticsEvents,
+  analyticsMetrics: () => analyticsMetrics,
+  announcementAnalytics: () => announcementAnalytics,
+  announcementComments: () => announcementComments,
+  announcementLikes: () => announcementLikes,
+  announcementShares: () => announcementShares,
+  announcements: () => announcements,
+  categories: () => categories,
+  categoriesRelations: () => categoriesRelations,
+  checkUsernameSchema: () => checkUsernameSchema,
+  clientTemplateCustomizations: () => clientTemplateCustomizations2,
+  commissions: () => commissions,
+  commissionsRelations: () => commissionsRelations,
+  customDomains: () => customDomains,
+  domainUserSessions: () => domainUserSessions,
+  domainUserSessionsRelations: () => domainUserSessionsRelations,
+  endUserActivities: () => endUserActivities,
+  endUserActivitiesRelations: () => endUserActivitiesRelations,
+  forgotPasswordSchema: () => forgotPasswordSchema,
+  insertActivitySchema: () => insertActivitySchema,
+  insertAffiliatePaymentSchema: () => insertAffiliatePaymentSchema,
+  insertAffiliateSchema: () => insertAffiliateSchema,
+  insertAiContentOptimizationSchema: () => insertAiContentOptimizationSchema,
+  insertAiGeneratedContentSchema: () => insertAiGeneratedContentSchema,
+  insertAiRecommendationSchema: () => insertAiRecommendationSchema,
+  insertAnalyticsEventSchema: () => insertAnalyticsEventSchema,
+  insertAnalyticsMetricSchema: () => insertAnalyticsMetricSchema,
+  insertAnnouncementAnalyticsSchema: () => insertAnnouncementAnalyticsSchema,
+  insertAnnouncementCommentSchema: () => insertAnnouncementCommentSchema,
+  insertAnnouncementLikeSchema: () => insertAnnouncementLikeSchema,
+  insertAnnouncementSchema: () => insertAnnouncementSchema,
+  insertAnnouncementShareSchema: () => insertAnnouncementShareSchema,
+  insertCategorySchema: () => insertCategorySchema,
+  insertClientTemplateCustomizationSchema: () => insertClientTemplateCustomizationSchema,
+  insertCustomDomainSchema: () => insertCustomDomainSchema,
+  insertEndUserActivitySchema: () => insertEndUserActivitySchema,
+  insertIntegrationLogSchema: () => insertIntegrationLogSchema,
+  insertIntegrationSchema: () => insertIntegrationSchema,
+  insertLandingPageSchema: () => insertLandingPageSchema,
+  insertLinkMetaImageSchema: () => insertLinkMetaImageSchema,
+  insertNmiCredentialsSchema: () => insertNmiCredentialsSchema,
+  insertPaymentAccountSchema: () => insertPaymentAccountSchema,
+  insertPlanCategorySchema: () => insertPlanCategorySchema,
+  insertPlanProductSchema: () => insertPlanProductSchema,
+  insertPlanSchema: () => insertPlanSchema,
+  insertPlatformSettingSchema: () => insertPlatformSettingSchema,
+  insertProductSchema: () => insertProductSchema,
+  insertPurchaseHistorySchema: () => insertPurchaseHistorySchema,
+  insertReferralClickSchema: () => insertReferralClickSchema,
+  insertReferralLinkSchema: () => insertReferralLinkSchema,
+  insertReferralSignupSchema: () => insertReferralSignupSchema,
+  insertSubscriptionSchema: () => insertSubscriptionSchema,
+  insertTemplateSchema: () => insertTemplateSchema,
+  insertThemeSchema: () => insertThemeSchema,
+  insertUserPreferencesSchema: () => insertUserPreferencesSchema,
+  insertUserSchema: () => insertUserSchema,
+  insertUserSessionSchema: () => insertUserSessionSchema,
+  insertUserThemePreferenceSchema: () => insertUserThemePreferenceSchema,
+  insertWhiteLabelSchema: () => insertWhiteLabelSchema,
+  integrationLogs: () => integrationLogs,
+  integrations: () => integrations,
+  landingPages: () => landingPages2,
+  linkMetaImages: () => linkMetaImages,
+  linkMetaImagesRelations: () => linkMetaImagesRelations,
+  loginSchema: () => loginSchema,
+  nmiCredentials: () => nmiCredentials,
+  passwordResetTokens: () => passwordResetTokens,
+  paymentAccounts: () => paymentAccounts,
+  planCategories: () => planCategories,
+  planCategoriesRelations: () => planCategoriesRelations,
+  planProducts: () => planProducts,
+  planProductsRelations: () => planProductsRelations,
+  plans: () => plans,
+  plansRelations: () => plansRelations,
+  platformSettings: () => platformSettings,
+  products: () => products,
+  productsRelations: () => productsRelations,
+  purchaseHistory: () => purchaseHistory,
+  referralClicks: () => referralClicks,
+  referralCommissions: () => referralCommissions,
+  referralLinks: () => referralLinks,
+  referralSignups: () => referralSignups,
+  referralTracking: () => referralTracking,
+  referralTrackingRelations: () => referralTrackingRelations,
+  resetPasswordSchema: () => resetPasswordSchema,
+  sessions: () => sessions,
+  signupSchema: () => signupSchema,
+  subscriptions: () => subscriptions,
+  subscriptionsRelations: () => subscriptionsRelations,
+  templates: () => templates,
+  themes: () => themes,
+  upsertUserSchema: () => upsertUserSchema,
+  userPreferences: () => userPreferences,
+  userPreferencesRelations: () => userPreferencesRelations,
+  userSessions: () => userSessions,
+  userSessionsRelations: () => userSessionsRelations,
+  userThemePreferences: () => userThemePreferences,
+  users: () => users,
+  usersRelations: () => usersRelations,
+  whiteLabels: () => whiteLabels,
+  whiteLabelsRelations: () => whiteLabelsRelations
+});
+import {
+  pgTable,
+  varchar,
+  timestamp,
+  jsonb,
+  index,
+  serial,
+  integer,
+  decimal,
+  boolean
+} from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+var sessions, domainUserSessions, referralTracking, affiliatePlanVisibility, users, passwordResetTokens, plans, userPreferences, whiteLabels, affiliates, subscriptions, commissions, referralCommissions, paymentAccounts, affiliatePayments, categories, products, activities, purchaseHistory, endUserActivities, userSessions, usersRelations, userPreferencesRelations, plansRelations, whiteLabelsRelations, referralTrackingRelations, domainUserSessionsRelations, affiliatesRelations, subscriptionsRelations, commissionsRelations, categoriesRelations, productsRelations, activitiesRelations, endUserActivitiesRelations, userSessionsRelations, integrations, integrationLogs, aiGeneratedContent, aiRecommendations, aiContentOptimizations, referralLinks, referralSignups, referralClicks, planProducts, planCategories, linkMetaImages, templates, themes, userThemePreferences, clientTemplateCustomizations2, platformSettings, analyticsEvents, analyticsMetrics, announcements, announcementLikes, announcementComments, announcementShares, announcementAnalytics, insertPlanSchema, insertWhiteLabelSchema, insertAffiliateSchema, insertPurchaseHistorySchema, insertCategorySchema, insertProductSchema, insertActivitySchema, insertEndUserActivitySchema, insertUserSessionSchema, insertSubscriptionSchema, insertIntegrationSchema, insertIntegrationLogSchema, insertReferralLinkSchema, insertReferralSignupSchema, insertReferralClickSchema, insertAnnouncementSchema, insertAnnouncementLikeSchema, insertAnnouncementCommentSchema, insertUserPreferencesSchema, insertPaymentAccountSchema, insertAffiliatePaymentSchema, insertAnnouncementShareSchema, insertAiGeneratedContentSchema, insertAiRecommendationSchema, insertAiContentOptimizationSchema, insertTemplateSchema, planProductsRelations, planCategoriesRelations, linkMetaImagesRelations, insertPlanProductSchema, insertPlanCategorySchema, insertLinkMetaImageSchema, insertThemeSchema, insertUserThemePreferenceSchema, insertClientTemplateCustomizationSchema, insertPlatformSettingSchema, insertAnalyticsEventSchema, insertAnalyticsMetricSchema, upsertUserSchema, loginSchema, signupSchema, checkUsernameSchema, forgotPasswordSchema, resetPasswordSchema, insertUserSchema, insertAnnouncementAnalyticsSchema, landingPages2, insertLandingPageSchema, customDomains, insertCustomDomainSchema, nmiCredentials, insertNmiCredentialsSchema;
+var init_schema = __esm({
+  "shared/schema.ts"() {
+    "use strict";
+    sessions = pgTable(
+      "sessions",
+      {
+        sid: varchar("sid", { length: 255 }).primaryKey(),
+        sess: jsonb("sess").notNull(),
+        expire: timestamp("expire", { mode: "string" }).notNull()
+      },
+      (table) => [index("IDX_session_expire").on(table.expire)]
+    );
+    domainUserSessions = pgTable("domain_user_sessions", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id", { length: 255 }).notNull().references(() => users.id),
+      domainPath: varchar("domain_path", { length: 255 }).notNull(),
+      whiteLabelId: integer("white_label_id").notNull().references(() => whiteLabels.id),
+      sessionId: varchar("session_id", { length: 255 }).notNull(),
+      isActive: boolean("is_active").default(true),
+      lastActivity: timestamp("last_activity", { mode: "string" }).defaultNow(),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    referralTracking = pgTable("referral_tracking", {
+      id: serial("id").primaryKey(),
+      affiliateId: varchar("affiliate_id", { length: 255 }).notNull().references(() => users.id),
+      // The affiliate who referred the user
+      referredUserId: varchar("referred_user_id", { length: 255 }).notNull().references(() => users.id),
+      // The end-user who was referred
+      whiteLabelId: integer("white_label_id").notNull().references(() => whiteLabels.id),
+      // The white-label client associated with the affiliate
+      domainPath: varchar("domain_path", { length: 255 }).notNull(),
+      // The domain where the referral occurred
+      referralSource: varchar("referral_source", { length: 50 }).default("landing_page"),
+      // Source of referral (landing_page, direct_link, etc.)
+      status: varchar("status", { length: 20 }).default("pending"),
+      // pending, confirmed, paid
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    affiliatePlanVisibility = pgTable("affiliate_plan_visibility", {
+      id: serial("id").primaryKey(),
+      affiliateId: varchar("affiliate_id", { length: 255 }).notNull().references(() => users.id),
+      // The affiliate who controls visibility
+      planId: integer("plan_id").notNull().references(() => plans.id),
+      // The plan being controlled
+      isVisible: boolean("is_visible").default(false),
+      // Whether this affiliate shows this plan on their landing page
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    users = pgTable("users", {
+      id: varchar("id", { length: 255 }).primaryKey().notNull(),
+      username: varchar("username", { length: 255 }).notNull(),
+      email: varchar("email", { length: 255 }),
+      firstName: varchar("first_name", { length: 255 }).notNull(),
+      lastName: varchar("last_name", { length: 255 }).notNull(),
+      password: varchar("password", { length: 255 }),
+      // Hashed password for username/password auth
+      profileImageUrl: varchar("profile_image_url", { length: 255 }),
+      logoImageUrl: varchar("logo_image_url", { length: 255 }),
+      role: varchar("role", { length: 50 }).notNull().default("white_label_client"),
+      isActive: boolean("is_active").default(true),
+      whiteLabelId: integer("white_label_id").references(() => whiteLabels.id),
+      // For end-users to associate with specific white-label clients
+      googleId: varchar("google_id", { length: 255 }),
+      // For Google OAuth users
+      authProvider: varchar("auth_provider", { length: 50 }).notNull().default("local"),
+      // Additional fields for affiliate authentication
+      name: varchar("name", { length: 255 }),
+      // Full name for affiliates
+      phone: varchar("phone", { length: 255 }),
+      // Phone number for affiliates
+      company: varchar("company", { length: 255 }),
+      // Company for affiliates
+      referralCode: varchar("referral_code", { length: 255 }),
+      // Unique referral code for Super Admin Affiliates
+      affiliateOfWhiteLabelId: integer("affiliate_of_white_label_id").references(() => whiteLabels.id),
+      // Tracks which white label the affiliate signed up through
+      userOfWhiteLabelId: integer("user_of_white_label_id").references(() => whiteLabels.id),
+      // Tracks which white label the user belongs to
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    passwordResetTokens = pgTable("password_reset_tokens", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id", { length: 255 }).notNull().references(() => users.id),
+      hashedToken: varchar("hashed_token", { length: 255 }).notNull().unique(),
+      // Store SHA-256 hash instead of plaintext
+      expiresAt: timestamp("expires_at", { mode: "string" }).notNull(),
+      used: boolean("used").default(false),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow()
+    });
+    plans = pgTable("plans", {
+      id: serial("id").primaryKey(),
+      name: varchar("name", { length: 255 }).notNull(),
+      description: varchar("description", { length: 1e3 }),
+      monthlyPrice: varchar("monthly_price", { length: 255 }),
+      affiliateCommissionPercentage: varchar("affiliate_commission_percentage", { length: 255 }),
+      maxUsers: integer("max_users"),
+      features: jsonb("features").$type(),
+      accesses: jsonb("accesses").$type().default([]),
+      // Available features: categories, affiliates, ai_content_studio
+      selectedCategories: jsonb("selected_categories").$type().default([]),
+      selectedProducts: jsonb("selected_products").$type().default([]),
+      isActive: boolean("is_active").default(true),
+      isPublic: boolean("is_public").default(false),
+      // Visibility for affiliates on landing pages
+      isMainSitePlan: boolean("is_main_site_plan").default(false),
+      // Display on main landing page
+      allowAffiliatePromotion: boolean("allow_affiliate_promotion").default(false),
+      // Whether affiliates can promote this plan
+      status: varchar("status", { length: 50 }).default("published"),
+      scheduledAt: timestamp("scheduled_at", { mode: "string" }),
+      publishedAt: timestamp("published_at", { mode: "string" }),
+      createdBy: varchar("created_by", { length: 255 }).notNull().references(() => users.id),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    userPreferences = pgTable("user_preferences", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id", { length: 255 }).notNull().references(() => users.id),
+      theme: varchar("theme", { length: 50 }).default("light"),
+      primaryColor: varchar("primary_color", { length: 255 }).default("#2563EB"),
+      // Dashboard primary color
+      secondaryColor: varchar("secondary_color", { length: 255 }).default("#64748B"),
+      // Dashboard secondary color
+      logoUrl: varchar("logo_url", { length: 255 }),
+      // User's custom logo for dashboard/website
+      language: varchar("language", { length: 255 }).default("en"),
+      timezone: varchar("timezone", { length: 255 }).default("UTC"),
+      currency: varchar("currency", { length: 255 }).default("USD"),
+      emailNotifications: boolean("email_notifications").default(true),
+      marketingEmails: boolean("marketing_emails").default(false),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    whiteLabels = pgTable("white_labels", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id", { length: 255 }).notNull().references(() => users.id),
+      planId: integer("plan_id").references(() => plans.id),
+      businessName: varchar("business_name", { length: 255 }).notNull(),
+      domain: varchar("domain", { length: 255 }),
+      domainPath: varchar("domain_path", { length: 255 }),
+      // Short path for domain routing (e.g., "hammad")
+      logoUrl: varchar("logo_url", { length: 255 }),
+      primaryColor: varchar("primary_color", { length: 255 }).default("#2563EB"),
+      secondaryColor: varchar("secondary_color", { length: 255 }).default("#64748B"),
+      defaultLandingPageId: integer("default_landing_page_id").references(() => landingPages2.id),
+      // Default landing page for domain
+      landingPageCode: varchar("landing_page_code", { length: 50 }),
+      // Controls which landing page template to use (e.g., "default")
+      emailSettings: jsonb("email_settings").$type().default({}),
+      // Custom email configuration for white-label clients
+      isActive: boolean("is_active").default(true),
+      invitedBy: varchar("invited_by", { length: 255 }).references(() => users.id),
+      // Super Admin Affiliate who invited them
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    affiliates = pgTable("affiliates", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id", { length: 255 }).notNull().references(() => users.id),
+      referralCode: varchar("referral_code", { length: 255 }),
+      commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }).notNull().default("10.00"),
+      totalEarnings: decimal("total_earnings", { precision: 10, scale: 2 }).default("0.00"),
+      totalReferrals: integer("total_referrals").default(0),
+      isActive: boolean("is_active").default(true),
+      bankName: varchar("bank_name", { length: 255 }),
+      accountNumber: varchar("account_number", { length: 255 }),
+      accountOwnerName: varchar("account_owner_name", { length: 255 }),
+      accountType: varchar("account_type", { length: 255 }),
+      affiliateType: varchar("affiliate_type", { length: 50 }),
+      parentId: varchar("parent_id", { length: 255 }),
+      // Can reference users.id or whiteLabels.id
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    subscriptions = pgTable("subscriptions", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id", { length: 255 }).references(() => users.id),
+      whiteLabelId: integer("white_label_id").notNull().references(() => whiteLabels.id),
+      planId: integer("plan_id").notNull().references(() => plans.id),
+      selectedCategories: jsonb("selected_categories").$type().default([]),
+      // User-specific category selections
+      selectedProducts: jsonb("selected_products").$type().default([]),
+      // User-specific product selections
+      status: varchar("status", { length: 50 }).notNull().default("active"),
+      billingCycle: varchar("billing_cycle", { length: 50 }).notNull().default("monthly"),
+      amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+      referralCode: varchar("referral_code", { length: 255 }),
+      // Super Admin Affiliate referral code used in purchase
+      currentPeriodStart: timestamp("current_period_start", { mode: "string" }),
+      currentPeriodEnd: timestamp("current_period_end", { mode: "string" }),
+      cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false),
+      stripeSubscriptionId: varchar("stripe_subscription_id", { length: 255 }),
+      stripeCustomerId: varchar("stripe_customer_id", { length: 255 }),
+      nextBillingDate: timestamp("next_billing_date", { mode: "string" }),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    commissions = pgTable("commissions", {
+      id: serial("id").primaryKey(),
+      affiliateId: integer("affiliate_id").notNull().references(() => affiliates.id),
+      subscriptionId: integer("subscription_id").notNull().references(() => subscriptions.id),
+      amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+      commissionType: varchar("commission_type", { length: 50 }).notNull(),
+      status: varchar("status", { length: 50 }).notNull().default("pending"),
+      paidAt: timestamp("paid_at", { mode: "string" }),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow()
+    });
+    referralCommissions = pgTable("referral_commissions", {
+      id: serial("id").primaryKey(),
+      affiliateId: varchar("affiliate_id", { length: 255 }).notNull().references(() => users.id),
+      // Super Admin Affiliate who owns the referral code
+      subscriptionId: integer("subscription_id").notNull().references(() => subscriptions.id),
+      // The subscription that generated the commission
+      planId: integer("plan_id").notNull().references(() => plans.id),
+      // The plan that was purchased
+      referralCode: varchar("referral_code", { length: 255 }).notNull(),
+      // The referral code that was used
+      purchaserUserId: varchar("purchaser_user_id", { length: 255 }).notNull().references(() => users.id),
+      // White-label client who made the purchase
+      commissionAmount: decimal("commission_amount", { precision: 10, scale: 2 }).notNull(),
+      commissionPercentage: decimal("commission_percentage", { precision: 5, scale: 2 }).notNull(),
+      planAmount: decimal("plan_amount", { precision: 10, scale: 2 }).notNull(),
+      // Original plan price
+      status: varchar("status", { length: 50 }).notNull().default("pending"),
+      paidAt: timestamp("paid_at", { mode: "string" }),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    paymentAccounts = pgTable("payment_accounts", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id", { length: 255 }).notNull().references(() => users.id),
+      // One account per user
+      bankName: varchar("bank_name", { length: 255 }).notNull(),
+      accountOwnerName: varchar("account_owner_name", { length: 255 }).notNull(),
+      accountNumber: varchar("account_number", { length: 255 }).notNull(),
+      accountType: varchar("account_type", { length: 50 }).notNull(),
+      isActive: boolean("is_active").default(true),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    affiliatePayments = pgTable("affiliate_payments", {
+      id: serial("id").primaryKey(),
+      affiliateId: varchar("affiliate_id", { length: 255 }).notNull().references(() => users.id),
+      // Super Admin Affiliate receiving payment
+      amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+      // Amount paid
+      currency: varchar("currency", { length: 3 }).default("USD"),
+      // Currency code
+      paymentMethod: varchar("payment_method", { length: 255 }).default("bank_transfer"),
+      // Payment method used
+      transactionId: varchar("transaction_id", { length: 255 }),
+      // Transaction ID from payment provider
+      notes: varchar("notes", { length: 1e3 }),
+      // Legacy notes
+      status: varchar("status", { length: 50 }).default("completed"),
+      metadata: jsonb("metadata"),
+      // Additional payment metadata
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow(),
+      paidByUserId: varchar("paid_by_user_id", { length: 255 }).references(() => users.id),
+      // Duplicate column
+      paidBy: varchar("paid_by", { length: 255 }).references(() => users.id),
+      // Super Admin making payment (main column)
+      transactionProofUrl: varchar("transaction_proof_url", { length: 255 }),
+      // Optional proof of payment image
+      description: varchar("description", { length: 1e3 }),
+      // Optional payment description/notes
+      receiptImageUrl: varchar("receipt_image_url", { length: 255 }),
+      // Legacy receipt image
+      // Historical bank details - preserved at time of payment to prevent changes from affecting history
+      historicalBankName: varchar("historical_bank_name", { length: 255 }),
+      // Bank name at payment time
+      historicalAccountNumber: varchar("historical_account_number", { length: 255 }),
+      // Account number at payment time
+      historicalAccountOwnerName: varchar("historical_account_owner_name", { length: 255 }),
+      // Account owner at payment time
+      historicalAccountType: varchar("historical_account_type", { length: 255 })
+      // Account type at payment time
+    });
+    categories = pgTable("categories", {
+      id: serial("id").primaryKey(),
+      whiteLabelId: integer("white_label_id").notNull().references(() => whiteLabels.id),
+      name: varchar("name", { length: 255 }).notNull(),
+      description: varchar("description", { length: 1e3 }),
+      parentCategoryId: integer("parent_category_id"),
+      isActive: boolean("is_active").default(true),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    products = pgTable("products", {
+      id: serial("id").primaryKey(),
+      whiteLabelId: integer("white_label_id").notNull().references(() => whiteLabels.id),
+      categoryId: integer("category_id").references(() => categories.id),
+      createdBy: varchar("created_by", { length: 255 }).notNull().references(() => users.id),
+      name: varchar("name", { length: 255 }).notNull(),
+      description: varchar("description", { length: 1e3 }),
+      price: decimal("price", { precision: 10, scale: 2 }),
+      type: varchar("type", { length: 50 }).notNull(),
+      contentUrl: varchar("content_url", { length: 255 }),
+      // URL or file path for digital content
+      accessDuration: integer("access_duration"),
+      // access duration in days, null = lifetime
+      imageUrl: varchar("image_url", { length: 255 }),
+      attachments: jsonb("attachments").$type().default([]),
+      metadata: jsonb("metadata").$type(),
+      isActive: boolean("is_active").default(true),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    activities = pgTable("activities", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id", { length: 255 }).notNull().references(() => users.id),
+      type: varchar("type", { length: 255 }).notNull(),
+      // e.g., "client_joined", "commission_paid", "plan_created"
+      description: varchar("description", { length: 1e3 }).notNull(),
+      metadata: jsonb("metadata"),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow()
+    });
+    purchaseHistory = pgTable("purchase_history", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id", { length: 255 }).notNull().references(() => users.id),
+      // The end-user who made the purchase
+      whiteLabelId: integer("white_label_id").notNull().references(() => whiteLabels.id),
+      // Which white-label client they purchased from
+      planId: integer("plan_id").notNull().references(() => plans.id),
+      // Which plan was purchased
+      amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+      // Purchase amount
+      transactionId: varchar("transaction_id", { length: 255 }),
+      // Payment gateway transaction ID
+      paymentMethod: varchar("payment_method", { length: 255 }),
+      // Payment method used
+      status: varchar("status", { length: 50 }).default("pending"),
+      metadata: jsonb("metadata").$type(),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow()
+    });
+    endUserActivities = pgTable("end_user_activities", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id", { length: 255 }).notNull().references(() => users.id),
+      // The end-user
+      whiteLabelId: integer("white_label_id").notNull().references(() => whiteLabels.id),
+      // Which white-label client they belong to
+      activityType: varchar("activity_type", { length: 50 }).notNull(),
+      description: varchar("description", { length: 1e3 }),
+      metadata: jsonb("metadata").$type(),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow()
+    });
+    userSessions = pgTable("user_sessions", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id", { length: 255 }).notNull().references(() => users.id),
+      whiteLabelId: integer("white_label_id").references(() => whiteLabels.id),
+      sessionToken: varchar("session_token", { length: 255 }).notNull(),
+      isActive: boolean("is_active").default(true),
+      ipAddress: varchar("ip_address", { length: 255 }),
+      userAgent: varchar("user_agent", { length: 1e3 }),
+      lastActiveAt: timestamp("last_active_at", { mode: "string" }).defaultNow(),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      expiresAt: timestamp("expires_at", { mode: "string" })
+    });
+    usersRelations = relations(users, ({ one, many }) => ({
+      whiteLabels: many(whiteLabels),
+      affiliates: many(affiliates),
+      activities: many(activities),
+      createdPlans: many(plans),
+      endUserActivities: many(endUserActivities),
+      userSessions: many(userSessions),
+      referralsMade: many(referralTracking, { relationName: "affiliateReferrals" }),
+      referralsReceived: many(referralTracking, { relationName: "referredUsers" }),
+      domainSessions: many(domainUserSessions),
+      preferences: one(userPreferences)
+    }));
+    userPreferencesRelations = relations(userPreferences, ({ one }) => ({
+      user: one(users, {
+        fields: [userPreferences.userId],
+        references: [users.id]
+      })
+    }));
+    plansRelations = relations(plans, ({ one, many }) => ({
+      creator: one(users, {
+        fields: [plans.createdBy],
+        references: [users.id]
+      }),
+      whiteLabels: many(whiteLabels),
+      subscriptions: many(subscriptions),
+      planProducts: many(planProducts),
+      planCategories: many(planCategories)
+    }));
+    whiteLabelsRelations = relations(whiteLabels, ({ one, many }) => ({
+      user: one(users, {
+        fields: [whiteLabels.userId],
+        references: [users.id]
+      }),
+      plan: one(plans, {
+        fields: [whiteLabels.planId],
+        references: [plans.id]
+      }),
+      invitedByUser: one(users, {
+        fields: [whiteLabels.invitedBy],
+        references: [users.id]
+      }),
+      subscriptions: many(subscriptions),
+      products: many(products),
+      affiliates: many(affiliates),
+      endUserActivities: many(endUserActivities),
+      userSessions: many(userSessions),
+      referralTracking: many(referralTracking)
+    }));
+    referralTrackingRelations = relations(referralTracking, ({ one }) => ({
+      affiliate: one(users, {
+        fields: [referralTracking.affiliateId],
+        references: [users.id],
+        relationName: "affiliateReferrals"
+      }),
+      referredUser: one(users, {
+        fields: [referralTracking.referredUserId],
+        references: [users.id],
+        relationName: "referredUsers"
+      }),
+      whiteLabel: one(whiteLabels, {
+        fields: [referralTracking.whiteLabelId],
+        references: [whiteLabels.id]
+      })
+    }));
+    domainUserSessionsRelations = relations(domainUserSessions, ({ one }) => ({
+      user: one(users, {
+        fields: [domainUserSessions.userId],
+        references: [users.id]
+      })
+    }));
+    affiliatesRelations = relations(affiliates, ({ one, many }) => ({
+      user: one(users, {
+        fields: [affiliates.userId],
+        references: [users.id]
+      }),
+      parent: one(whiteLabels, {
+        fields: [affiliates.parentId],
+        references: [whiteLabels.id]
+      }),
+      commissions: many(commissions)
+    }));
+    subscriptionsRelations = relations(subscriptions, ({ one, many }) => ({
+      whiteLabel: one(whiteLabels, {
+        fields: [subscriptions.whiteLabelId],
+        references: [whiteLabels.id]
+      }),
+      plan: one(plans, {
+        fields: [subscriptions.planId],
+        references: [plans.id]
+      }),
+      commissions: many(commissions)
+    }));
+    commissionsRelations = relations(commissions, ({ one }) => ({
+      affiliate: one(affiliates, {
+        fields: [commissions.affiliateId],
+        references: [affiliates.id]
+      }),
+      subscription: one(subscriptions, {
+        fields: [commissions.subscriptionId],
+        references: [subscriptions.id]
+      })
+    }));
+    categoriesRelations = relations(categories, ({ one, many }) => ({
+      whiteLabel: one(whiteLabels, {
+        fields: [categories.whiteLabelId],
+        references: [whiteLabels.id]
+      }),
+      products: many(products),
+      planCategories: many(planCategories)
+    }));
+    productsRelations = relations(products, ({ one, many }) => ({
+      whiteLabel: one(whiteLabels, {
+        fields: [products.whiteLabelId],
+        references: [whiteLabels.id]
+      }),
+      category: one(categories, {
+        fields: [products.categoryId],
+        references: [categories.id]
+      }),
+      planProducts: many(planProducts)
+    }));
+    activitiesRelations = relations(activities, ({ one }) => ({
+      user: one(users, {
+        fields: [activities.userId],
+        references: [users.id]
+      })
+    }));
+    endUserActivitiesRelations = relations(endUserActivities, ({ one }) => ({
+      user: one(users, {
+        fields: [endUserActivities.userId],
+        references: [users.id]
+      }),
+      whiteLabel: one(whiteLabels, {
+        fields: [endUserActivities.whiteLabelId],
+        references: [whiteLabels.id]
+      })
+    }));
+    userSessionsRelations = relations(userSessions, ({ one }) => ({
+      user: one(users, {
+        fields: [userSessions.userId],
+        references: [users.id]
+      }),
+      whiteLabel: one(whiteLabels, {
+        fields: [userSessions.whiteLabelId],
+        references: [whiteLabels.id]
+      })
+    }));
+    integrations = pgTable("integrations", {
+      id: serial("id").primaryKey(),
+      serviceName: varchar("service_name", { length: 255 }).notNull(),
+      displayName: varchar("display_name", { length: 255 }).notNull(),
+      description: varchar("description", { length: 1e3 }),
+      category: varchar("category", { length: 255 }).notNull(),
+      // payment, analytics, marketing, etc.
+      isActive: boolean("is_active").default(false),
+      isConnected: boolean("is_connected").default(false),
+      apiKeyEncrypted: varchar("api_key_encrypted", { length: 1e3 }),
+      webhookUrl: varchar("webhook_url", { length: 255 }),
+      settings: jsonb("settings").$type(),
+      lastSyncAt: timestamp("last_sync_at", { mode: "string" }),
+      userId: varchar("user_id", { length: 255 }).notNull().references(() => users.id),
+      whiteLabelId: integer("white_label_id").references(() => whiteLabels.id),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    integrationLogs = pgTable("integration_logs", {
+      id: serial("id").primaryKey(),
+      integrationId: integer("integration_id").notNull().references(() => integrations.id),
+      action: varchar("action", { length: 255 }).notNull(),
+      // connect, disconnect, sync, error
+      status: varchar("status", { length: 255 }).notNull(),
+      // success, failed, pending
+      message: varchar("message", { length: 1e3 }),
+      errorDetails: jsonb("error_details").$type(),
+      metadata: jsonb("metadata").$type(),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow()
+    });
+    aiGeneratedContent = pgTable("ai_generated_content", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id", { length: 255 }).references(() => users.id).notNull(),
+      type: varchar("type", { length: 50 }).notNull(),
+      // 'product_description', 'marketing_copy', 'email_template', etc.
+      prompt: varchar("prompt", { length: 1e3 }).notNull(),
+      generatedContent: varchar("generated_content", { length: 1e3 }).notNull(),
+      metadata: jsonb("metadata").$type(),
+      // tone, audience, keywords, etc.
+      isApproved: boolean("is_approved").default(false),
+      usageCount: integer("usage_count").default(0),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    aiRecommendations = pgTable("ai_recommendations", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id", { length: 255 }).references(() => users.id).notNull(),
+      type: varchar("type", { length: 50 }).notNull(),
+      // 'plan', 'product', 'integration', 'action'
+      title: varchar("title", { length: 255 }).notNull(),
+      description: varchar("description", { length: 1e3 }).notNull(),
+      reason: varchar("reason", { length: 1e3 }),
+      priority: integer("priority").default(1),
+      // 1-5 scale
+      isViewed: boolean("is_viewed").default(false),
+      isActioned: boolean("is_actioned").default(false),
+      metadata: jsonb("metadata").$type(),
+      expiresAt: timestamp("expires_at", { mode: "string" }),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow()
+    });
+    aiContentOptimizations = pgTable("ai_content_optimizations", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id", { length: 255 }).references(() => users.id).notNull(),
+      originalContent: varchar("original_content", { length: 1e3 }).notNull(),
+      optimizedContent: varchar("optimized_content", { length: 1e3 }).notNull(),
+      optimizationType: varchar("optimization_type", { length: 50 }).notNull(),
+      // 'seo', 'readability', 'engagement'
+      improvements: jsonb("improvements").$type(),
+      // array of improvement descriptions
+      qualityScore: integer("quality_score"),
+      // 1-100
+      isApplied: boolean("is_applied").default(false),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow()
+    });
+    referralLinks = pgTable("referral_links", {
+      id: serial("id").primaryKey(),
+      affiliateId: varchar("affiliate_id", { length: 255 }).references(() => users.id).notNull(),
+      referralCode: varchar("referral_code", { length: 50 }).unique().notNull(),
+      isActive: boolean("is_active").default(true),
+      totalClicks: integer("total_clicks").default(0),
+      totalSignups: integer("total_signups").default(0),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    referralSignups = pgTable("referral_signups", {
+      id: serial("id").primaryKey(),
+      referralLinkId: integer("referral_link_id").references(() => referralLinks.id).notNull(),
+      affiliateId: varchar("affiliate_id", { length: 255 }).references(() => users.id).notNull(),
+      signupUserId: varchar("signup_user_id", { length: 255 }).references(() => users.id).notNull(),
+      ipAddress: varchar("ip_address", { length: 255 }),
+      userAgent: varchar("user_agent", { length: 1e3 }),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow()
+    });
+    referralClicks = pgTable("referral_clicks", {
+      id: serial("id").primaryKey(),
+      referralLinkId: integer("referral_link_id").references(() => referralLinks.id).notNull(),
+      affiliateId: varchar("affiliate_id", { length: 255 }).references(() => users.id).notNull(),
+      ipAddress: varchar("ip_address", { length: 255 }),
+      userAgent: varchar("user_agent", { length: 1e3 }),
+      convertedToSignup: boolean("converted_to_signup").default(false),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow()
+    });
+    planProducts = pgTable("plan_products", {
+      id: serial("id").primaryKey(),
+      planId: integer("plan_id").notNull().references(() => plans.id),
+      productId: integer("product_id").notNull().references(() => products.id),
+      isActive: boolean("is_active").default(true),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    planCategories = pgTable("plan_categories", {
+      id: serial("id").primaryKey(),
+      planId: integer("plan_id").notNull().references(() => plans.id),
+      categoryId: integer("category_id").notNull().references(() => categories.id),
+      isActive: boolean("is_active").default(true),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    linkMetaImages = pgTable("link_meta_images", {
+      id: serial("id").primaryKey(),
+      url: varchar("url", { length: 255 }).notNull().unique(),
+      title: varchar("title", { length: 255 }),
+      description: varchar("description", { length: 1e3 }),
+      imageUrl: varchar("image_url", { length: 255 }),
+      siteName: varchar("site_name", { length: 255 }),
+      faviconUrl: varchar("favicon_url", { length: 255 }),
+      isActive: boolean("is_active").default(true),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    templates = pgTable("templates", {
+      id: serial("id").primaryKey(),
+      name: varchar("name", { length: 255 }).notNull(),
+      description: varchar("description", { length: 1e3 }),
+      type: varchar("type", { length: 50 }).notNull(),
+      // dashboard, email, landing, etc
+      category: varchar("category", { length: 100 }).notNull(),
+      previewUrl: varchar("preview_url", { length: 255 }),
+      thumbnailUrl: varchar("thumbnail_url", { length: 255 }),
+      configSchema: jsonb("config_schema").$type(),
+      defaultConfig: jsonb("default_config").$type(),
+      isActive: boolean("is_active").default(true),
+      isPremium: boolean("is_premium").default(false),
+      createdBy: varchar("created_by", { length: 255 }).notNull(),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    themes = pgTable("themes", {
+      id: serial("id").primaryKey(),
+      name: varchar("name", { length: 255 }).notNull(),
+      description: varchar("description", { length: 1e3 }),
+      colors: jsonb("colors").$type().notNull(),
+      isDefault: boolean("is_default").default(false),
+      isActive: boolean("is_active").default(true),
+      createdBy: varchar("created_by", { length: 255 }).notNull(),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    userThemePreferences = pgTable("user_theme_preferences", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id", { length: 255 }).references(() => users.id).notNull(),
+      themeId: integer("theme_id").references(() => themes.id).notNull(),
+      isActive: boolean("is_active").default(true),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    clientTemplateCustomizations2 = pgTable("client_template_customizations", {
+      id: serial("id").primaryKey(),
+      clientId: integer("client_id").references(() => whiteLabels.id).notNull(),
+      templateId: integer("template_id").references(() => templates.id).notNull(),
+      customConfig: jsonb("custom_config").$type().notNull(),
+      isActive: boolean("is_active").default(true),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    platformSettings = pgTable("platform_settings", {
+      id: serial("id").primaryKey(),
+      key: varchar("key", { length: 255 }).notNull().unique(),
+      value: jsonb("value").$type().notNull(),
+      type: varchar("type", { length: 50 }).notNull(),
+      // string, number, boolean, object, array
+      category: varchar("category", { length: 100 }).notNull(),
+      description: varchar("description", { length: 1e3 }),
+      isPublic: boolean("is_public").default(false),
+      updatedBy: varchar("updated_by", { length: 255 }).notNull(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    analyticsEvents = pgTable("analytics_events", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id", { length: 255 }).references(() => users.id),
+      sessionId: varchar("session_id", { length: 255 }),
+      eventType: varchar("event_type", { length: 100 }).notNull(),
+      eventData: jsonb("event_data").$type(),
+      userAgent: varchar("user_agent", { length: 255 }),
+      ipAddress: varchar("ip_address", { length: 45 }),
+      timestamp: timestamp("timestamp", { mode: "string" }).defaultNow()
+    });
+    analyticsMetrics = pgTable("analytics_metrics", {
+      id: serial("id").primaryKey(),
+      metricName: varchar("metric_name", { length: 255 }).notNull(),
+      metricValue: varchar("metric_value", { length: 255 }).notNull(),
+      dimensions: jsonb("dimensions").$type(),
+      period: varchar("period", { length: 20 }).notNull(),
+      // day, week, month, year
+      date: timestamp("date", { mode: "string" }).notNull(),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow()
+    });
+    announcements = pgTable("announcements", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id", { length: 255 }).references(() => users.id).notNull(),
+      whiteLabelId: integer("white_label_id").references(() => whiteLabels.id),
+      title: varchar("title", { length: 255 }),
+      content: varchar("content", { length: 1e3 }).notNull(),
+      attachments: jsonb("attachments").$type().default([]),
+      visibility: varchar("visibility", { length: 50 }).default("public"),
+      status: varchar("status", { length: 50 }).default("draft"),
+      scheduledAt: timestamp("scheduled_at", { mode: "string" }),
+      publishedAt: timestamp("published_at", { mode: "string" }),
+      targetingType: varchar("targeting_type", { length: 50 }).default("everyone"),
+      targetedPlanIds: jsonb("targeted_plan_ids").$type().default([]),
+      isPinned: boolean("is_pinned").default(false),
+      isActive: boolean("is_active").default(true),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    announcementLikes = pgTable("announcement_likes", {
+      id: serial("id").primaryKey(),
+      announcementId: integer("announcement_id").references(() => announcements.id).notNull(),
+      userId: varchar("user_id", { length: 255 }).references(() => users.id).notNull(),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow()
+    });
+    announcementComments = pgTable("announcement_comments", {
+      id: serial("id").primaryKey(),
+      announcementId: integer("announcement_id").references(() => announcements.id).notNull(),
+      userId: varchar("user_id", { length: 255 }).references(() => users.id).notNull(),
+      content: varchar("content", { length: 1e3 }).notNull(),
+      parentCommentId: integer("parent_comment_id"),
+      isActive: boolean("is_active").default(true),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    announcementShares = pgTable("announcement_shares", {
+      id: serial("id").primaryKey(),
+      announcementId: integer("announcement_id").references(() => announcements.id).notNull(),
+      userId: varchar("user_id", { length: 255 }).references(() => users.id).notNull(),
+      sharedWith: varchar("shared_with", { length: 50 }).default("public"),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow()
+    });
+    announcementAnalytics = pgTable("announcement_analytics", {
+      id: serial("id").primaryKey(),
+      announcementId: integer("announcement_id").references(() => announcements.id).notNull(),
+      userId: varchar("user_id", { length: 255 }).references(() => users.id).notNull(),
+      eventType: varchar("event_type", { length: 50 }).notNull(),
+      eventData: jsonb("event_data").$type(),
+      sessionId: varchar("session_id", { length: 255 }),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow()
+    });
+    insertPlanSchema = createInsertSchema(plans).omit({
+      id: true,
+      createdAt: true,
+      updatedAt: true,
+      publishedAt: true
+    });
+    insertWhiteLabelSchema = createInsertSchema(whiteLabels).omit({
+      id: true,
+      createdAt: true,
+      updatedAt: true
+    });
+    insertAffiliateSchema = createInsertSchema(affiliates).omit({
+      id: true,
+      createdAt: true,
+      updatedAt: true
+    });
+    insertPurchaseHistorySchema = createInsertSchema(purchaseHistory).omit({
+      id: true,
+      createdAt: true
+    });
+    insertCategorySchema = createInsertSchema(categories).omit({
+      id: true,
+      createdAt: true,
+      updatedAt: true
+    });
+    insertProductSchema = createInsertSchema(products).omit({
+      id: true,
+      createdAt: true,
+      updatedAt: true
+    });
+    insertActivitySchema = createInsertSchema(activities).omit({
+      id: true,
+      createdAt: true
+    });
+    insertEndUserActivitySchema = createInsertSchema(endUserActivities).omit({
+      id: true,
+      createdAt: true
+    });
+    insertUserSessionSchema = createInsertSchema(userSessions).omit({
+      id: true,
+      createdAt: true
+    });
+    insertSubscriptionSchema = createInsertSchema(subscriptions).omit({
+      id: true,
+      createdAt: true,
+      updatedAt: true
+    });
+    insertIntegrationSchema = createInsertSchema(integrations).omit({
+      id: true,
+      createdAt: true,
+      updatedAt: true
+    });
+    insertIntegrationLogSchema = createInsertSchema(integrationLogs).omit({
+      id: true,
+      createdAt: true
+    });
+    insertReferralLinkSchema = createInsertSchema(referralLinks).omit({
+      id: true,
+      createdAt: true,
+      updatedAt: true
+    });
+    insertReferralSignupSchema = createInsertSchema(referralSignups).omit({
+      id: true,
+      createdAt: true
+    });
+    insertReferralClickSchema = createInsertSchema(referralClicks).omit({
+      id: true,
+      createdAt: true
+    });
+    insertAnnouncementSchema = createInsertSchema(announcements).omit({
+      id: true,
+      createdAt: true,
+      updatedAt: true
+    });
+    insertAnnouncementLikeSchema = createInsertSchema(announcementLikes).omit({
+      id: true,
+      createdAt: true
+    });
+    insertAnnouncementCommentSchema = createInsertSchema(announcementComments).omit({
+      id: true,
+      createdAt: true,
+      updatedAt: true
+    });
+    insertUserPreferencesSchema = createInsertSchema(userPreferences).omit({
+      id: true,
+      createdAt: true,
+      updatedAt: true
+    });
+    insertPaymentAccountSchema = createInsertSchema(paymentAccounts).omit({
+      id: true,
+      createdAt: true,
+      updatedAt: true
+    });
+    insertAffiliatePaymentSchema = createInsertSchema(affiliatePayments).omit({
+      id: true,
+      createdAt: true,
+      updatedAt: true
+    });
+    insertAnnouncementShareSchema = createInsertSchema(announcementShares).omit({
+      id: true,
+      createdAt: true
+    });
+    insertAiGeneratedContentSchema = createInsertSchema(aiGeneratedContent).omit({
+      id: true,
+      createdAt: true,
+      updatedAt: true
+    });
+    insertAiRecommendationSchema = createInsertSchema(aiRecommendations).omit({
+      id: true,
+      createdAt: true
+    });
+    insertAiContentOptimizationSchema = createInsertSchema(aiContentOptimizations).omit({
+      id: true,
+      createdAt: true
+    });
+    insertTemplateSchema = createInsertSchema(templates).omit({
+      id: true,
+      createdAt: true,
+      updatedAt: true
+    });
+    planProductsRelations = relations(planProducts, ({ one }) => ({
+      plan: one(plans, {
+        fields: [planProducts.planId],
+        references: [plans.id]
+      }),
+      product: one(products, {
+        fields: [planProducts.productId],
+        references: [products.id]
+      })
+    }));
+    planCategoriesRelations = relations(planCategories, ({ one }) => ({
+      plan: one(plans, {
+        fields: [planCategories.planId],
+        references: [plans.id]
+      }),
+      category: one(categories, {
+        fields: [planCategories.categoryId],
+        references: [categories.id]
+      })
+    }));
+    linkMetaImagesRelations = relations(linkMetaImages, ({ many }) => ({
+      // Can be connected to products with website_link type
+    }));
+    insertPlanProductSchema = createInsertSchema(planProducts).omit({
+      id: true,
+      createdAt: true,
+      updatedAt: true
+    });
+    insertPlanCategorySchema = createInsertSchema(planCategories).omit({
+      id: true,
+      createdAt: true,
+      updatedAt: true
+    });
+    insertLinkMetaImageSchema = createInsertSchema(linkMetaImages).omit({
+      id: true,
+      createdAt: true,
+      updatedAt: true
+    });
+    insertThemeSchema = createInsertSchema(themes).omit({
+      id: true,
+      createdAt: true,
+      updatedAt: true
+    });
+    insertUserThemePreferenceSchema = createInsertSchema(userThemePreferences).omit({
+      id: true,
+      updatedAt: true
+    });
+    insertClientTemplateCustomizationSchema = createInsertSchema(clientTemplateCustomizations2).omit({
+      id: true,
+      createdAt: true,
+      updatedAt: true
+    });
+    insertPlatformSettingSchema = createInsertSchema(platformSettings).omit({
+      id: true,
+      updatedAt: true
+    });
+    insertAnalyticsEventSchema = createInsertSchema(analyticsEvents).omit({
+      id: true,
+      timestamp: true
+    });
+    insertAnalyticsMetricSchema = createInsertSchema(analyticsMetrics).omit({
+      id: true,
+      createdAt: true
+    });
+    upsertUserSchema = createInsertSchema(users).pick({
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      profileImageUrl: true,
+      whiteLabelId: true,
+      affiliateOfWhiteLabelId: true
+    }).extend({
+      role: z.enum(["super_admin", "super_admin_affiliate", "white_label_client", "white_label_affiliate", "end_user"]).optional()
+    });
+    loginSchema = z.object({
+      username: z.string().min(3, "Username must be at least 3 characters"),
+      password: z.string().min(6, "Password must be at least 6 characters")
+    });
+    signupSchema = z.object({
+      firstName: z.string().min(2, "First name must be at least 2 characters"),
+      lastName: z.string().min(2, "Last name must be at least 2 characters"),
+      username: z.string().min(3, "Username must be at least 3 characters").regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
+      password: z.string().min(6, "Password must be at least 6 characters"),
+      role: z.enum(["super_admin", "super_admin_affiliate", "white_label_client", "white_label_affiliate", "end_user"]).default("white_label_client")
+    });
+    checkUsernameSchema = z.object({
+      username: z.string().min(3, "Username must be at least 3 characters")
+    });
+    forgotPasswordSchema = z.object({
+      email: z.string().email("Please enter a valid email address").min(5, "Email must be at least 5 characters").max(255, "Email must be less than 255 characters").transform((val) => val.toLowerCase().trim())
+    });
+    resetPasswordSchema = z.object({
+      token: z.string().min(64, "Invalid reset token format").max(64, "Invalid reset token format").regex(/^[a-f0-9]{64}$/, "Invalid reset token format"),
+      newPassword: z.string().min(6, "Password must be at least 6 characters").max(128, "Password must be less than 128 characters")
+    });
+    insertUserSchema = createInsertSchema(users).omit({
+      createdAt: true,
+      updatedAt: true
+    });
+    insertAnnouncementAnalyticsSchema = createInsertSchema(announcementAnalytics).omit({
+      id: true,
+      createdAt: true
+    });
+    landingPages2 = pgTable("landing_pages", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id", { length: 255 }).notNull(),
+      name: varchar("name", { length: 255 }).notNull(),
+      domainPath: varchar("domain_path", { length: 100 }).unique(),
+      elements: jsonb("elements").notNull(),
+      settings: jsonb("settings").notNull(),
+      isPublished: boolean("is_published").default(false),
+      publishedAt: timestamp("published_at", { mode: "string" }),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow().notNull()
+    });
+    insertLandingPageSchema = createInsertSchema(landingPages2).omit({
+      id: true,
+      createdAt: true,
+      updatedAt: true
+    });
+    customDomains = pgTable("custom_domains", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id", { length: 255 }).notNull(),
+      landingPageId: integer("landing_page_id").references(() => landingPages2.id),
+      domain: varchar("domain", { length: 255 }).notNull().unique(),
+      isVerified: boolean("is_verified").default(false),
+      verificationToken: varchar("verification_token", { length: 255 }),
+      sslEnabled: boolean("ssl_enabled").default(false),
+      isActive: boolean("is_active").default(true),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow().notNull()
+    });
+    insertCustomDomainSchema = createInsertSchema(customDomains).omit({
+      id: true,
+      createdAt: true,
+      updatedAt: true
+    });
+    nmiCredentials = pgTable("nmi_credentials", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id", { length: 255 }).notNull().references(() => users.id),
+      username: varchar("username", { length: 255 }).notNull(),
+      password: varchar("password", { length: 255 }).notNull(),
+      // Encrypted
+      securityKey: varchar("security_key", { length: 255 }).notNull(),
+      // Encrypted
+      processorId: varchar("processor_id", { length: 255 }),
+      // Optional
+      gatewayUrl: varchar("gateway_url", { length: 500 }).default("https://secure.networkmerchants.com/api/transact.php"),
+      isTestMode: boolean("is_test_mode").default(false),
+      isActive: boolean("is_active").default(true),
+      lastTestedAt: timestamp("last_tested_at", { mode: "string" }),
+      testStatus: varchar("test_status", { length: 50 }),
+      // success, failed, pending
+      testErrorMessage: varchar("test_error_message", { length: 1e3 }),
+      createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
+      updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
+    });
+    insertNmiCredentialsSchema = createInsertSchema(nmiCredentials).omit({
+      id: true,
+      createdAt: true,
+      updatedAt: true
+    });
+  }
+});
+
 // server/db.ts
 var db_exports = {};
 __export(db_exports, {
@@ -15,16 +1196,14 @@ __export(db_exports, {
   db: () => db,
   executeWithRetry: () => executeWithRetry
 });
-import mysql from "mysql2/promise";
-import { drizzle } from "drizzle-orm/mysql2";
-import * as schema from "@shared/schema";
+import { neon } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-http";
 async function testConnection() {
   try {
-    const testConnection2 = await connection.getConnection();
-    console.log("Database connection test successful");
-    testConnection2.release();
+    await connection`SELECT 1 as test`;
+    console.log("\u2705 Database connection test successful");
   } catch (error) {
-    console.error("Database connection test failed:", error);
+    console.error("\u274C Database connection test failed:", error);
   }
 }
 async function executeWithRetry(operation, maxRetries = 3, delay = 1e3) {
@@ -35,7 +1214,7 @@ async function executeWithRetry(operation, maxRetries = 3, delay = 1e3) {
     } catch (error) {
       lastError = error;
       console.error(`Database operation failed (attempt ${attempt}/${maxRetries}):`, error);
-      if (error instanceof Error && (error.message.includes("Duplicate entry") || error.message.includes("Data too long") || error.message.includes("cannot be null"))) {
+      if (error instanceof Error && (error.message.includes("duplicate key") || error.message.includes("violates") || error.message.includes("invalid"))) {
         throw error;
       }
       if (attempt < maxRetries) {
@@ -47,52 +1226,31 @@ async function executeWithRetry(operation, maxRetries = 3, delay = 1e3) {
   }
   throw lastError;
 }
-var connection, db;
+var databaseUrl, connection, db;
 var init_db = __esm({
   "server/db.ts"() {
-    if (!process.env.DATABASE_URL) {
+    "use strict";
+    init_schema();
+    databaseUrl = process.env.DATABASE_URL?.startsWith("postgresql://") || process.env.DATABASE_URL?.startsWith("postgres://") ? process.env.DATABASE_URL : process.env.PGHOST && process.env.PGUSER ? `postgresql://${process.env.PGUSER}:${process.env.PGPASSWORD}@${process.env.PGHOST}:${process.env.PGPORT || 5432}/${process.env.PGDATABASE}?sslmode=require` : process.env.DATABASE_URL;
+    if (!databaseUrl) {
       throw new Error(
         "DATABASE_URL must be set. Did you forget to provision a database?"
       );
     }
-    connection = mysql.createPool({
-      uri: process.env.DATABASE_URL,
-      connectionLimit: 10,
-      // Increased connection pool size
-      acquireTimeout: 6e4,
-      // Increased timeout for acquiring connections
-      timeout: 12e4,
-      // Increased query timeout
-      reconnect: true,
-      // Enable automatic reconnection
-      idleTimeout: 3e5,
-      // 5 minutes idle timeout
-      maxReconnects: 3,
-      // Maximum reconnection attempts
-      reconnectDelay: 2e3
-      // Delay between reconnection attempts
-    });
-    connection.on("error", (err) => {
-      console.error("Database connection error:", err);
-      if (err.code === "PROTOCOL_CONNECTION_LOST") {
-        console.log("Database connection lost. Attempting to reconnect...");
-      } else if (err.code === "ER_CON_COUNT_ERROR") {
-        console.log("Too many database connections. Retrying...");
-      } else if (err.code === "ECONNREFUSED") {
-        console.log("Database connection refused. Check database server status.");
-      } else {
-        console.log("Unexpected database error:", err.code);
-      }
-    });
-    connection.on("connection", (connection2) => {
-      console.log("New database connection established as id " + connection2.threadId);
-    });
+    connection = neon(databaseUrl);
     testConnection();
-    db = drizzle(connection, { schema, mode: "default" });
+    db = drizzle(connection, { schema: schema_exports });
   }
 });
 
 // server/defaultLandingPage.ts
+var defaultLandingPage_exports = {};
+__export(defaultLandingPage_exports, {
+  defaultLandingPageElements: () => defaultLandingPageElements,
+  defaultLandingPageSettings: () => defaultLandingPageSettings,
+  generateDefaultBuilderElements: () => generateDefaultBuilderElements,
+  generateEnhancedJavaScript: () => generateEnhancedJavaScript
+});
 function generateDefaultBuilderElements(businessName = "") {
   return [
     // 🎯 PREMIUM NAVIGATION BAR - Glass Morphism Design
@@ -363,9 +1521,130 @@ function generateDefaultBuilderElements(businessName = "") {
     }
   ];
 }
+function generateEnhancedJavaScript() {
+  return `
+    <script>
+      // Smooth scrolling for navigation links
+      document.addEventListener('DOMContentLoaded', function() {
+        const links = document.querySelectorAll('a[href^="#"]');
+        links.forEach(link => {
+          link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          });
+        });
+
+        // Scroll animations
+        const observerOptions = {
+          threshold: 0.1,
+          rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.style.opacity = '1';
+              entry.target.style.transform = 'translateY(0)';
+            }
+          });
+        }, observerOptions);
+
+        // Observe all sections
+        document.querySelectorAll('section').forEach(section => {
+          section.style.opacity = '0';
+          section.style.transform = 'translateY(30px)';
+          section.style.transition = 'all 0.6s ease-out';
+          observer.observe(section);
+        });
+
+        // Mobile menu enhancement
+        const mobileMenuButton = document.querySelector('[data-mobile-menu-toggle]');
+        const mobileMenu = document.querySelector('[data-mobile-menu]');
+        
+        if (mobileMenuButton && mobileMenu) {
+          mobileMenuButton.addEventListener('click', function() {
+            mobileMenu.classList.toggle('active');
+            this.classList.toggle('active');
+          });
+        }
+
+        // Navbar scroll effect
+        let lastScrollY = window.scrollY;
+        const navbar = document.querySelector('[data-navbar]');
+        
+        window.addEventListener('scroll', function() {
+          const currentScrollY = window.scrollY;
+          
+          if (navbar) {
+            if (currentScrollY > 100) {
+              navbar.style.background = 'rgba(255, 255, 255, 0.98)';
+              navbar.style.backdropFilter = 'blur(20px) saturate(180%)';
+              navbar.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.12)';
+            } else {
+              navbar.style.background = 'rgba(255, 255, 255, 0.95)';
+              navbar.style.backdropFilter = 'blur(25px) saturate(180%)';
+              navbar.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.08)';
+            }
+          }
+          
+          lastScrollY = currentScrollY;
+        });
+
+        // Button hover effects
+        document.querySelectorAll('button, .btn, [role="button"]').forEach(button => {
+          button.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+            this.style.boxShadow = '0 12px 35px rgba(0, 0, 0, 0.15)';
+          });
+          
+          button.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = '';
+          });
+        });
+
+        // Form enhancements
+        document.querySelectorAll('input, textarea').forEach(input => {
+          input.addEventListener('focus', function() {
+            this.parentElement.classList.add('focused');
+          });
+          
+          input.addEventListener('blur', function() {
+            if (!this.value) {
+              this.parentElement.classList.remove('focused');
+            }
+          });
+        });
+      });
+
+      // Analytics tracking
+      function trackEvent(eventName, properties = {}) {
+        if (typeof gtag !== 'undefined') {
+          gtag('event', eventName, properties);
+        }
+        console.log('Event tracked:', eventName, properties);
+      }
+
+      // Track CTA clicks
+      document.addEventListener('click', function(e) {
+        if (e.target.matches('[data-cta]') || e.target.closest('[data-cta]')) {
+          const cta = e.target.matches('[data-cta]') ? e.target : e.target.closest('[data-cta]');
+          trackEvent('cta_click', {
+            cta_text: cta.textContent.trim(),
+            cta_location: cta.getAttribute('data-cta')
+          });
+        }
+      });
+    </script>
+  `;
+}
 var defaultLandingPageSettings, defaultLandingPageElements;
 var init_defaultLandingPage = __esm({
   "server/defaultLandingPage.ts"() {
+    "use strict";
     defaultLandingPageSettings = {
       meta: {
         title: "Professional Landing Page",
@@ -437,6 +1716,7 @@ function isEncrypted(text) {
 var ENCRYPTION_KEY, ALGORITHM;
 var init_crypto_utils = __esm({
   "server/crypto-utils.ts"() {
+    "use strict";
     ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || "your-32-character-secret-key-here!";
     ALGORITHM = "aes-256-cbc";
   }
@@ -448,57 +1728,12 @@ __export(storage_exports, {
   DatabaseStorage: () => DatabaseStorage,
   storage: () => storage
 });
-import {
-  users,
-  plans,
-  whiteLabels,
-  affiliates,
-  subscriptions,
-  commissions,
-  purchaseHistory,
-  categories,
-  products,
-  activities,
-  endUserActivities,
-  userSessions,
-  domainUserSessions,
-  referralTracking,
-  integrations,
-  integrationLogs,
-  aiGeneratedContent,
-  aiRecommendations,
-  aiContentOptimizations,
-  templates,
-  themes,
-  userThemePreferences,
-  clientTemplateCustomizations as clientTemplateCustomizations2,
-  platformSettings,
-  analyticsEvents,
-  analyticsMetrics,
-  landingPages as landingPages2,
-  customDomains,
-  announcements,
-  announcementLikes,
-  announcementComments,
-  announcementShares,
-  announcementAnalytics,
-  referralLinks,
-  referralSignups,
-  referralClicks,
-  affiliatePlanVisibility,
-  referralCommissions,
-  userPreferences,
-  paymentAccounts,
-  affiliatePayments,
-  nmiCredentials,
-  planProducts,
-  planCategories,
-  linkMetaImages
-} from "@shared/schema";
 import { eq, desc, sql, and, or, not, inArray, gte, lte, sum } from "drizzle-orm";
 var DatabaseStorage, storage;
 var init_storage = __esm({
   "server/storage.ts"() {
+    "use strict";
+    init_schema();
     init_db();
     init_defaultLandingPage();
     DatabaseStorage = class {
@@ -524,6 +1759,10 @@ var init_storage = __esm({
       }
       async getUserByEmail(email) {
         const [user] = await db.select().from(users).where(eq(users.email, email));
+        return user;
+      }
+      async getUserByUsername(username) {
+        const [user] = await db.select().from(users).where(eq(users.username, username));
         return user;
       }
       // Domain-specific user lookup
@@ -576,26 +1815,26 @@ var init_storage = __esm({
         );
       }
       async getDomainUserSessionsBySessionId(sessionId, domainPath) {
-        const sessions = await db.select().from(domainUserSessions).where(
+        const sessions2 = await db.select().from(domainUserSessions).where(
           and(
             eq(domainUserSessions.sessionId, sessionId),
             eq(domainUserSessions.domainPath, domainPath),
             eq(domainUserSessions.isActive, true)
           )
         );
-        return sessions;
+        return sessions2;
       }
       // Get end-users specific to a white-label client
-      async getEndUsersByWhiteLabel(whiteLabelId) {
+      async getEndUsersByWhiteLabel(whiteLabelId2) {
         return db.select().from(users).where(
           and(
             eq(users.role, "end_user"),
-            eq(users.whiteLabelId, whiteLabelId)
+            eq(users.whiteLabelId, whiteLabelId2)
           )
         ).orderBy(desc(users.createdAt));
       }
       // Get purchase history specific to a white-label client
-      async getPurchasesByWhiteLabel(whiteLabelId) {
+      async getPurchasesByWhiteLabel(whiteLabelId2) {
         return db.select({
           id: purchaseHistory.id,
           userId: purchaseHistory.userId,
@@ -614,7 +1853,7 @@ var init_storage = __esm({
             lastName: users.lastName,
             username: users.username
           }
-        }).from(purchaseHistory).leftJoin(users, eq(purchaseHistory.userId, users.id)).where(eq(purchaseHistory.whiteLabelId, whiteLabelId)).orderBy(desc(purchaseHistory.createdAt));
+        }).from(purchaseHistory).leftJoin(users, eq(purchaseHistory.userId, users.id)).where(eq(purchaseHistory.whiteLabelId, whiteLabelId2)).orderBy(desc(purchaseHistory.createdAt));
       }
       async createUser(userData) {
         if (userData.role === "super_admin_affiliate" && !userData.referralCode) {
@@ -636,8 +1875,7 @@ var init_storage = __esm({
           whiteLabelId: whiteLabel.id,
           role: "end_user"
         };
-        const result = await db.insert(users).values(userWithDomain);
-        const [user] = await db.select().from(users).where(eq(users.id, result.insertId));
+        const [user] = await db.insert(users).values(userWithDomain).returning();
         return user;
       }
       // Get domain-specific user
@@ -662,41 +1900,35 @@ var init_storage = __esm({
             userData.referralCode = await this.generateUniqueReferralCode(baseName);
           }
         }
-        try {
-          const result = await db.insert(users).values(userData);
-          const [user] = await db.select().from(users).where(eq(users.id, result.insertId));
-          return user;
-        } catch (error) {
-          await db.update(users).set({
+        const [user] = await db.insert(users).values(userData).onConflictDoUpdate({
+          target: users.id,
+          set: {
             ...userData,
             updatedAt: /* @__PURE__ */ new Date()
-          }).where(eq(users.id, userData.id));
-          const [user] = await db.select().from(users).where(eq(users.id, userData.id));
-          return user;
-        }
+          }
+        }).returning();
+        return user;
       }
       async updateUser(userId, updates) {
-        await db.update(users).set({
+        const [user] = await db.update(users).set({
           ...updates,
           updatedAt: /* @__PURE__ */ new Date()
-        }).where(eq(users.id, userId));
-        const [user] = await db.select().from(users).where(eq(users.id, userId));
+        }).where(eq(users.id, userId)).returning();
         return user;
       }
       async updateUserRole(userId, role) {
-        await db.update(users).set({
+        const [user] = await db.update(users).set({
           role,
           updatedAt: /* @__PURE__ */ new Date()
-        }).where(eq(users.id, userId));
-        const [user] = await db.select().from(users).where(eq(users.id, userId));
+        }).where(eq(users.id, userId)).returning();
         return user;
       }
-      // Referral code operations for Super Admin Affiliates
+      // Referral code operations for Super Admin Affiliates and White Label Affiliates
       async updateUserReferralCode(userId, referralCode) {
         const [user] = await db.update(users).set({
           referralCode,
           updatedAt: /* @__PURE__ */ new Date()
-        }).where(eq(users.id, userId));
+        }).where(eq(users.id, userId)).returning();
         return user;
       }
       async checkReferralCodeAvailability(referralCode, excludeUserId) {
@@ -716,6 +1948,19 @@ var init_storage = __esm({
       async getUserByReferralCode(referralCode) {
         const [user] = await db.select().from(users).where(eq(users.referralCode, referralCode));
         return user;
+      }
+      async getUsersByReferralCode(referralCode) {
+        const affiliate = await this.getUserByReferralCode(referralCode);
+        if (!affiliate) {
+          return [];
+        }
+        const referralRecords = await db.select().from(referralTracking).where(eq(referralTracking.affiliateId, affiliate.id));
+        if (referralRecords.length === 0) {
+          return [];
+        }
+        const referredUserIds = referralRecords.map((r) => r.referredUserId);
+        const referredUsers = await db.select().from(users).where(inArray(users.id, referredUserIds));
+        return referredUsers;
       }
       async generateUniqueReferralCode(baseName) {
         let referralCode = baseName.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -799,11 +2044,8 @@ var init_storage = __esm({
           selectedProducts: plan.selectedProducts,
           name: plan.name
         });
-        const result = await db.insert(plans).values(plan);
-        const insertId = result[0]?.insertId || result.insertId;
-        console.log("Plan inserted with ID:", insertId);
-        const [newPlan] = await db.select().from(plans).where(eq(plans.id, insertId)).limit(1);
-        console.log("Fetched created plan:", {
+        const [newPlan] = await db.insert(plans).values(plan).returning();
+        console.log("Plan created:", {
           id: newPlan.id,
           name: newPlan.name,
           selectedCategories: newPlan.selectedCategories,
@@ -882,19 +2124,24 @@ var init_storage = __esm({
         const [whiteLabel] = await db.select().from(whiteLabels).where(eq(whiteLabels.domainPath, domainPath));
         return whiteLabel;
       }
-      async setDefaultLandingPage(whiteLabelId, landingPageId) {
-        await db.update(whiteLabels).set({ defaultLandingPageId: landingPageId }).where(eq(whiteLabels.id, whiteLabelId));
+      async setDefaultLandingPage(whiteLabelId2, landingPageId) {
+        await db.update(whiteLabels).set({
+          defaultLandingPageId: landingPageId,
+          landingPageCode: "default"
+        }).where(eq(whiteLabels.id, whiteLabelId2));
       }
       async setLandingPageAsDomainPage(landingPageId, domainPath) {
-        await db.update(whiteLabels).set({ defaultLandingPageId: landingPageId }).where(eq(whiteLabels.domainPath, domainPath));
+        await db.update(whiteLabels).set({
+          defaultLandingPageId: landingPageId,
+          landingPageCode: "default"
+        }).where(eq(whiteLabels.domainPath, domainPath));
       }
       async createWhiteLabel(whiteLabel) {
-        const result = await db.insert(whiteLabels).values(whiteLabel);
-        const insertId = result[0].insertId;
-        const [newWhiteLabel] = await db.select().from(whiteLabels).where(eq(whiteLabels.id, insertId)).limit(1);
+        const [newWhiteLabel] = await db.insert(whiteLabels).values(whiteLabel).returning();
         if (!newWhiteLabel.defaultLandingPageId) {
           try {
             console.log("Creating default landing page for new white-label:", newWhiteLabel.businessName);
+            const { defaultLandingPageSettings: defaultLandingPageSettings2 } = await Promise.resolve().then(() => (init_defaultLandingPage(), defaultLandingPage_exports));
             const defaultLandingPage = await this.createLandingPage({
               userId: newWhiteLabel.userId,
               name: `${newWhiteLabel.businessName} - Default Landing Page`,
@@ -940,6 +2187,7 @@ var init_storage = __esm({
                   size: { width: 100, height: 40 }
                 }
               ],
+              settings: defaultLandingPageSettings2,
               isPublished: true,
               domainPath: newWhiteLabel.domainPath
             });
@@ -953,7 +2201,7 @@ var init_storage = __esm({
         return newWhiteLabel;
       }
       async updateWhiteLabel(id, whiteLabel) {
-        const [updatedWhiteLabel] = await db.update(whiteLabels).set({ ...whiteLabel, updatedAt: /* @__PURE__ */ new Date() }).where(eq(whiteLabels.id, id));
+        const [updatedWhiteLabel] = await db.update(whiteLabels).set({ ...whiteLabel, updatedAt: /* @__PURE__ */ new Date() }).where(eq(whiteLabels.id, id)).returning();
         return updatedWhiteLabel;
       }
       async getAffiliates() {
@@ -968,7 +2216,7 @@ var init_storage = __esm({
         return affiliate;
       }
       // Get affiliates associated with a white-label client
-      async getAffiliatesByWhiteLabel(whiteLabelId) {
+      async getAffiliatesByWhiteLabel(whiteLabelId2) {
         const affiliateUsers = await db.select({
           userId: users.id,
           email: users.email,
@@ -976,23 +2224,23 @@ var init_storage = __esm({
           lastName: users.lastName,
           whiteLabelId: users.whiteLabelId
         }).from(users).where(and(
-          eq(users.whiteLabelId, whiteLabelId),
+          eq(users.whiteLabelId, whiteLabelId2),
           eq(users.role, "end_user")
         ));
         return affiliateUsers;
       }
       // Get active domain sessions for affiliate tracking
-      async getActiveDomainSessions(domainPath, whiteLabelId) {
-        const sessions = await db.select({
+      async getActiveDomainSessions(domainPath, whiteLabelId2) {
+        const sessions2 = await db.select({
           userId: domainUserSessions.userId,
           userEmail: users.email,
           userRole: users.role
         }).from(domainUserSessions).leftJoin(users, eq(domainUserSessions.userId, users.id)).where(and(
           eq(domainUserSessions.domainPath, domainPath),
           eq(domainUserSessions.isActive, true),
-          eq(domainUserSessions.whiteLabelId, whiteLabelId)
+          eq(domainUserSessions.whiteLabelId, whiteLabelId2)
         ));
-        return sessions;
+        return sessions2;
       }
       // Get detailed referrals for an affiliate with end-user purchase information
       async getDetailedReferralsByAffiliate(affiliateId, domainPath) {
@@ -1029,9 +2277,7 @@ var init_storage = __esm({
         return referrals;
       }
       async createAffiliate(affiliate) {
-        const result = await db.insert(affiliates).values(affiliate);
-        const insertId = result[0].insertId;
-        const [newAffiliate] = await db.select().from(affiliates).where(eq(affiliates.id, insertId)).limit(1);
+        const [newAffiliate] = await db.insert(affiliates).values(affiliate).returning();
         return newAffiliate;
       }
       async getSubscriptions() {
@@ -1126,30 +2372,23 @@ var init_storage = __esm({
           referralCode: data.referralCode,
           ipAddress: data.ipAddress || null,
           userAgent: data.userAgent || null
-        });
+        }).returning();
         return click;
       }
       async createSubscription(subscription) {
-        const insertResult = await db.insert(subscriptions).values(subscription);
-        const insertId = insertResult[0]?.insertId;
-        console.log("Debug insertId:", insertId, "Type:", typeof insertId, "Truthy:", !!insertId, "Greater than 0:", insertId > 0);
-        if (insertId == null || insertId == 0 || insertId === 0n) {
-          console.error("Insert result:", insertResult);
-          throw new Error("Failed to create subscription - no insertId returned");
-        }
-        const [newSubscription] = await db.select().from(subscriptions).where(eq(subscriptions.id, Number(insertId))).limit(1);
+        const [newSubscription] = await db.insert(subscriptions).values(subscription).returning();
         if (!newSubscription) {
-          throw new Error("Failed to retrieve created subscription");
+          throw new Error("Failed to create subscription");
         }
         return newSubscription;
       }
-      async cancelExistingSubscriptions(whiteLabelId) {
+      async cancelExistingSubscriptions(whiteLabelId2) {
         await db.update(subscriptions).set({
           status: "cancelled",
           updatedAt: /* @__PURE__ */ new Date()
         }).where(
           and(
-            eq(subscriptions.whiteLabelId, whiteLabelId),
+            eq(subscriptions.whiteLabelId, whiteLabelId2),
             eq(subscriptions.status, "active")
           )
         );
@@ -1171,32 +2410,36 @@ var init_storage = __esm({
         );
       }
       // Category operations
-      async getCategoriesByWhiteLabel(whiteLabelId) {
-        return db.select().from(categories).where(eq(categories.whiteLabelId, whiteLabelId)).orderBy(categories.parentCategoryId, categories.name);
+      async getCategoriesByWhiteLabel(whiteLabelId2) {
+        return db.select().from(categories).where(eq(categories.whiteLabelId, whiteLabelId2)).orderBy(categories.parentCategoryId, categories.name);
       }
       async getCategories(userId) {
+        const user = await this.getUser(userId);
+        if (!user) {
+          return [];
+        }
+        if (user.role === "super_admin") {
+          return await db.select().from(categories).orderBy(categories.name);
+        }
         const whiteLabel = await this.getWhiteLabelByUserId(userId);
         if (!whiteLabel) {
           return [];
         }
-        return await db.select().from(categories).where(eq(categories.whiteLabelId, whiteLabel.id)).orderBy(categories.parentCategoryId, categories.name);
+        return await db.select().from(categories).where(eq(categories.whiteLabelId, whiteLabel.id)).orderBy(categories.name);
       }
       async createCategory(category) {
-        const result = await db.insert(categories).values(category);
-        const insertId = result.insertId;
-        const [newCategory] = await db.select().from(categories).where(eq(categories.id, insertId));
+        const [newCategory] = await db.insert(categories).values(category).returning();
         return newCategory;
       }
       async updateCategory(id, categoryData) {
-        await db.update(categories).set({ ...categoryData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(categories.id, id));
-        const [updatedCategory] = await db.select().from(categories).where(eq(categories.id, id));
+        const [updatedCategory] = await db.update(categories).set({ ...categoryData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(categories.id, id)).returning();
         return updatedCategory;
       }
       async deleteCategory(id) {
         await db.delete(categories).where(eq(categories.id, id));
       }
-      async getProductsByWhiteLabel(whiteLabelId) {
-        return db.select().from(products).where(eq(products.whiteLabelId, whiteLabelId)).orderBy(desc(products.createdAt));
+      async getProductsByWhiteLabel(whiteLabelId2) {
+        return db.select().from(products).where(eq(products.whiteLabelId, whiteLabelId2)).orderBy(desc(products.createdAt));
       }
       async getProductsByCategory(categoryId) {
         return db.select().from(products).where(eq(products.categoryId, categoryId)).orderBy(desc(products.createdAt));
@@ -1253,50 +2496,48 @@ var init_storage = __esm({
         return result?.count || 0;
       }
       // Domain-specific analytics methods for white-label clients
-      async getUserCountForWhiteLabel(whiteLabelId) {
+      async getUserCountForWhiteLabel(whiteLabelId2) {
         const [result] = await db.select({ count: sql`count(*)` }).from(users).where(and(
-          eq(users.whiteLabelId, whiteLabelId),
+          eq(users.whiteLabelId, whiteLabelId2),
           eq(users.role, "end_user")
         ));
         return result?.count || 0;
       }
-      async getTotalPurchasesForWhiteLabel(whiteLabelId) {
+      async getTotalPurchasesForWhiteLabel(whiteLabelId2) {
         const [result] = await db.select({ count: sql`count(*)` }).from(purchaseHistory).where(and(
-          eq(purchaseHistory.whiteLabelId, whiteLabelId),
+          eq(purchaseHistory.whiteLabelId, whiteLabelId2),
           eq(purchaseHistory.status, "completed")
         ));
         return result?.count || 0;
       }
-      async getPurchasedUsersCountForWhiteLabel(whiteLabelId) {
+      async getPurchasedUsersCountForWhiteLabel(whiteLabelId2) {
         const [result] = await db.select({ count: sql`count(distinct ${purchaseHistory.userId})` }).from(purchaseHistory).where(and(
-          eq(purchaseHistory.whiteLabelId, whiteLabelId),
+          eq(purchaseHistory.whiteLabelId, whiteLabelId2),
           eq(purchaseHistory.status, "completed")
         ));
         return result?.count || 0;
       }
-      async getLoginCountForWhiteLabel(whiteLabelId) {
+      async getLoginCountForWhiteLabel(whiteLabelId2) {
         const thirtyDaysAgo = /* @__PURE__ */ new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         const [result] = await db.select({ count: sql`count(*)` }).from(endUserActivities).where(and(
-          eq(endUserActivities.whiteLabelId, whiteLabelId),
+          eq(endUserActivities.whiteLabelId, whiteLabelId2),
           eq(endUserActivities.activityType, "login"),
           sql`${endUserActivities.createdAt} >= ${thirtyDaysAgo}`
         ));
         return result?.count || 0;
       }
       async createActivity(activity) {
-        const result = await db.insert(activities).values(activity);
-        const insertId = result.insertId;
-        const [newActivity] = await db.select().from(activities).where(eq(activities.id, insertId));
+        const [newActivity] = await db.insert(activities).values(activity).returning();
         return newActivity;
       }
       async getTotalRevenue() {
         const [result] = await db.select({ total: sql`coalesce(sum(${subscriptions.amount}), 0)` }).from(subscriptions).where(eq(subscriptions.status, "active"));
         return result.total;
       }
-      async getTotalRevenueForWhiteLabel(whiteLabelId) {
+      async getTotalRevenueForWhiteLabel(whiteLabelId2) {
         const [result] = await db.select({ total: sql`coalesce(sum(cast(${purchaseHistory.amount} as decimal)), 0)` }).from(purchaseHistory).where(and(
-          eq(purchaseHistory.whiteLabelId, whiteLabelId),
+          eq(purchaseHistory.whiteLabelId, whiteLabelId2),
           eq(purchaseHistory.status, "completed")
         ));
         return result.total;
@@ -1310,9 +2551,7 @@ var init_storage = __esm({
         return integration;
       }
       async createIntegration(integration) {
-        const result = await db.insert(integrations).values(integration);
-        const insertId = result.insertId;
-        const [newIntegration] = await db.select().from(integrations).where(eq(integrations.id, insertId));
+        const [newIntegration] = await db.insert(integrations).values(integration).returning();
         return newIntegration;
       }
       async updateIntegration(id, integrationData) {
@@ -1327,9 +2566,7 @@ var init_storage = __esm({
         return db.select().from(integrationLogs).where(eq(integrationLogs.integrationId, integrationId));
       }
       async createIntegrationLog(log2) {
-        const result = await db.insert(integrationLogs).values(log2);
-        const insertId = result.insertId;
-        const [newLog] = await db.select().from(integrationLogs).where(eq(integrationLogs.id, insertId));
+        const [newLog] = await db.insert(integrationLogs).values(log2).returning();
         return newLog;
       }
       // AI Content Generation operations
@@ -1378,13 +2615,11 @@ var init_storage = __esm({
         return template;
       }
       async createTemplate(template) {
-        const result = await db.insert(templates).values(template);
-        const insertId = result.insertId;
-        const [newTemplate] = await db.select().from(templates).where(eq(templates.id, insertId));
+        const [newTemplate] = await db.insert(templates).values(template).returning();
         return newTemplate;
       }
       async updateTemplate(id, templateData) {
-        const [updatedTemplate] = await db.update(templates).set({ ...templateData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(templates.id, id));
+        const [updatedTemplate] = await db.update(templates).set({ ...templateData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(templates.id, id)).returning();
         return updatedTemplate;
       }
       async deleteTemplate(id) {
@@ -1399,13 +2634,11 @@ var init_storage = __esm({
         return theme;
       }
       async createTheme(themeData) {
-        const result = await db.insert(themes).values(themeData);
-        const insertId = result.insertId;
-        const [theme] = await db.select().from(themes).where(eq(themes.id, insertId));
+        const [theme] = await db.insert(themes).values(themeData).returning();
         return theme;
       }
       async updateTheme(id, themeData) {
-        const [theme] = await db.update(themes).set({ ...themeData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(themes.id, id));
+        const [theme] = await db.update(themes).set({ ...themeData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(themes.id, id)).returning();
         return theme;
       }
       async deleteTheme(id) {
@@ -1433,13 +2666,11 @@ var init_storage = __esm({
         return customization;
       }
       async createClientTemplateCustomization(customization) {
-        const result = await db.insert(clientTemplateCustomizations2).values(customization);
-        const insertId = result.insertId;
-        const [newCustomization] = await db.select().from(clientTemplateCustomizations2).where(eq(clientTemplateCustomizations2.id, insertId));
+        const [newCustomization] = await db.insert(clientTemplateCustomizations2).values(customization).returning();
         return newCustomization;
       }
       async updateClientTemplateCustomization(id, customizationData) {
-        const [updatedCustomization] = await db.update(clientTemplateCustomizations2).set({ ...customizationData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(clientTemplateCustomizations2.id, id));
+        const [updatedCustomization] = await db.update(clientTemplateCustomizations2).set({ ...customizationData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(clientTemplateCustomizations2.id, id)).returning();
         return updatedCustomization;
       }
       async deleteClientTemplateCustomization(id) {
@@ -1454,9 +2685,7 @@ var init_storage = __esm({
         return setting;
       }
       async createPlatformSetting(setting) {
-        const result = await db.insert(platformSettings).values(setting);
-        const insertId = result.insertId;
-        const [newSetting] = await db.select().from(platformSettings).where(eq(platformSettings.id, insertId));
+        const [newSetting] = await db.insert(platformSettings).values(setting).returning();
         return newSetting;
       }
       async updatePlatformSetting(key, settingData) {
@@ -1478,9 +2707,7 @@ var init_storage = __esm({
         return await query.orderBy(analyticsEvents.timestamp).limit(1e3);
       }
       async createAnalyticsEvent(event) {
-        const result = await db.insert(analyticsEvents).values(event);
-        const insertId = result.insertId;
-        const [newEvent] = await db.select().from(analyticsEvents).where(eq(analyticsEvents.id, insertId));
+        const [newEvent] = await db.insert(analyticsEvents).values(event).returning();
         return newEvent;
       }
       async getAnalyticsMetrics(filters) {
@@ -1494,9 +2721,7 @@ var init_storage = __esm({
         return await query.orderBy(analyticsMetrics.date);
       }
       async createAnalyticsMetric(metric) {
-        const result = await db.insert(analyticsMetrics).values(metric);
-        const insertId = result.insertId;
-        const [newMetric] = await db.select().from(analyticsMetrics).where(eq(analyticsMetrics.id, insertId));
+        const [newMetric] = await db.insert(analyticsMetrics).values(metric).returning();
         return newMetric;
       }
       async getAnalyticsOverview() {
@@ -1523,14 +2748,11 @@ var init_storage = __esm({
         return page;
       }
       async createLandingPage(landingPage) {
-        const result = await db.insert(landingPages2).values(landingPage);
-        const insertId = result.insertId;
-        const [newPage] = await db.select().from(landingPages2).where(eq(landingPages2.id, insertId));
+        const [newPage] = await db.insert(landingPages2).values(landingPage).returning();
         return newPage;
       }
       async updateLandingPage(id, landingPageData) {
-        await db.update(landingPages2).set({ ...landingPageData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(landingPages2.id, id));
-        const [updatedPage] = await db.select().from(landingPages2).where(eq(landingPages2.id, id));
+        const [updatedPage] = await db.update(landingPages2).set({ ...landingPageData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(landingPages2.id, id)).returning();
         return updatedPage;
       }
       async clearAllUserDomainPaths(userId) {
@@ -1612,9 +2834,7 @@ var init_storage = __esm({
           isPublished: true,
           publishedAt: /* @__PURE__ */ new Date()
         };
-        const result = await db.insert(landingPages2).values(landingPageData);
-        const insertId = result.insertId;
-        const [newPage] = await db.select().from(landingPages2).where(eq(landingPages2.id, insertId));
+        const [newPage] = await db.insert(landingPages2).values(landingPageData).returning();
         return newPage;
       }
       // Get or create default landing page for a user with domain path
@@ -1642,22 +2862,18 @@ var init_storage = __esm({
         return customDomain;
       }
       async createCustomDomain(customDomain) {
-        const result = await db.insert(customDomains).values(customDomain);
-        const insertId = result.insertId;
-        const [newDomain] = await db.select().from(customDomains).where(eq(customDomains.id, insertId));
+        const [newDomain] = await db.insert(customDomains).values(customDomain).returning();
         return newDomain;
       }
       async updateCustomDomain(id, customDomainData) {
-        await db.update(customDomains).set({ ...customDomainData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(customDomains.id, id));
-        const [updatedDomain] = await db.select().from(customDomains).where(eq(customDomains.id, id));
+        const [updatedDomain] = await db.update(customDomains).set({ ...customDomainData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(customDomains.id, id)).returning();
         return updatedDomain;
       }
       async deleteCustomDomain(id) {
         await db.delete(customDomains).where(eq(customDomains.id, id));
       }
       async verifyCustomDomain(id) {
-        await db.update(customDomains).set({ isVerified: true, updatedAt: /* @__PURE__ */ new Date() }).where(eq(customDomains.id, id));
-        const [verifiedDomain] = await db.select().from(customDomains).where(eq(customDomains.id, id));
+        const [verifiedDomain] = await db.update(customDomains).set({ isVerified: true, updatedAt: /* @__PURE__ */ new Date() }).where(eq(customDomains.id, id)).returning();
         return verifiedDomain;
       }
       generateVerificationToken() {
@@ -1675,14 +2891,11 @@ var init_storage = __esm({
         return db.select().from(products).where(eq(products.whiteLabelId, whiteLabel.id)).orderBy(desc(products.createdAt));
       }
       async createProduct(productData) {
-        const result = await db.insert(products).values(productData);
-        const insertId = result.insertId;
-        const [newProduct] = await db.select().from(products).where(eq(products.id, insertId));
+        const [newProduct] = await db.insert(products).values(productData).returning();
         return newProduct;
       }
       async updateProduct(id, productData) {
-        await db.update(products).set({ ...productData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(products.id, id));
-        const [updatedProduct] = await db.select().from(products).where(eq(products.id, id));
+        const [updatedProduct] = await db.update(products).set({ ...productData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(products.id, id)).returning();
         return updatedProduct;
       }
       async deleteProduct(id) {
@@ -1694,12 +2907,7 @@ var init_storage = __esm({
         try {
           const { targetingType, targetedPlanIds, ...safeData } = announcementData;
           try {
-            const result = await db.insert(announcements).values(announcementData);
-            const insertId = result[0]?.insertId || result.insertId;
-            if (!insertId) {
-              throw new Error("Failed to create announcement: No insert ID returned");
-            }
-            const [announcement] = await db.select({
+            const [announcement] = await db.insert(announcements).values(announcementData).returning({
               id: announcements.id,
               userId: announcements.userId,
               title: announcements.title,
@@ -1712,20 +2920,15 @@ var init_storage = __esm({
               isPinned: announcements.isPinned,
               createdAt: announcements.createdAt,
               updatedAt: announcements.updatedAt
-            }).from(announcements).where(eq(announcements.id, insertId)).limit(1);
+            });
             if (!announcement) {
-              throw new Error("Failed to retrieve created announcement");
+              throw new Error("Failed to create announcement");
             }
             return announcement;
           } catch (columnError) {
             if (columnError.code === "42703") {
               console.log("Targeting columns not yet available, inserting without targeting data");
-              const result = await db.insert(announcements).values(safeData);
-              const insertId = result[0]?.insertId || result.insertId;
-              if (!insertId) {
-                throw new Error("Failed to create announcement: No insert ID returned");
-              }
-              const [announcement] = await db.select({
+              const [announcement] = await db.insert(announcements).values(safeData).returning({
                 id: announcements.id,
                 userId: announcements.userId,
                 title: announcements.title,
@@ -1738,9 +2941,9 @@ var init_storage = __esm({
                 isPinned: announcements.isPinned,
                 createdAt: announcements.createdAt,
                 updatedAt: announcements.updatedAt
-              }).from(announcements).where(eq(announcements.id, insertId)).limit(1);
+              });
               if (!announcement) {
-                throw new Error("Failed to retrieve created announcement");
+                throw new Error("Failed to create announcement");
               }
               return announcement;
             }
@@ -1887,7 +3090,7 @@ var init_storage = __esm({
           console.log("Successfully published scheduled announcements");
         }
       }
-      async getSuperAdminAnnouncements(limit = 20, offset = 0) {
+      async getSuperAdminAnnouncements(userId, limit = 20, offset = 0) {
         console.log("Fetching Super Admin announcements...");
         const query = db.select({
           id: announcements.id,
@@ -1917,7 +3120,13 @@ var init_storage = __esm({
           SELECT COUNT(*) 
           FROM ${announcementShares} 
           WHERE ${announcementShares.announcementId} = ${announcements.id}
-        ), 0)`.as("sharesCount")
+        ), 0)`.as("sharesCount"),
+          userLiked: userId ? sql`(
+          SELECT COUNT(*) > 0 
+          FROM ${announcementLikes} 
+          WHERE ${announcementLikes.announcementId} = ${announcements.id} 
+          AND ${announcementLikes.userId} = ${userId}
+        )`.as("userLiked") : sql`false`.as("userLiked")
         }).from(announcements).leftJoin(users, eq(announcements.userId, users.id)).where(
           and(
             eq(announcements.isActive, true),
@@ -1971,8 +3180,8 @@ var init_storage = __esm({
         return result;
       }
       // ADDED: Get announcements by white-label client ID for affiliate dashboard
-      async getAnnouncementsByWhiteLabelId(whiteLabelId, userId, limit = 20, offset = 0) {
-        console.log("Fetching announcements for white-label ID:", whiteLabelId);
+      async getAnnouncementsByWhiteLabelId(whiteLabelId2, userId, limit = 20, offset = 0) {
+        console.log("Fetching announcements for white-label ID:", whiteLabelId2);
         const query = db.select({
           id: announcements.id,
           userId: announcements.userId,
@@ -2011,7 +3220,7 @@ var init_storage = __esm({
         }).from(announcements).leftJoin(users, eq(announcements.userId, users.id)).where(
           and(
             eq(announcements.isActive, true),
-            eq(announcements.whiteLabelId, whiteLabelId)
+            eq(announcements.whiteLabelId, whiteLabelId2)
           )
         ).orderBy(desc(announcements.isPinned), desc(announcements.createdAt)).limit(limit).offset(offset);
         const result = await query;
@@ -2246,6 +3455,9 @@ var init_storage = __esm({
           return { liked: true };
         }
       }
+      async likeAnnouncement(announcementId, userId) {
+        await this.toggleAnnouncementLike(announcementId, userId);
+      }
       async getAnnouncementComments(announcementId, limit = 50, offset = 0) {
         return await db.select({
           id: announcementComments.id,
@@ -2265,34 +3477,24 @@ var init_storage = __esm({
         ).orderBy(desc(announcementComments.createdAt)).limit(limit).offset(offset);
       }
       async createAnnouncementComment(commentData) {
-        const result = await db.insert(announcementComments).values(commentData);
-        const insertId = result[0]?.insertId || result.insertId;
-        if (!insertId) {
+        const [comment] = await db.insert(announcementComments).values(commentData).returning();
+        if (!comment) {
           throw new Error("Failed to create announcement comment");
         }
-        const comment = await db.select().from(announcementComments).where(eq(announcementComments.id, insertId)).limit(1);
-        if (!comment[0]) {
-          throw new Error("Failed to retrieve created announcement comment");
-        }
-        return comment[0];
+        return comment;
       }
       // Announcement analytics implementations
       async createAnnouncementAnalytics(data) {
         try {
-          const result = await db.insert(announcementAnalytics).values(data);
-          const insertId = result[0]?.insertId || result.insertId;
-          if (!insertId) {
-            throw new Error("Failed to insert analytics record");
-          }
-          const [analyticsEntry] = await db.select({
+          const [analyticsEntry] = await db.insert(announcementAnalytics).values(data).returning({
             id: announcementAnalytics.id,
             announcementId: announcementAnalytics.announcementId,
             userId: announcementAnalytics.userId,
             eventType: announcementAnalytics.eventType,
             createdAt: announcementAnalytics.createdAt
-          }).from(announcementAnalytics).where(eq(announcementAnalytics.id, insertId)).limit(1);
+          });
           if (!analyticsEntry) {
-            throw new Error("Failed to fetch created analytics record");
+            throw new Error("Failed to create analytics record");
           }
           return analyticsEntry;
         } catch (error) {
@@ -2319,7 +3521,7 @@ var init_storage = __esm({
           announcementId,
           userId,
           sharedWith
-        });
+        }).returning();
         return share;
       }
       // Plan-Product Management operations
@@ -2440,17 +3642,17 @@ var init_storage = __esm({
         const validPlans = allPlans.filter((plan) => plan.id !== null);
         console.log(`[DEBUG] getUserPurchasedPlans - Valid plans (non-null):`, validPlans);
         const uniquePlans = validPlans.filter(
-          (plan, index, self) => index === self.findIndex((p) => p.id === plan.id)
+          (plan, index2, self) => index2 === self.findIndex((p) => p.id === plan.id)
         );
         console.log(`[DEBUG] getUserPurchasedPlans - Unique plans:`, uniquePlans);
         const planDetails = await Promise.all(
           uniquePlans.map(async (plan) => {
-            const categories3 = await this.getPlanCategories(plan.id);
-            const products3 = await this.getPlanProducts(plan.id);
+            const categories2 = await this.getPlanCategories(plan.id);
+            const products2 = await this.getPlanProducts(plan.id);
             return {
               ...plan,
-              categories: categories3,
-              products: products3
+              categories: categories2,
+              products: products2
             };
           })
         );
@@ -2461,18 +3663,18 @@ var init_storage = __esm({
         if (whiteLabel.length === 0) {
           return [];
         }
-        const whiteLabelId = whiteLabel[0].id;
+        const domainOwnerId = whiteLabel[0].userId;
         const purchasedPlans = await db.select({
           id: plans.id,
           name: plans.name,
           description: plans.description,
           monthlyPrice: plans.monthlyPrice,
-          purchaseDate: purchaseHistory.createdAt
+          purchaseDate: purchaseHistory.createdAt,
+          createdBy: plans.createdBy
         }).from(purchaseHistory).leftJoin(plans, eq(purchaseHistory.planId, plans.id)).where(
           and(
             eq(purchaseHistory.userId, userId),
-            eq(purchaseHistory.status, "completed"),
-            eq(purchaseHistory.whiteLabelId, whiteLabelId)
+            eq(purchaseHistory.status, "completed")
           )
         ).orderBy(desc(purchaseHistory.createdAt));
         const activeSubscriptions = await db.select({
@@ -2480,26 +3682,31 @@ var init_storage = __esm({
           name: plans.name,
           description: plans.description,
           monthlyPrice: plans.monthlyPrice,
-          purchaseDate: subscriptions.createdAt
+          purchaseDate: subscriptions.createdAt,
+          createdBy: plans.createdBy
         }).from(subscriptions).leftJoin(plans, eq(subscriptions.planId, plans.id)).where(
           and(
             eq(subscriptions.userId, userId),
-            eq(subscriptions.status, "active"),
-            eq(subscriptions.whiteLabelId, whiteLabelId)
+            eq(subscriptions.status, "active")
           )
         ).orderBy(desc(subscriptions.createdAt));
         const allPlans = [...purchasedPlans, ...activeSubscriptions];
         const uniquePlans = allPlans.filter(
-          (plan, index, self) => index === self.findIndex((p) => p.id === plan.id)
+          (plan, index2, self) => index2 === self.findIndex((p) => p.id === plan.id)
         );
+        const domainOwnerPlans = uniquePlans.filter((plan) => plan.createdBy === domainOwnerId);
         const planDetails = await Promise.all(
-          uniquePlans.map(async (plan) => {
-            const categories3 = await this.getPlanCategories(plan.id);
-            const products3 = await this.getPlanProducts(plan.id);
+          domainOwnerPlans.map(async (plan) => {
+            const categories2 = await this.getPlanCategories(plan.id);
+            const products2 = await this.getPlanProducts(plan.id);
             return {
-              ...plan,
-              categories: categories3,
-              products: products3
+              id: plan.id,
+              name: plan.name,
+              description: plan.description,
+              monthlyPrice: plan.monthlyPrice,
+              purchaseDate: plan.purchaseDate,
+              categories: categories2,
+              products: products2
             };
           })
         );
@@ -2579,8 +3786,8 @@ var init_storage = __esm({
         if (whiteLabel.length === 0) {
           return [];
         }
-        const whiteLabelId = whiteLabel[0].id;
-        return await db.select().from(subscriptions).where(eq(subscriptions.whiteLabelId, whiteLabelId)).orderBy(desc(subscriptions.createdAt));
+        const whiteLabelId2 = whiteLabel[0].id;
+        return await db.select().from(subscriptions).where(eq(subscriptions.whiteLabelId, whiteLabelId2)).orderBy(desc(subscriptions.createdAt));
       }
       async getSubscriptionById(subscriptionId) {
         const [subscription] = await db.select().from(subscriptions).where(eq(subscriptions.id, subscriptionId)).limit(1);
@@ -2781,37 +3988,31 @@ var init_storage = __esm({
       async updatePurchaseStatus(id, status) {
         const [updatedPurchase] = await db.update(purchaseHistory).set({
           status
-        }).where(eq(purchaseHistory.id, id));
+        }).where(eq(purchaseHistory.id, id)).returning();
         return updatedPurchase;
       }
       // Purchase history operations for plan analytics
       async createPurchaseHistory(purchase) {
-        const result = await db.insert(purchaseHistory).values(purchase);
-        if (result[0]?.insertId) {
-          const [insertedRecord] = await db.select().from(purchaseHistory).where(eq(purchaseHistory.id, result[0].insertId)).limit(1);
-          if (insertedRecord) {
-            return insertedRecord;
-          }
+        const [insertedRecord] = await db.insert(purchaseHistory).values(purchase).returning();
+        if (!insertedRecord) {
+          throw new Error("Failed to create purchase history record");
         }
-        throw new Error("Failed to retrieve inserted purchase history record");
+        return insertedRecord;
       }
       // End-user activity tracking methods
       async createEndUserActivity(activity) {
-        const result = await db.insert(endUserActivities).values(activity);
-        if (result[0]?.insertId) {
-          const [insertedRecord] = await db.select().from(endUserActivities).where(eq(endUserActivities.id, result[0].insertId)).limit(1);
-          if (insertedRecord) {
-            return insertedRecord;
-          }
+        const [insertedRecord] = await db.insert(endUserActivities).values(activity).returning();
+        if (!insertedRecord) {
+          throw new Error("Failed to create end user activity record");
         }
-        throw new Error("Failed to retrieve inserted end user activity record");
+        return insertedRecord;
       }
       async trackEndUserActivity(activity) {
         return await this.createEndUserActivity(activity);
       }
-      async getEndUserActivitiesByWhiteLabel(whiteLabelId, limit = 50) {
+      async getEndUserActivitiesByWhiteLabel(whiteLabelId2, limit = 50) {
         console.log("\u{1F50D} [Storage] getEndUserActivitiesByWhiteLabel called:", {
-          whiteLabelId,
+          whiteLabelId: whiteLabelId2,
           limit
         });
         try {
@@ -2829,9 +4030,9 @@ var init_storage = __esm({
               firstName: users.firstName,
               lastName: users.lastName
             }
-          }).from(endUserActivities).leftJoin(users, eq(endUserActivities.userId, users.id)).where(eq(endUserActivities.whiteLabelId, whiteLabelId)).orderBy(desc(endUserActivities.createdAt)).limit(limit);
+          }).from(endUserActivities).leftJoin(users, eq(endUserActivities.userId, users.id)).where(eq(endUserActivities.whiteLabelId, whiteLabelId2)).orderBy(desc(endUserActivities.createdAt)).limit(limit);
           console.log("\u2705 [Storage] getEndUserActivitiesByWhiteLabel retrieved activities:", {
-            whiteLabelId,
+            whiteLabelId: whiteLabelId2,
             count: activities2.length,
             limit,
             activities: activities2.map((a) => ({
@@ -2846,7 +4047,7 @@ var init_storage = __esm({
           return activities2;
         } catch (error) {
           console.error("\u274C [Storage] getEndUserActivitiesByWhiteLabel error:", {
-            whiteLabelId,
+            whiteLabelId: whiteLabelId2,
             limit,
             error: error.message,
             stack: error.stack
@@ -2854,30 +4055,30 @@ var init_storage = __esm({
           throw error;
         }
       }
-      async getEndUserActivityStats(whiteLabelId) {
+      async getEndUserActivityStats(whiteLabelId2) {
         const weekAgo = /* @__PURE__ */ new Date();
         weekAgo.setDate(weekAgo.getDate() - 7);
         const [signupCount] = await db.select({ count: sql`count(*)` }).from(endUserActivities).where(and(
-          eq(endUserActivities.whiteLabelId, whiteLabelId),
+          eq(endUserActivities.whiteLabelId, whiteLabelId2),
           eq(endUserActivities.activityType, "signup")
         ));
         const [loginCount] = await db.select({ count: sql`count(*)` }).from(endUserActivities).where(and(
-          eq(endUserActivities.whiteLabelId, whiteLabelId),
+          eq(endUserActivities.whiteLabelId, whiteLabelId2),
           eq(endUserActivities.activityType, "login")
         ));
         const [purchaseCount] = await db.select({ count: sql`count(*)` }).from(endUserActivities).where(and(
-          eq(endUserActivities.whiteLabelId, whiteLabelId),
+          eq(endUserActivities.whiteLabelId, whiteLabelId2),
           eq(endUserActivities.activityType, "purchase")
         ));
         const [recentSignupCount] = await db.select({ count: sql`count(*)` }).from(endUserActivities).where(and(
-          eq(endUserActivities.whiteLabelId, whiteLabelId),
+          eq(endUserActivities.whiteLabelId, whiteLabelId2),
           eq(endUserActivities.activityType, "signup"),
           sql`${endUserActivities.createdAt} >= ${weekAgo}`
         ));
         const dayAgo = /* @__PURE__ */ new Date();
         dayAgo.setDate(dayAgo.getDate() - 1);
         const [activeUserCount] = await db.select({ count: sql`count(distinct ${userSessions.userId})` }).from(userSessions).where(and(
-          eq(userSessions.whiteLabelId, whiteLabelId),
+          eq(userSessions.whiteLabelId, whiteLabelId2),
           eq(userSessions.isActive, true),
           sql`${userSessions.lastActiveAt} >= ${dayAgo}`
         ));
@@ -2891,7 +4092,7 @@ var init_storage = __esm({
       }
       // User session tracking methods
       async createUserSession(session2) {
-        const [newSession] = await db.insert(userSessions).values(session2);
+        const [newSession] = await db.insert(userSessions).values(session2).returning();
         return newSession;
       }
       async updateUserSession(sessionToken, data) {
@@ -2900,11 +4101,11 @@ var init_storage = __esm({
           lastActiveAt: /* @__PURE__ */ new Date()
         }).where(eq(userSessions.sessionToken, sessionToken));
       }
-      async getActiveUsersByWhiteLabel(whiteLabelId) {
+      async getActiveUsersByWhiteLabel(whiteLabelId2) {
         const dayAgo = /* @__PURE__ */ new Date();
         dayAgo.setDate(dayAgo.getDate() - 1);
         return await db.select().from(users).innerJoin(userSessions, eq(users.id, userSessions.userId)).where(and(
-          eq(userSessions.whiteLabelId, whiteLabelId),
+          eq(userSessions.whiteLabelId, whiteLabelId2),
           eq(userSessions.isActive, true),
           sql`${userSessions.lastActiveAt} >= ${dayAgo}`
         ));
@@ -2933,9 +4134,9 @@ var init_storage = __esm({
         console.log(`Invalidated all sessions for user: ${userId}`);
       }
       // End-user management for white-label clients
-      async getEndUsersByWhiteLabel(whiteLabelId) {
+      async getEndUsersByWhiteLabel(whiteLabelId2) {
         const endUsers = await db.select().from(users).where(and(
-          eq(users.whiteLabelId, whiteLabelId),
+          eq(users.whiteLabelId, whiteLabelId2),
           eq(users.role, "end_user")
         )).orderBy(desc(users.createdAt));
         const enrichedUsers = await Promise.all(
@@ -2950,7 +4151,7 @@ var init_storage = __esm({
               total: sql`coalesce(sum(${purchaseHistory.amount}), 0)`
             }).from(purchaseHistory).where(and(
               eq(purchaseHistory.userId, user.id),
-              eq(purchaseHistory.whiteLabelId, whiteLabelId),
+              eq(purchaseHistory.whiteLabelId, whiteLabelId2),
               eq(purchaseHistory.status, "completed")
             ));
             return {
@@ -2969,21 +4170,21 @@ var init_storage = __esm({
         );
         return enrichedUsers;
       }
-      async getEndUserPurchaseHistory(userId, whiteLabelId) {
+      async getEndUserPurchaseHistory(userId, whiteLabelId2) {
         return await db.select().from(purchaseHistory).where(and(
           eq(purchaseHistory.userId, userId),
-          eq(purchaseHistory.whiteLabelId, whiteLabelId)
+          eq(purchaseHistory.whiteLabelId, whiteLabelId2)
         )).orderBy(desc(purchaseHistory.createdAt));
       }
       async getPlanAnalytics(userId) {
         console.log("\u{1F50D} [Storage] getPlanAnalytics called for userId:", userId);
         try {
           const whiteLabel = await db.select().from(whiteLabels).where(eq(whiteLabels.userId, userId)).limit(1);
-          const whiteLabelId = whiteLabel && whiteLabel.length > 0 ? whiteLabel[0].id : null;
+          const whiteLabelId2 = whiteLabel && whiteLabel.length > 0 ? whiteLabel[0].id : null;
           console.log("\u{1F4CA} [Storage] getPlanAnalytics white label lookup:", {
             userId,
             whiteLabelFound: whiteLabel.length > 0,
-            whiteLabelId,
+            whiteLabelId: whiteLabelId2,
             whiteLabel: whiteLabel[0] || null
           });
           const allPlans = await db.select().from(plans).where(eq(plans.isActive, true));
@@ -3077,7 +4278,7 @@ var init_storage = __esm({
           );
           console.log("\u{1F3AF} [Storage] getPlanAnalytics final result:", {
             userId,
-            whiteLabelId,
+            whiteLabelId: whiteLabelId2,
             totalPlans: planAnalytics.length,
             summary: planAnalytics.map((p) => ({
               planName: p.planName,
@@ -3105,8 +4306,8 @@ var init_storage = __esm({
         if (selectedCategories.length === 0) {
           return [];
         }
-        const whiteLabelId = selectedCategories[0].whiteLabelId;
-        const allCategories = await db.select().from(categories).where(eq(categories.whiteLabelId, whiteLabelId));
+        const whiteLabelId2 = selectedCategories[0].whiteLabelId;
+        const allCategories = await db.select().from(categories).where(eq(categories.whiteLabelId, whiteLabelId2));
         const getDescendantCategories = (parentIds) => {
           const descendants = allCategories.filter((cat) => cat.parentCategoryId && parentIds.includes(cat.parentCategoryId)).map((cat) => cat.id);
           if (descendants.length > 0) {
@@ -3143,7 +4344,7 @@ var init_storage = __esm({
         }
         const allProducts = [...categoryProducts, ...explicitProducts];
         const uniqueProducts = allProducts.filter(
-          (product, index, self) => index === self.findIndex((p) => p.id === product.id)
+          (product, index2, self) => index2 === self.findIndex((p) => p.id === product.id)
         );
         return uniqueProducts;
       }
@@ -3153,11 +4354,11 @@ var init_storage = __esm({
         if (!plan) {
           return null;
         }
-        const categories3 = await this.getPlanCategories(planId);
-        const products3 = await this.getPlanProducts(planId);
+        const categories2 = await this.getPlanCategories(planId);
+        const products2 = await this.getPlanProducts(planId);
         const categoriesWithProducts = await Promise.all(
-          categories3.map(async (category) => {
-            const categoryProducts = await db.select().from(products3).where(eq(products3.categoryId, category.id));
+          categories2.map(async (category) => {
+            const categoryProducts = await db.select().from(products2).where(eq(products2.categoryId, category.id));
             return {
               ...category,
               products: categoryProducts
@@ -3167,7 +4368,7 @@ var init_storage = __esm({
         return {
           ...plan,
           categories: categoriesWithProducts,
-          products: products3.filter((p) => !p.categoryId)
+          products: products2.filter((p) => !p.categoryId)
           // Standalone products
         };
       }
@@ -3251,7 +4452,7 @@ var init_storage = __esm({
           lastPurchaseDate: group.lastPurchaseDate
         }));
       }
-      async getReferralsByWhiteLabel(whiteLabelId) {
+      async getReferralsByWhiteLabel(whiteLabelId2) {
         return await db.select({
           id: referralTracking.id,
           affiliateId: referralTracking.affiliateId,
@@ -3266,7 +4467,7 @@ var init_storage = __esm({
             firstName: users.firstName,
             lastName: users.lastName
           }
-        }).from(referralTracking).leftJoin(users, eq(referralTracking.affiliateId, users.id)).where(eq(referralTracking.whiteLabelId, whiteLabelId)).orderBy(desc(referralTracking.createdAt));
+        }).from(referralTracking).leftJoin(users, eq(referralTracking.affiliateId, users.id)).where(eq(referralTracking.whiteLabelId, whiteLabelId2)).orderBy(desc(referralTracking.createdAt));
       }
       // Affiliate plan visibility operations
       async getAffiliatePlanVisibility(affiliateId) {
@@ -3438,16 +4639,14 @@ var init_storage = __esm({
         );
         return commissionData;
       }
-      // Simple method to get ALL super admin affiliates
+      // Simple method to get ONLY super admin affiliates (NOT white label affiliates)
       async getAllAffiliatesForSuperAdmin() {
         try {
           const superAdminAffiliates = await db.select().from(users).where(eq(users.role, "super_admin_affiliate"));
-          const whiteLabelAffiliates = await db.select().from(users).where(eq(users.role, "white_label_affiliate"));
-          const allAffiliates = [...superAdminAffiliates, ...whiteLabelAffiliates];
-          if (allAffiliates.length === 0) {
+          if (superAdminAffiliates.length === 0) {
             return [];
           }
-          const affiliateList = allAffiliates.map((affiliate) => ({
+          const affiliateList = superAdminAffiliates.map((affiliate) => ({
             id: affiliate.id,
             name: affiliate.name || `${affiliate.firstName || ""} ${affiliate.lastName || ""}`.trim() || "Unnamed Affiliate",
             email: affiliate.email || "no-email@example.com",
@@ -3562,7 +4761,7 @@ var init_storage = __esm({
         }
       }
       // Real affiliate data methods for top performers
-      async getTopAffiliatesByWhiteLabel(whiteLabelId, limit = 3) {
+      async getTopAffiliatesByWhiteLabel(whiteLabelId2, limit = 3) {
         const allAffiliates = await db.select({
           id: users.id,
           email: users.email,
@@ -3571,7 +4770,7 @@ var init_storage = __esm({
           name: users.name,
           createdAt: users.createdAt
         }).from(users).where(and(
-          eq(users.whiteLabelId, whiteLabelId),
+          eq(users.affiliateOfWhiteLabelId, whiteLabelId2),
           eq(users.role, "white_label_affiliate")
         ));
         if (allAffiliates.length === 0) {
@@ -3582,7 +4781,7 @@ var init_storage = __esm({
           affiliates2.map(async (affiliate) => {
             const referrals = await db.select().from(referralTracking).where(and(
               eq(referralTracking.affiliateId, affiliate.id),
-              eq(referralTracking.whiteLabelId, whiteLabelId)
+              eq(referralTracking.whiteLabelId, whiteLabelId2)
             ));
             const referralPurchases = await db.select({
               amount: purchaseHistory.amount,
@@ -3592,7 +4791,7 @@ var init_storage = __esm({
               eq(purchaseHistory.userId, referralTracking.referredUserId)
             ).where(and(
               eq(referralTracking.affiliateId, affiliate.id),
-              eq(referralTracking.whiteLabelId, whiteLabelId),
+              eq(referralTracking.whiteLabelId, whiteLabelId2),
               eq(purchaseHistory.status, "completed")
             ));
             const totalPurchases = referralPurchases.length;
@@ -3840,7 +5039,7 @@ var init_storage = __esm({
           return [];
         }
       }
-      async getCommissionDataByWhiteLabel(whiteLabelId) {
+      async getCommissionDataByWhiteLabel(whiteLabelId2) {
         const affiliates2 = await db.select({
           id: users.id,
           email: users.email,
@@ -3848,14 +5047,14 @@ var init_storage = __esm({
           lastName: users.lastName,
           name: users.name
         }).from(users).where(and(
-          eq(users.whiteLabelId, whiteLabelId),
+          eq(users.affiliateOfWhiteLabelId, whiteLabelId2),
           eq(users.role, "white_label_affiliate")
         ));
         const commissionData = await Promise.all(
           affiliates2.map(async (affiliate) => {
             const referrals = await db.select().from(referralTracking).where(and(
               eq(referralTracking.affiliateId, affiliate.id),
-              eq(referralTracking.whiteLabelId, whiteLabelId)
+              eq(referralTracking.whiteLabelId, whiteLabelId2)
             ));
             const referralPurchases = await db.select({
               id: purchaseHistory.id,
@@ -3868,7 +5067,7 @@ var init_storage = __esm({
               eq(purchaseHistory.userId, referralTracking.referredUserId)
             ).leftJoin(plans, eq(purchaseHistory.planId, plans.id)).where(and(
               eq(referralTracking.affiliateId, affiliate.id),
-              eq(referralTracking.whiteLabelId, whiteLabelId),
+              eq(referralTracking.whiteLabelId, whiteLabelId2),
               eq(purchaseHistory.status, "completed")
             )).orderBy(desc(purchaseHistory.createdAt));
             const totalRevenue = referralPurchases.reduce((sum2, purchase) => sum2 + parseFloat(purchase.amount), 0);
@@ -3971,8 +5170,10 @@ var init_storage = __esm({
       }
       async createPaymentAccount(account) {
         try {
-          const result = await db.insert(paymentAccounts).values(account);
-          const [newAccount] = await db.select().from(paymentAccounts).where(eq(paymentAccounts.id, result.insertId)).limit(1);
+          const [newAccount] = await db.insert(paymentAccounts).values(account).returning();
+          if (!newAccount) {
+            throw new Error("Failed to create payment account");
+          }
           return newAccount;
         } catch (error) {
           console.error("Error creating payment account:", error);
@@ -4012,8 +5213,10 @@ var init_storage = __esm({
       }
       async createAffiliatePayment(payment) {
         try {
-          const result = await db.insert(affiliatePayments).values(payment);
-          const [newPayment] = await db.select().from(affiliatePayments).where(eq(affiliatePayments.id, result.insertId)).limit(1);
+          const [newPayment] = await db.insert(affiliatePayments).values(payment).returning();
+          if (!newPayment) {
+            throw new Error("Failed to create affiliate payment");
+          }
           return newPayment;
         } catch (error) {
           console.error("Error creating affiliate payment:", error);
@@ -4076,6 +5279,46 @@ var init_storage = __esm({
               needToPay: Math.max(0, totalCommission - totalPaid),
               hasAccountDetails
             }];
+          } else if (requestingUser?.role === "white_label_client") {
+            const whiteLabel = await this.getWhiteLabelByUserId(requestingUserId);
+            if (!whiteLabel) {
+              return [];
+            }
+            const affiliates2 = await db.select({
+              id: users.id,
+              firstName: users.firstName,
+              lastName: users.lastName,
+              name: users.name,
+              email: users.email,
+              role: users.role
+            }).from(users).where(and(
+              eq(users.role, "white_label_affiliate"),
+              eq(users.affiliateOfWhiteLabelId, whiteLabel.id)
+            ));
+            const summaries = [];
+            for (const affiliate of affiliates2) {
+              const commissions2 = await db.select({
+                commissionAmount: referralCommissions.commissionAmount
+              }).from(referralCommissions).where(eq(referralCommissions.affiliateId, affiliate.id));
+              const totalCommission = commissions2.reduce((sum2, c) => sum2 + parseFloat(c.commissionAmount || "0"), 0);
+              const payments = await db.select({
+                amount: affiliatePayments.amount
+              }).from(affiliatePayments).where(eq(affiliatePayments.affiliateId, affiliate.id));
+              const totalPaid = payments.reduce((sum2, p) => sum2 + parseFloat(String(p.amount) || "0"), 0);
+              const paymentAccount = await this.getAffiliatePaymentAccount(affiliate.id);
+              const hasAccountDetails = !!(paymentAccount?.bankName && paymentAccount?.accountOwnerName && paymentAccount?.accountNumber);
+              summaries.push({
+                id: affiliate.id,
+                name: affiliate.name || `${affiliate.firstName || ""} ${affiliate.lastName || ""}`.trim() || "Unknown",
+                email: affiliate.email || "No email",
+                role: affiliate.role,
+                totalCommission,
+                totalPaid,
+                needToPay: Math.max(0, totalCommission - totalPaid),
+                hasAccountDetails
+              });
+            }
+            return summaries;
           } else {
             return [];
           }
@@ -4115,6 +5358,7 @@ var init_storage = __esm({
           userId: newUser.id,
           businessName: organizationData.businessName,
           domainPath: organizationData.domainPath,
+          landingPageCode: "default",
           isActive: true
         });
         const [newWhiteLabel] = await db.select().from(whiteLabels).where(eq(whiteLabels.domainPath, organizationData.domainPath)).limit(1);
@@ -4171,11 +5415,15 @@ var init_storage = __esm({
       async createNmiCredentials(data) {
         const { encrypt: encrypt2 } = await Promise.resolve().then(() => (init_crypto_utils(), crypto_utils_exports));
         const encryptedData = {
-          ...data,
+          userId: data.userId,
+          username: data.username,
           password: encrypt2(data.password),
-          securityKey: encrypt2(data.securityKey)
+          securityKey: encrypt2(data.securityKey),
+          gatewayUrl: data.gatewayUrl,
+          isTestMode: data.isTestMode,
+          isActive: data.isActive
         };
-        const [result] = await db.insert(nmiCredentials).values(encryptedData);
+        const result = await db.insert(nmiCredentials).values(encryptedData).returning();
         return this.getNmiCredentials(data.userId);
       }
       async getNmiCredentials(userId) {
@@ -4239,6 +5487,253 @@ var init_storage = __esm({
           return { success: false, error: error.message };
         }
       }
+      // Admin user management methods
+      async getAllUsers() {
+        return await db.select().from(users).orderBy(users.createdAt);
+      }
+      async getUsersByWhiteLabelId(whiteLabelId2) {
+        return await db.select().from(users).where(eq(users.userOfWhiteLabelId, whiteLabelId2)).orderBy(users.createdAt);
+      }
+      async getEndUserActivitiesByUserId(userId) {
+        return await db.select().from(endUserActivities).where(eq(endUserActivities.userId, userId)).orderBy(endUserActivities.createdAt);
+      }
+      async getUserPurchasesByUserId(userId) {
+        return await db.select().from(purchaseHistory).where(eq(purchaseHistory.userId, userId)).orderBy(purchaseHistory.purchaseDate);
+      }
+      // Comprehensive Analytics Functions for Super-Admin Dashboard
+      async getRevenueOverview(startDate, endDate) {
+        try {
+          const dateFilter = this.buildDateFilter(startDate, endDate);
+          const mainSiteRevenue = await db.select({
+            totalRevenue: sql`coalesce(sum(cast(${purchaseHistory.amount} as decimal)), 0)`,
+            totalSales: sql`count(${purchaseHistory.id})`
+          }).from(purchaseHistory).innerJoin(plans, eq(purchaseHistory.planId, plans.id)).where(and(
+            eq(plans.isMainSitePlan, true),
+            eq(purchaseHistory.status, "completed"),
+            dateFilter
+          ));
+          const whiteLabelRevenue = await db.select({
+            totalRevenue: sql`coalesce(sum(cast(${purchaseHistory.amount} as decimal)), 0)`,
+            totalSales: sql`count(${purchaseHistory.id})`
+          }).from(purchaseHistory).innerJoin(plans, eq(purchaseHistory.planId, plans.id)).where(and(
+            eq(plans.isMainSitePlan, false),
+            eq(purchaseHistory.status, "completed"),
+            dateFilter
+          ));
+          const monthlyRevenue = await db.select({
+            month: sql`to_char(${purchaseHistory.createdAt}, 'YYYY-MM')`,
+            mainSiteRevenue: sql`coalesce(sum(case when ${plans.isMainSitePlan} = true then cast(${purchaseHistory.amount} as decimal) else 0 end), 0)`,
+            whiteLabelRevenue: sql`coalesce(sum(case when ${plans.isMainSitePlan} = false then cast(${purchaseHistory.amount} as decimal) else 0 end), 0)`
+          }).from(purchaseHistory).innerJoin(plans, eq(purchaseHistory.planId, plans.id)).where(and(
+            eq(purchaseHistory.status, "completed"),
+            dateFilter
+          )).groupBy(sql`to_char(${purchaseHistory.createdAt}, 'YYYY-MM')`).orderBy(sql`to_char(${purchaseHistory.createdAt}, 'YYYY-MM')`);
+          return {
+            mainSiteRevenue: {
+              total: parseFloat(mainSiteRevenue[0]?.totalRevenue?.toString() || "0"),
+              sales: Number(mainSiteRevenue[0]?.totalSales || 0)
+            },
+            whiteLabelRevenue: {
+              total: parseFloat(whiteLabelRevenue[0]?.totalRevenue?.toString() || "0"),
+              sales: Number(whiteLabelRevenue[0]?.totalSales || 0)
+            },
+            monthlyTrend: monthlyRevenue.map((item) => ({
+              month: item.month,
+              mainSiteRevenue: parseFloat(item.mainSiteRevenue?.toString() || "0"),
+              whiteLabelRevenue: parseFloat(item.whiteLabelRevenue?.toString() || "0")
+            }))
+          };
+        } catch (error) {
+          console.error("Error fetching revenue overview:", error);
+          return { mainSiteRevenue: { total: 0, sales: 0 }, whiteLabelRevenue: { total: 0, sales: 0 }, monthlyTrend: [] };
+        }
+      }
+      async getWhiteLabelMetrics(startDate, endDate) {
+        try {
+          const dateFilter = this.buildDateFilter(startDate, endDate);
+          const activeWhiteLabels = await db.select({ count: sql`count(*)` }).from(whiteLabels).where(and(
+            eq(whiteLabels.isActive, true),
+            dateFilter ? gte(whiteLabels.createdAt, new Date(startDate)) : void 0
+          ));
+          const newWhiteLabels = await db.select({ count: sql`count(*)` }).from(whiteLabels).where(dateFilter || sql`true`);
+          const whiteLabelPerformance = await db.select({
+            whiteLabelId: whiteLabels.id,
+            businessName: whiteLabels.businessName,
+            totalRevenue: sql`coalesce(sum(cast(${purchaseHistory.amount} as decimal)), 0)`,
+            totalSales: sql`count(${purchaseHistory.id})`,
+            totalPlans: sql`count(distinct ${plans.id})`
+          }).from(whiteLabels).leftJoin(users, eq(whiteLabels.userId, users.id)).leftJoin(plans, eq(plans.createdBy, users.id)).leftJoin(purchaseHistory, and(
+            eq(purchaseHistory.planId, plans.id),
+            eq(purchaseHistory.status, "completed"),
+            dateFilter
+          )).where(eq(whiteLabels.isActive, true)).groupBy(whiteLabels.id, whiteLabels.businessName).orderBy(desc(sql`coalesce(sum(cast(${purchaseHistory.amount} as decimal)), 0)`)).limit(10);
+          return {
+            activeCount: Number(activeWhiteLabels[0]?.count || 0),
+            newCount: Number(newWhiteLabels[0]?.count || 0),
+            topPerformers: whiteLabelPerformance.map((wl) => ({
+              id: wl.whiteLabelId,
+              businessName: wl.businessName,
+              totalRevenue: parseFloat(wl.totalRevenue?.toString() || "0"),
+              totalSales: Number(wl.totalSales || 0),
+              totalPlans: Number(wl.totalPlans || 0)
+            }))
+          };
+        } catch (error) {
+          console.error("Error fetching white label metrics:", error);
+          return { activeCount: 0, newCount: 0, topPerformers: [] };
+        }
+      }
+      async getPlanPerformance(startDate, endDate) {
+        try {
+          const dateFilter = this.buildDateFilter(startDate, endDate);
+          const mainSitePlans = await db.select({
+            planId: plans.id,
+            planName: plans.name,
+            price: plans.price,
+            totalSales: sql`count(${purchaseHistory.id})`,
+            totalRevenue: sql`coalesce(sum(cast(${purchaseHistory.amount} as decimal)), 0)`
+          }).from(plans).leftJoin(purchaseHistory, and(
+            eq(purchaseHistory.planId, plans.id),
+            eq(purchaseHistory.status, "completed"),
+            dateFilter
+          )).where(and(
+            eq(plans.isMainSitePlan, true),
+            eq(plans.isActive, true)
+          )).groupBy(plans.id, plans.name, plans.price).orderBy(desc(sql`coalesce(sum(cast(${purchaseHistory.amount} as decimal)), 0)`));
+          const totalPlansCount = await db.select({
+            mainSitePlans: sql`count(case when ${plans.isMainSitePlan} = true then 1 end)`,
+            whiteLabelPlans: sql`count(case when ${plans.isMainSitePlan} = false then 1 end)`
+          }).from(plans).where(eq(plans.isActive, true));
+          return {
+            mainSitePlans: mainSitePlans.map((plan) => ({
+              id: plan.planId,
+              name: plan.planName,
+              price: parseFloat(plan.price || "0"),
+              totalSales: Number(plan.totalSales || 0),
+              totalRevenue: parseFloat(plan.totalRevenue?.toString() || "0")
+            })),
+            totalCounts: {
+              mainSitePlans: Number(totalPlansCount[0]?.mainSitePlans || 0),
+              whiteLabelPlans: Number(totalPlansCount[0]?.whiteLabelPlans || 0)
+            }
+          };
+        } catch (error) {
+          console.error("Error fetching plan performance:", error);
+          return { mainSitePlans: [], totalCounts: { mainSitePlans: 0, whiteLabelPlans: 0 } };
+        }
+      }
+      async getPurchaseTrends(startDate, endDate) {
+        try {
+          const dateFilter = this.buildDateFilter(startDate, endDate);
+          const dailyTrends = await db.select({
+            date: sql`date(${purchaseHistory.createdAt})`,
+            totalPurchases: sql`count(${purchaseHistory.id})`,
+            totalRevenue: sql`coalesce(sum(cast(${purchaseHistory.amount} as decimal)), 0)`,
+            mainSitePurchases: sql`count(case when ${plans.isMainSitePlan} = true then 1 end)`,
+            whiteLabelPurchases: sql`count(case when ${plans.isMainSitePlan} = false then 1 end)`
+          }).from(purchaseHistory).innerJoin(plans, eq(purchaseHistory.planId, plans.id)).where(and(
+            eq(purchaseHistory.status, "completed"),
+            dateFilter
+          )).groupBy(sql`date(${purchaseHistory.createdAt})`).orderBy(sql`date(${purchaseHistory.createdAt})`);
+          const recentPurchases = await db.select({
+            id: purchaseHistory.id,
+            amount: purchaseHistory.amount,
+            createdAt: purchaseHistory.createdAt,
+            planName: plans.name,
+            userEmail: users.email,
+            isMainSitePlan: plans.isMainSitePlan
+          }).from(purchaseHistory).innerJoin(plans, eq(purchaseHistory.planId, plans.id)).leftJoin(users, eq(purchaseHistory.userId, users.id)).where(and(
+            eq(purchaseHistory.status, "completed"),
+            dateFilter
+          )).orderBy(desc(purchaseHistory.createdAt)).limit(20);
+          return {
+            dailyTrends: dailyTrends.map((trend) => ({
+              date: trend.date,
+              totalPurchases: Number(trend.totalPurchases || 0),
+              totalRevenue: parseFloat(trend.totalRevenue?.toString() || "0"),
+              mainSitePurchases: Number(trend.mainSitePurchases || 0),
+              whiteLabelPurchases: Number(trend.whiteLabelPurchases || 0)
+            })),
+            recentPurchases: recentPurchases.map((purchase) => ({
+              id: purchase.id,
+              amount: parseFloat(purchase.amount || "0"),
+              createdAt: purchase.createdAt,
+              planName: purchase.planName,
+              userEmail: purchase.userEmail,
+              isMainSitePlan: purchase.isMainSitePlan
+            }))
+          };
+        } catch (error) {
+          console.error("Error fetching purchase trends:", error);
+          return { dailyTrends: [], recentPurchases: [] };
+        }
+      }
+      async getComparisonData(startDate, endDate, compareStartDate, compareEndDate, metrics) {
+        try {
+          const currentPeriodFilter = this.buildDateFilter(startDate, endDate);
+          const comparePeriodFilter = this.buildDateFilter(compareStartDate, compareEndDate);
+          const comparisonData = {};
+          if (metrics.includes("revenue")) {
+            const currentRevenue = await db.select({
+              totalRevenue: sql`coalesce(sum(cast(${purchaseHistory.amount} as decimal)), 0)`
+            }).from(purchaseHistory).where(and(
+              eq(purchaseHistory.status, "completed"),
+              currentPeriodFilter
+            ));
+            const compareRevenue = await db.select({
+              totalRevenue: sql`coalesce(sum(cast(${purchaseHistory.amount} as decimal)), 0)`
+            }).from(purchaseHistory).where(and(
+              eq(purchaseHistory.status, "completed"),
+              comparePeriodFilter
+            ));
+            comparisonData.revenue = {
+              current: parseFloat(currentRevenue[0]?.totalRevenue?.toString() || "0"),
+              previous: parseFloat(compareRevenue[0]?.totalRevenue?.toString() || "0")
+            };
+          }
+          if (metrics.includes("sales")) {
+            const currentSales = await db.select({
+              totalSales: sql`count(${purchaseHistory.id})`
+            }).from(purchaseHistory).where(and(
+              eq(purchaseHistory.status, "completed"),
+              currentPeriodFilter
+            ));
+            const compareSales = await db.select({
+              totalSales: sql`count(${purchaseHistory.id})`
+            }).from(purchaseHistory).where(and(
+              eq(purchaseHistory.status, "completed"),
+              comparePeriodFilter
+            ));
+            comparisonData.sales = {
+              current: Number(currentSales[0]?.totalSales || 0),
+              previous: Number(compareSales[0]?.totalSales || 0)
+            };
+          }
+          if (metrics.includes("whiteLabels")) {
+            const currentWhiteLabels = await db.select({ count: sql`count(*)` }).from(whiteLabels).where(currentPeriodFilter);
+            const compareWhiteLabels = await db.select({ count: sql`count(*)` }).from(whiteLabels).where(comparePeriodFilter);
+            comparisonData.whiteLabels = {
+              current: Number(currentWhiteLabels[0]?.count || 0),
+              previous: Number(compareWhiteLabels[0]?.count || 0)
+            };
+          }
+          return comparisonData;
+        } catch (error) {
+          console.error("Error fetching comparison data:", error);
+          return {};
+        }
+      }
+      buildDateFilter(startDate, endDate) {
+        if (!startDate && !endDate) return void 0;
+        const conditions = [];
+        if (startDate) {
+          conditions.push(gte(purchaseHistory.createdAt, new Date(startDate)));
+        }
+        if (endDate) {
+          conditions.push(lte(purchaseHistory.createdAt, new Date(endDate)));
+        }
+        return conditions.length > 1 ? and(...conditions) : conditions[0];
+      }
     };
     storage = new DatabaseStorage();
   }
@@ -4255,6 +5750,7 @@ import OpenAI from "openai";
 var ModernAIService, aiService;
 var init_ai = __esm({
   "server/ai.ts"() {
+    "use strict";
     ModernAIService = class {
       gemini;
       geminiModel;
@@ -4550,11 +6046,11 @@ Provide 5-7 specific, actionable recommendations that would help this user achie
           const result = await this.geminiModel.generateContent(prompt);
           const response = await result.response;
           const content = response.text();
-          const recommendations = content.split("\n").filter((line) => line.trim().length > 0).map((rec, index) => ({
-            id: index + 1,
+          const recommendations = content.split("\n").filter((line) => line.trim().length > 0).map((rec, index2) => ({
+            id: index2 + 1,
             title: rec.replace(/^\d+\.?\s*/, "").trim(),
             description: rec.trim(),
-            priority: index < 3 ? "high" : "medium",
+            priority: index2 < 3 ? "high" : "medium",
             category: request.context
           }));
           return recommendations;
@@ -4676,16 +6172,51 @@ __export(emailService_exports, {
   sendLoginNotification: () => sendLoginNotification,
   sendPlanOwnerNotificationEmail: () => sendPlanOwnerNotificationEmail,
   sendPurchaseConfirmationEmail: () => sendPurchaseConfirmationEmail,
+  sendUserInvitation: () => sendUserInvitation,
   sendVerificationEmail: () => sendVerificationEmail,
   sendWelcomeEmail: () => sendWelcomeEmail,
   sendWhiteLabelInvitation: () => sendWhiteLabelInvitation
 });
 import nodemailer from "nodemailer";
+import { eq as eq2 } from "drizzle-orm";
 function escapeHtml(unsafe) {
   if (unsafe == null) {
     return "";
   }
   return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+async function createWhiteLabelTransporter(whiteLabelId2) {
+  try {
+    const whiteLabelData = await db.select().from(whiteLabels).where(eq2(whiteLabels.id, whiteLabelId2)).limit(1);
+    if (whiteLabelData.length === 0) {
+      console.log(`White label ${whiteLabelId2} not found, using default transporter`);
+      return defaultTransporter;
+    }
+    const emailSettings = whiteLabelData[0].emailSettings;
+    if (!emailSettings || !emailSettings.useCustomSmtp) {
+      console.log(`Using super admin email settings for white label ${whiteLabelId2}`);
+      return defaultTransporter;
+    }
+    console.log(`Creating custom email transporter for white label ${whiteLabelId2}`);
+    return nodemailer.createTransport({
+      host: emailSettings.smtpHost || "smtp.gmail.com",
+      port: emailSettings.smtpPort || 465,
+      secure: emailSettings.smtpSecure !== false,
+      // default to true
+      auth: {
+        user: emailSettings.smtpUser,
+        pass: emailSettings.smtpPass
+      },
+      debug: true,
+      logger: true,
+      tls: {
+        rejectUnauthorized: false
+      }
+    });
+  } catch (error) {
+    console.error(`Error creating white label transporter for ${whiteLabelId2}:`, error);
+    return defaultTransporter;
+  }
 }
 async function sendEmail(params) {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
@@ -4693,8 +6224,28 @@ async function sendEmail(params) {
     return false;
   }
   try {
+    const transporter = params.whiteLabelId ? await createWhiteLabelTransporter(params.whiteLabelId) : defaultTransporter;
+    let fromEmail = params.from;
+    let fromName = "WhiteLabel Portal";
+    if (params.whiteLabelId) {
+      try {
+        const whiteLabelData = await db.select().from(whiteLabels).where(eq2(whiteLabels.id, params.whiteLabelId)).limit(1);
+        if (whiteLabelData.length > 0) {
+          const emailSettings = whiteLabelData[0].emailSettings;
+          if (emailSettings && emailSettings.useCustomSmtp) {
+            fromEmail = emailSettings.fromEmail || params.from;
+            fromName = emailSettings.fromName || whiteLabelData[0].businessName || "WhiteLabel Portal";
+          } else {
+            fromEmail = process.env.EMAIL_USER || "teamwhitelabelportal@gmail.com";
+            fromName = whiteLabelData[0].businessName || "WhiteLabel Portal";
+          }
+        }
+      } catch (error) {
+        console.error("Error getting white label email settings:", error);
+      }
+    }
     const info = await transporter.sendMail({
-      from: `"WhiteLabel Portal" <${params.from}>`,
+      from: `"${fromName}" <${fromEmail}>`,
       to: params.to,
       subject: params.subject,
       text: params.text,
@@ -4711,7 +6262,7 @@ async function sendEmail(params) {
     console.log(`Email sent successfully to ${params.to} - Message ID: ${info.messageId}`);
     return true;
   } catch (error) {
-    console.error("Gmail SMTP email error:", error);
+    console.error("Email sending error:", error);
     return false;
   }
 }
@@ -4816,7 +6367,8 @@ async function sendVerificationEmail(email, code) {
     from: "info@whitelabelportal.com",
     subject,
     text,
-    html
+    html,
+    whiteLabelId: void 0
   });
 }
 async function sendPurchaseConfirmationEmail(email, userName, planName, planCost, purchaseDate) {
@@ -4918,6 +6470,136 @@ async function sendPurchaseConfirmationEmail(email, userName, planName, planCost
                 <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #374151;">
                     <p style="color: #6b7280; margin: 0; font-size: 11px;">
                         \xA9 2025 WhiteLabel Portal. All rights reserved.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+  `;
+  return await sendEmail({
+    to: email,
+    from: "info@whitelabelportal.com",
+    subject,
+    text,
+    html,
+    whiteLabelId
+  });
+}
+async function sendUserInvitation(email, firstName, lastName, inviterName, inviterWhiteLabelId) {
+  console.log("DEBUG - sendUserInvitation called with:", {
+    email,
+    firstName,
+    lastName,
+    inviterName,
+    inviterWhiteLabelId,
+    inviterWhiteLabelIdType: typeof inviterWhiteLabelId
+  });
+  const subject = `\u{1F389} You're Invited to Join ${inviterName}'s Platform!`;
+  const safeFirstName = escapeHtml(firstName);
+  const safeLastName = escapeHtml(lastName);
+  const safeInviterName = escapeHtml(inviterName);
+  const invitationUrl = inviterWhiteLabelId ? `https://whitelabelportal.com/login?whitelabel_id=${inviterWhiteLabelId}` : `https://whitelabelportal.com/login`;
+  console.log("DEBUG - Generated invitation URL:", invitationUrl);
+  const text = `Hello ${firstName} ${lastName}, You have been invited by ${inviterName} to join their platform. Get started now and discover all the amazing features waiting for you!`;
+  const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>You're Invited!</title>
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+            <!-- Header with Logo -->
+            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px 20px; text-align: center;">
+                <img src="cid:logo" alt="Platform" style="max-width: 200px; height: auto; margin-bottom: 20px;" />
+                <h1 style="color: #ffffff; margin: 0; font-size: 32px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    You're Invited! \u{1F389}
+                </h1>
+                <p style="color: #d1fae5; margin: 10px 0 0 0; font-size: 18px; font-weight: 500;">
+                    Join ${safeInviterName}'s platform
+                </p>
+            </div>
+            
+            <!-- Main Content -->
+            <div style="padding: 40px 20px;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h2 style="color: #1f2937; margin: 0 0 15px 0; font-size: 24px; font-weight: 600;">
+                        Hello ${safeFirstName} ${safeLastName}!
+                    </h2>
+                    <p style="color: #4b5563; margin: 0; font-size: 16px; line-height: 1.6;">
+                        <strong>${safeInviterName}</strong> has invited you to join their platform. Get started now and discover all the amazing features waiting for you!
+                    </p>
+                </div>
+                
+                <!-- Call to Action -->
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="${invitationUrl}" 
+                       style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3); transition: all 0.3s ease;">
+                        Get Started Now \u2192
+                    </a>
+                </div>
+                
+                <!-- Features -->
+                <div style="background: #f0fdf4; border-radius: 12px; padding: 30px; margin: 30px 0;">
+                    <h3 style="color: #1f2937; margin: 0 0 20px 0; font-size: 20px; font-weight: 600; text-align: center;">
+                        What's waiting for you:
+                    </h3>
+                    <div style="display: grid; gap: 15px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; flex-shrink: 0;"></div>
+                            <p style="color: #4b5563; margin: 0; font-size: 14px; line-height: 1.5;">
+                                Instant access to premium features
+                            </p>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; flex-shrink: 0;"></div>
+                            <p style="color: #4b5563; margin: 0; font-size: 14px; line-height: 1.5;">
+                                Personalized user experience
+                            </p>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; flex-shrink: 0;"></div>
+                            <p style="color: #4b5563; margin: 0; font-size: 14px; line-height: 1.5;">
+                                Direct support from ${safeInviterName}
+                            </p>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; flex-shrink: 0;"></div>
+                            <p style="color: #4b5563; margin: 0; font-size: 14px; line-height: 1.5;">
+                                Easy setup - no technical knowledge required
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Getting Started Section -->
+                <div style="background: #ecfdf5; border-radius: 8px; padding: 20px; margin: 20px 0; border-left: 4px solid #10b981;">
+                    <h4 style="color: #059669; margin: 0 0 10px 0; font-size: 16px; font-weight: 600;">
+                        \u{1F680} Ready to Get Started?
+                    </h4>
+                    <p style="color: #059669; margin: 0; font-size: 14px; line-height: 1.5;">
+                        Click the "Get Started Now" button above to create your account and begin your journey with ${safeInviterName}'s platform!
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div style="background: #1f2937; padding: 30px 20px; text-align: center;">
+                <div style="margin-bottom: 20px;">
+                    <img src="cid:logo" alt="Platform" style="max-width: 120px; height: auto; opacity: 0.8;" />
+                </div>
+                <p style="color: #9ca3af; margin: 0 0 10px 0; font-size: 14px;">
+                    Personal Invitation from ${safeInviterName}
+                </p>
+                <p style="color: #6b7280; margin: 0; font-size: 12px;">
+                    Join thousands of users already enjoying the platform
+                </p>
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #374151;">
+                    <p style="color: #6b7280; margin: 0; font-size: 11px;">
+                        This invitation was sent by ${safeInviterName}. If you didn't expect this invitation, you can safely ignore this email.
                     </p>
                 </div>
             </div>
@@ -5053,7 +6735,7 @@ async function sendPlanOwnerNotificationEmail(email, ownerName, purchaserName, p
     html
   });
 }
-async function sendWelcomeEmail(email, userName, userRole) {
+async function sendWelcomeEmail(email, userName, userRole, whiteLabelId2) {
   const subject = "\u{1F389} Welcome to WhiteLabel Portal - Your Business Platform Awaits!";
   const safeUserName = escapeHtml(userName);
   const safeUserRole = escapeHtml(userRole);
@@ -5280,7 +6962,7 @@ async function sendLoginNotification(email, userName, loginMetadata) {
     html
   });
 }
-async function sendWhiteLabelInvitation(email, firstName, lastName, businessName, inviterName) {
+async function sendWhiteLabelInvitation(email, firstName, lastName, businessName, inviterName, whiteLabelId2) {
   const subject = `\u{1F680} You're Invited to Join WhiteLabel Portal - ${businessName}`;
   const safeFirstName = escapeHtml(firstName);
   const safeLastName = escapeHtml(lastName);
@@ -5403,19 +7085,22 @@ async function sendWhiteLabelInvitation(email, firstName, lastName, businessName
     html
   });
 }
-var transporter;
+var defaultTransporter;
 var init_emailService = __esm({
   "server/emailService.ts"() {
+    "use strict";
+    init_db();
+    init_schema();
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
       console.warn("EMAIL_USER or EMAIL_PASS environment variables not set - email functionality disabled");
     }
-    transporter = nodemailer.createTransport({
+    defaultTransporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 465,
       secure: true,
       // use SSL
       auth: {
-        user: process.env.EMAIL_USER,
+        user: process.env.EMAIL_USER || "teamwhitelabelportal@gmail.com",
         pass: process.env.EMAIL_PASS
       },
       debug: true,
@@ -5448,30 +7133,16 @@ import session from "express-session";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import MySQLStore from "express-mysql-session";
-import { users as users2, whiteLabels as whiteLabels2 } from "@shared/schema";
-import { eq as eq2 } from "drizzle-orm";
+import { eq as eq3 } from "drizzle-orm";
 import { generateId } from "lucia";
+import memorystore from "memorystore";
 function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1e3;
-  const MySQLStoreSession = MySQLStore(session);
-  const sessionStore = new MySQLStoreSession({
-    host: process.env.DB_HOST || "localhost",
-    port: parseInt(process.env.DB_PORT || "3306"),
-    user: process.env.DB_USER || "root",
-    password: process.env.DB_PASSWORD || "",
-    database: process.env.DB_NAME || "whitelabel_pro_mysql",
-    createDatabaseTable: false,
-    // Don't create table, use existing one
-    schema: {
-      tableName: "sessions",
-      columnNames: {
-        session_id: "sid",
-        expires: "expire",
-        data: "sess"
-      }
-    }
+  const sessionStore = new MemoryStore({
+    checkPeriod: 864e5
+    // Prune expired entries every 24h
   });
+  console.log("\u2705 In-memory session store initialized");
   return session({
     secret: process.env.SESSION_SECRET || "your-secret-key-here",
     store: sessionStore,
@@ -5492,7 +7163,7 @@ async function verifyPassword(password, hashedPassword) {
 }
 async function findUserByUsername(username) {
   try {
-    const [user] = await db.select().from(users2).where(eq2(users2.username, username));
+    const [user] = await db.select().from(users).where(eq3(users.username, username));
     return user;
   } catch (error) {
     console.error("Error finding user by username:", error);
@@ -5500,17 +7171,17 @@ async function findUserByUsername(username) {
   }
 }
 async function findUserByGoogleId(googleId) {
-  const [user] = await db.select().from(users2).where(eq2(users2.googleId, googleId));
+  const [user] = await db.select().from(users).where(eq3(users.googleId, googleId));
   return user;
 }
 async function findUserByEmailOrUsername(emailOrUsername) {
   try {
     const input = emailOrUsername.trim();
     if (input.includes("@")) {
-      const [userByEmail] = await db.select().from(users2).where(eq2(users2.email, input.toLowerCase()));
+      const [userByEmail] = await db.select().from(users).where(eq3(users.email, input.toLowerCase()));
       if (userByEmail) return userByEmail;
     }
-    const [userByUsername] = await db.select().from(users2).where(eq2(users2.username, input.toLowerCase()));
+    const [userByUsername] = await db.select().from(users).where(eq3(users.username, input.toLowerCase()));
     return userByUsername;
   } catch (error) {
     console.error("Error finding user by email or username:", error);
@@ -5526,7 +7197,7 @@ async function createEndUserWhiteLabelRecord(userId, userData) {
     let domainPath = `${baseDomainPath}-affiliate`;
     let counter = 1;
     while (true) {
-      const [existing] = await db.select().from(whiteLabels2).where(eq2(whiteLabels2.domainPath, domainPath));
+      const [existing] = await db.select().from(whiteLabels).where(eq3(whiteLabels.domainPath, domainPath));
       if (!existing) break;
       domainPath = `${baseDomainPath}-affiliate-${counter}`;
       counter++;
@@ -5567,13 +7238,16 @@ async function createUser(userData) {
       profileImageUrl: userData.profileImageUrl,
       whiteLabelId: userData.whiteLabelId
     };
+    if (userData.affiliateOfWhiteLabelId !== void 0) {
+      userDataWithId.affiliateOfWhiteLabelId = userData.affiliateOfWhiteLabelId;
+    }
     if (userData.role === "super_admin_affiliate") {
       const baseName = userData.firstName || userData.email?.split("@")[0] || userData.username || "affiliate";
       userDataWithId.referralCode = await storage.generateUniqueReferralCode(baseName);
       console.log(`Generated referral code for Super Admin Affiliate: ${userDataWithId.referralCode}`);
     }
-    await db.insert(users2).values(userDataWithId);
-    const [user] = await db.select().from(users2).where(eq2(users2.id, userId)).limit(1);
+    await db.insert(users).values(userDataWithId);
+    const [user] = await db.select().from(users).where(eq3(users.id, userId)).limit(1);
     if (userData.role === "end_user") {
       await createEndUserWhiteLabelRecord(userId, userData);
     }
@@ -5601,19 +7275,27 @@ async function setupAuth(app2) {
     { usernameField: "username" },
     async (username, password, done) => {
       try {
+        console.log(`\u{1F510} Login attempt - Username/Email: ${username}`);
         const user = await findUserByEmailOrUsername(username);
         if (!user) {
+          console.log(`\u274C Login failed - User not found for: ${username}`);
           return done(null, false, { message: "Invalid credentials" });
         }
+        console.log(`\u2705 User found - ID: ${user.id}, Email: ${user.email}, Role: ${user.role}`);
         if (!user.password) {
+          console.log(`\u274C Login failed - User has no password: ${user.id}`);
           return done(null, false, { message: "Invalid credentials" });
         }
+        console.log(`\u{1F511} Checking password for user: ${user.id}`);
         const isValidPassword = await verifyPassword(password, user.password);
         if (!isValidPassword) {
+          console.log(`\u274C Login failed - Invalid password for user: ${user.id}`);
           return done(null, false, { message: "Invalid credentials" });
         }
+        console.log(`\u2705 Login successful - User: ${user.id} (${user.email})`);
         return done(null, user);
       } catch (error) {
+        console.error(`\u274C Login error:`, error);
         return done(error);
       }
     }
@@ -5656,7 +7338,7 @@ async function setupAuth(app2) {
             return done(null, user);
           }
           if (profile.emails && profile.emails[0]) {
-            const [existingUser] = await db.select().from(users2).where(eq2(users2.email, profile.emails[0].value));
+            const [existingUser] = await db.select().from(users).where(eq3(users.email, profile.emails[0].value));
             if (existingUser && existingUser.authProvider === "local") {
               return done(null, false, {
                 message: `Account with email ${profile.emails[0].value} already exists. Please sign in with username and password.`
@@ -5717,19 +7399,22 @@ async function setupAuth(app2) {
   });
   passport.deserializeUser(async (id, done) => {
     try {
-      const [user] = await db.select().from(users2).where(eq2(users2.id, id));
+      const [user] = await db.select().from(users).where(eq3(users.id, id));
       done(null, user);
     } catch (error) {
       done(error);
     }
   });
 }
-var isAuthenticated;
+var MemoryStore, isAuthenticated;
 var init_auth = __esm({
   "server/auth.ts"() {
+    "use strict";
     init_db();
+    init_schema();
     init_storage();
     init_emailService();
+    MemoryStore = memorystore(session);
     isAuthenticated = (req, res, next) => {
       console.log("Auth check - isAuthenticated:", req.isAuthenticated(), "user:", req.user?.id, "sessionID:", req.sessionID);
       if (req.isAuthenticated()) {
@@ -5759,6 +7444,7 @@ function createNmiProcessor(credentials) {
 var NmiPaymentProcessor;
 var init_nmi_payment = __esm({
   "server/nmi-payment.ts"() {
+    "use strict";
     NmiPaymentProcessor = class {
       credentials;
       constructor(credentials) {
@@ -5944,23 +7630,23 @@ init_storage();
 init_ai();
 init_defaultLandingPage();
 init_db();
+init_schema();
 init_auth();
 import { createServer } from "http";
-import { purchaseHistory as purchaseHistory2, users as users4, whiteLabels as whiteLabels5, referralCommissions as referralCommissions2, subscriptions as subscriptions2, plans as plans2, insertUserPreferencesSchema, products as products2, categories as categories2 } from "@shared/schema";
-import { eq as eq5, and as and4, desc as desc2, sql as sql3, inArray as inArray2 } from "drizzle-orm";
+import { eq as eq6, and as and4, desc as desc2, sql as sql3, inArray as inArray2 } from "drizzle-orm";
 import bcrypt2 from "bcryptjs";
 import crypto3 from "crypto";
 
 // server/authRoutes.ts
 init_auth();
 init_storage();
+init_schema();
 init_db();
+init_schema();
 init_emailService();
 import passport2 from "passport";
 import multer from "multer";
-import { loginSchema, forgotPasswordSchema, resetPasswordSchema } from "@shared/schema";
-import { users as users3, whiteLabels as whiteLabels3, passwordResetTokens } from "@shared/schema";
-import { eq as eq3, sql as sql2 } from "drizzle-orm";
+import { eq as eq4, sql as sql2 } from "drizzle-orm";
 
 // server/passwordResetEmailService.ts
 init_emailService();
@@ -6509,7 +8195,7 @@ function registerAuthRoutes(app2) {
     try {
       const { email } = req.body;
       const lowercaseEmail = email.toLowerCase();
-      const [existingUser] = await db.select().from(users3).where(eq3(users3.email, lowercaseEmail)).limit(1);
+      const [existingUser] = await db.select().from(users).where(eq4(users.email, lowercaseEmail)).limit(1);
       if (existingUser) {
         return res.json({
           available: false,
@@ -6591,7 +8277,7 @@ function registerAuthRoutes(app2) {
       if (!email) {
         return res.status(400).json({ error: "Email is required" });
       }
-      const [user] = await db.select().from(users3).where(eq3(users3.email, email));
+      const [user] = await db.select().from(users).where(eq4(users.email, email));
       if (!user) {
         return res.status(401).json({ error: "User not found" });
       }
@@ -6603,10 +8289,10 @@ function registerAuthRoutes(app2) {
         try {
           const sessionToken = req.sessionID;
           const userWhiteLabel = await storage.getWhiteLabelByUserId(user.id);
-          const whiteLabelId = userWhiteLabel?.id || null;
+          const whiteLabelId2 = userWhiteLabel?.id || null;
           await storage.createUserSession({
             userId: user.id,
-            whiteLabelId,
+            whiteLabelId: whiteLabelId2,
             sessionToken,
             isActive: true,
             ipAddress: req.ip,
@@ -6636,17 +8322,30 @@ function registerAuthRoutes(app2) {
     }
   });
   app2.post("/api/auth/login", (req, res, next) => {
+    console.log("\u{1F4E5} LOGIN REQUEST - Body:", JSON.stringify({ username: req.body.username, password: req.body.password?.length ? `[${req.body.password.length} chars]` : "missing", whitelabel_id: req.body.whitelabel_id }));
+    if (req.body.whitelabel_id) {
+      req.session.pendingWhiteLabelId = req.body.whitelabel_id;
+      console.log(`\u2705 Stored pendingWhiteLabelId in session: ${req.body.whitelabel_id}`);
+    } else {
+      delete req.session.pendingWhiteLabelId;
+      console.log(`\u{1F9F9} Cleared pendingWhiteLabelId - not in request body`);
+    }
     try {
-      loginSchema.parse(req.body);
+      const validatedData = loginSchema.parse(req.body);
+      console.log("\u2705 SCHEMA VALIDATION PASSED -", { username: validatedData.username, passwordLength: validatedData.password.length });
     } catch (error) {
+      console.log("\u274C SCHEMA VALIDATION FAILED -", error.errors);
       return res.status(400).json({ error: "Invalid input", details: error.errors });
     }
+    console.log("\u{1F504} CALLING passport.authenticate('local')...");
     passport2.authenticate("local", (err, user, info) => {
+      console.log("\u{1F4DE} PASSPORT CALLBACK - err:", !!err, "user:", !!user, "info:", info);
       if (err) {
         console.error("Login error:", err);
         return res.status(500).json({ error: "Internal server error" });
       }
       if (!user) {
+        console.log("\u274C PASSPORT RETURNED NO USER - Info message:", info?.message);
         return res.status(401).json({
           error: info?.message || "Invalid credentials"
         });
@@ -6656,13 +8355,19 @@ function registerAuthRoutes(app2) {
           console.error("Session error:", err2);
           return res.status(500).json({ error: "Session error" });
         }
+        const pendingWhiteLabelId = req.session.pendingWhiteLabelId;
+        if (pendingWhiteLabelId) {
+          req.session.login_whitelabel_id = parseInt(pendingWhiteLabelId);
+          console.log(`\u2705 LOCAL LOGIN - Stored login_whitelabel_id: ${pendingWhiteLabelId} for user ${user.id}`);
+          delete req.session.pendingWhiteLabelId;
+        }
         try {
           const sessionToken = req.sessionID;
           const userWhiteLabel = await storage.getWhiteLabelByUserId(user.id);
-          const whiteLabelId = userWhiteLabel?.id || null;
+          const whiteLabelId2 = userWhiteLabel?.id || null;
           await storage.createUserSession({
             userId: user.id,
-            whiteLabelId,
+            whiteLabelId: whiteLabelId2,
             sessionToken,
             isActive: true,
             ipAddress: req.ip,
@@ -6762,15 +8467,15 @@ function registerAuthRoutes(app2) {
         return "super_admin_affiliate";
       }
       if (context && context.startsWith("client_")) {
-        const whiteLabelId = parseInt(context.replace("client_", ""));
+        const whiteLabelId2 = parseInt(context.replace("client_", ""));
         const [whiteLabelEntry] = await db.select({
-          id: whiteLabels3.id,
-          userId: whiteLabels3.userId,
-          businessName: whiteLabels3.businessName,
-          domainPath: whiteLabels3.domainPath
-        }).from(whiteLabels3).where(eq3(whiteLabels3.id, whiteLabelId));
+          id: whiteLabels.id,
+          userId: whiteLabels.userId,
+          businessName: whiteLabels.businessName,
+          domainPath: whiteLabels.domainPath
+        }).from(whiteLabels).where(eq4(whiteLabels.id, whiteLabelId2));
         if (whiteLabelEntry) {
-          console.log(`Assigning end-user to white-label client: ${whiteLabelEntry.businessName} (ID: ${whiteLabelId})`);
+          console.log(`Assigning end-user to white-label client: ${whiteLabelEntry.businessName} (ID: ${whiteLabelId2})`);
           return {
             role: "end_user",
             whitelabelClientId: whiteLabelEntry.userId,
@@ -6782,9 +8487,9 @@ function registerAuthRoutes(app2) {
       const domain = host?.split(".")[0];
       if (domain && domain !== "localhost" && !domain.includes("replit")) {
         const [whiteLabelEntry] = await db.select({
-          userId: users3.id,
-          whiteLabelId: whiteLabels3.id
-        }).from(whiteLabels3).innerJoin(users3, eq3(whiteLabels3.userId, users3.id)).where(eq3(whiteLabels3.domainPath, domain));
+          userId: users.id,
+          whiteLabelId: whiteLabels.id
+        }).from(whiteLabels).innerJoin(users, eq4(whiteLabels.userId, users.id)).where(eq4(whiteLabels.domainPath, domain));
         if (whiteLabelEntry) {
           return {
             role: "end_user",
@@ -6799,9 +8504,25 @@ function registerAuthRoutes(app2) {
       return "white_label_client";
     }
   };
-  app2.post("/api/auth/signup", async (req, res) => {
+  app2.post("/api/auth/signup", upload.single("profileImage"), async (req, res) => {
     try {
-      const { firstName, lastName, username, password, role: requestedRole, context } = req.body;
+      const { firstName, lastName, username, password, email, verificationCode, role: requestedRole, context, whitelabel_id } = req.body;
+      if (!email || !verificationCode) {
+        return res.status(400).json({ error: "Email and verification code are required" });
+      }
+      const lowercaseEmail = email.toLowerCase();
+      console.log("Local Signup - Verifying code for email:", lowercaseEmail);
+      console.log("Local Signup - Verification code:", verificationCode);
+      const verificationResult = VerificationStorage.verify(lowercaseEmail, verificationCode.toString());
+      console.log("Local Signup - Verification result:", verificationResult);
+      if (!verificationResult.valid) {
+        return res.status(400).json({
+          success: false,
+          verified: false,
+          message: verificationResult.message || "Incorrect verification code",
+          attempts: verificationResult.attempts
+        });
+      }
       const lowercaseUsername = username.toLowerCase();
       const existingUser = await findUserByUsername(lowercaseUsername);
       if (existingUser) {
@@ -6809,20 +8530,56 @@ function registerAuthRoutes(app2) {
           error: `Username already taken. Please try a different username.`
         });
       }
-      const roleResult = await determineUserRole(context, requestedRole, req);
-      const actualRole = typeof roleResult === "string" ? roleResult : roleResult.role;
-      const whitelabelClientId = typeof roleResult === "object" ? roleResult.whitelabelClientId : null;
-      const whiteLabelId = typeof roleResult === "object" ? roleResult.whiteLabelId : null;
+      let actualRole = "end_user";
+      let whitelabelClientId = null;
+      let whiteLabelId2 = null;
+      if (whitelabel_id) {
+        const parsedWhiteLabelId = parseInt(whitelabel_id);
+        console.log(`Local Signup - Processing whitelabel_id: ${whitelabel_id} (parsed: ${parsedWhiteLabelId})`);
+        const [whiteLabelEntry] = await db.select({
+          id: whiteLabels.id,
+          userId: whiteLabels.userId,
+          businessName: whiteLabels.businessName,
+          domainPath: whiteLabels.domainPath
+        }).from(whiteLabels).where(eq4(whiteLabels.id, parsedWhiteLabelId));
+        if (whiteLabelEntry) {
+          console.log(`Local Signup - Assigning end-user to white-label client: ${whiteLabelEntry.businessName} (ID: ${parsedWhiteLabelId})`);
+          actualRole = "end_user";
+          whitelabelClientId = whiteLabelEntry.userId;
+          whiteLabelId2 = whiteLabelEntry.id;
+        } else {
+          console.log(`Local Signup - Warning: whitelabel_id ${parsedWhiteLabelId} not found, proceeding as regular end_user`);
+        }
+      } else {
+        const roleResult = await determineUserRole(context, requestedRole, req);
+        actualRole = typeof roleResult === "string" ? roleResult : roleResult.role;
+        whitelabelClientId = typeof roleResult === "object" ? roleResult.whitelabelClientId : null;
+        whiteLabelId2 = typeof roleResult === "object" ? roleResult.whiteLabelId : null;
+      }
       const hashedPassword = await hashPassword(password);
-      const newUser = await createUser({
+      const userData = {
         username: lowercaseUsername,
         firstName,
         lastName,
+        email: lowercaseEmail,
         password: hashedPassword,
         role: actualRole,
-        authProvider: "local",
-        whiteLabelId
-      });
+        authProvider: "local"
+      };
+      if (actualRole === "affiliate" || actualRole === "super_admin_affiliate") {
+        if (whiteLabelId2) {
+          userData.affiliateOfWhiteLabelId = whiteLabelId2;
+          console.log(`Local Signup - Storing whiteLabelId ${whiteLabelId2} in affiliateOfWhiteLabelId for affiliate`);
+        }
+      } else if (actualRole === "end_user") {
+        if (whiteLabelId2) {
+          userData.userOfWhiteLabelId = whiteLabelId2;
+          console.log(`Local Signup - Storing whiteLabelId ${whiteLabelId2} in userOfWhiteLabelId for end user`);
+        }
+      } else {
+        userData.whiteLabelId = whiteLabelId2;
+      }
+      const newUser = await createUser(userData);
       req.logIn(newUser, (err) => {
         if (err) {
           console.error("Auto-login error:", err);
@@ -6851,18 +8608,130 @@ function registerAuthRoutes(app2) {
       });
     }
   });
-  app2.post("/api/auth/signup-affiliate", upload.none(), async (req, res) => {
+  app2.post("/api/auth/signup-white-label-affiliate", upload.single("profileImage"), async (req, res) => {
     try {
-      console.log("=== AFFILIATE SIGNUP DEBUG ===");
+      console.log("=== WHITE LABEL AFFILIATE SIGNUP DEBUG ===");
       console.log("Request body:", req.body);
-      console.log("Request headers content-type:", req.headers["content-type"]);
-      console.log("All request headers:", req.headers);
-      const { firstName, lastName, username, password, email, referralUrl, profileImage, verificationCode } = req.body;
+      console.log("Request file:", req.file);
+      const { firstName, lastName, username, password, email, referralUrl, verificationCode, role, whiteLabelId: whiteLabelId2 } = req.body;
+      const profileImageFile = req.file;
       console.log("Extracted fields:");
       console.log("- firstName:", firstName);
       console.log("- lastName:", lastName);
       console.log("- username:", username);
       console.log("- email:", email);
+      console.log("- whiteLabelId:", whiteLabelId2);
+      console.log("- verificationCode:", verificationCode);
+      if (!email || !verificationCode) {
+        console.log("\u274C Missing required fields");
+        return res.status(400).json({ error: "Email and verification code are required" });
+      }
+      if (!whiteLabelId2) {
+        console.log("\u274C Missing whiteLabelId");
+        return res.status(400).json({ error: "White label ID is required" });
+      }
+      const lowercaseEmail = email.toLowerCase();
+      console.log("Attempting to verify code for email:", lowercaseEmail);
+      const verificationResult = VerificationStorage.verify(lowercaseEmail, verificationCode.toString());
+      console.log("Verification result:", verificationResult);
+      if (!verificationResult.valid) {
+        return res.status(400).json({
+          success: false,
+          verified: false,
+          message: verificationResult.message,
+          attempts: verificationResult.attempts
+        });
+      }
+      const lowercaseUsername = username.toLowerCase();
+      const existingUser = await findUserByUsername(lowercaseUsername);
+      if (existingUser) {
+        return res.status(400).json({
+          error: `Username already taken. Please try a different username.`
+        });
+      }
+      const [existingEmailUser] = await db.select().from(users).where(eq4(users.email, lowercaseEmail));
+      if (existingEmailUser) {
+        return res.status(400).json({
+          error: `Email already registered. Please use a different email.`
+        });
+      }
+      const hashedPassword = await hashPassword(password);
+      const baseName = firstName || username || "wlaffiliate";
+      const referralCode = await storage.generateUniqueReferralCode(baseName);
+      let profileImagePath = null;
+      if (profileImageFile) {
+        profileImagePath = `/uploads/${profileImageFile.filename}`;
+      }
+      const newUser = await createUser({
+        username: lowercaseUsername,
+        firstName,
+        lastName,
+        email: lowercaseEmail,
+        password: hashedPassword,
+        role: "white_label_affiliate",
+        authProvider: "local",
+        referralCode,
+        referralUrl: referralUrl || null,
+        profileImage: profileImagePath,
+        whiteLabelId: parseInt(whiteLabelId2),
+        affiliateOfWhiteLabelId: parseInt(whiteLabelId2)
+        // Track which white label the affiliate signed up through
+      });
+      console.log("\u2705 White Label Affiliate created successfully:", {
+        id: newUser.id,
+        username: newUser.username,
+        role: newUser.role,
+        whiteLabelId: newUser.whiteLabelId
+      });
+      req.logIn(newUser, (err) => {
+        if (err) {
+          console.error("Auto-login error:", err);
+          return res.status(500).json({ error: "Account created but login failed" });
+        }
+        res.json({
+          success: true,
+          user: {
+            id: newUser.id,
+            username: newUser.username,
+            firstName: newUser.firstName,
+            lastName: newUser.lastName,
+            email: newUser.email,
+            role: newUser.role,
+            referralCode: newUser.referralCode,
+            referralUrl: newUser.referralUrl,
+            profileImage: newUser.profileImage,
+            whiteLabelId: newUser.whiteLabelId
+          }
+        });
+      });
+    } catch (error) {
+      console.error("White Label Affiliate signup error:", error);
+      if (error.name === "ZodError") {
+        return res.status(400).json({ error: "Invalid input", details: error.errors });
+      }
+      res.status(500).json({
+        error: error.message || "Failed to create white label affiliate account",
+        details: error.message
+      });
+    }
+  });
+  app2.post("/api/auth/signup-affiliate", upload.single("profileImage"), async (req, res) => {
+    try {
+      console.log("=== AFFILIATE SIGNUP DEBUG ===");
+      console.log("Request body:", req.body);
+      console.log("Request file:", req.file);
+      console.log("Request headers content-type:", req.headers["content-type"]);
+      console.log("All request headers:", req.headers);
+      const { firstName, lastName, username, password, email, referralUrl, verificationCode, role, domainPath, whiteLabelId: whiteLabelId2 } = req.body;
+      const profileImageFile = req.file;
+      console.log("Extracted fields:");
+      console.log("- firstName:", firstName);
+      console.log("- lastName:", lastName);
+      console.log("- username:", username);
+      console.log("- email:", email);
+      console.log("- role:", role);
+      console.log("- whiteLabelId:", whiteLabelId2);
+      console.log("- whiteLabelId type:", typeof whiteLabelId2);
       console.log("- verificationCode:", verificationCode);
       console.log("- verificationCode type:", typeof verificationCode);
       console.log("- verificationCode length:", verificationCode?.length);
@@ -6896,7 +8765,7 @@ function registerAuthRoutes(app2) {
           error: `Username already taken. Please try a different username.`
         });
       }
-      const [existingEmailUser] = await db.select().from(users3).where(eq3(users3.email, lowercaseEmail));
+      const [existingEmailUser] = await db.select().from(users).where(eq4(users.email, lowercaseEmail));
       if (existingEmailUser) {
         return res.status(400).json({
           error: `Email already registered. Please use a different email.`
@@ -6905,18 +8774,34 @@ function registerAuthRoutes(app2) {
       const hashedPassword = await hashPassword(password);
       const baseName = firstName || username || "affiliate";
       const referralCode = await storage.generateUniqueReferralCode(baseName);
-      const newUser = await createUser({
+      let profileImagePath = null;
+      if (profileImageFile) {
+        profileImagePath = `/uploads/${profileImageFile.filename}`;
+      }
+      const userRole = role && role.toLowerCase() === "end-user" ? "end_user" : "super_admin_affiliate";
+      const userData = {
         username: lowercaseUsername,
         firstName,
         lastName,
         email: lowercaseEmail,
         password: hashedPassword,
-        role: "super_admin_affiliate",
+        role: userRole,
         authProvider: "local",
         referralCode,
         referralUrl: referralUrl || null,
-        profileImage: profileImage || null
-      });
+        profileImage: profileImagePath
+      };
+      if (whiteLabelId2) {
+        const parsedWhiteLabelId = parseInt(whiteLabelId2);
+        if (userRole === "end_user") {
+          userData.userOfWhiteLabelId = parsedWhiteLabelId;
+          console.log(`Setting userOfWhiteLabelId to ${parsedWhiteLabelId} for end user`);
+        } else {
+          userData.affiliateOfWhiteLabelId = parsedWhiteLabelId;
+          console.log(`Setting affiliateOfWhiteLabelId to ${parsedWhiteLabelId} for affiliate`);
+        }
+      }
+      const newUser = await createUser(userData);
       req.logIn(newUser, (err) => {
         if (err) {
           console.error("Auto-login error:", err);
@@ -6964,29 +8849,47 @@ function registerAuthRoutes(app2) {
   });
   app2.get(
     "/api/auth/google/callback",
-    passport2.authenticate("google", { failureRedirect: "/auth?error=google_auth_failed" }),
+    passport2.authenticate("google", { failureRedirect: "/login?error=google_auth_failed" }),
     async (req, res) => {
       const user = req.user;
+      const pendingWhiteLabelId = req.session.pendingWhiteLabelId;
+      if (pendingWhiteLabelId) {
+        req.session.login_whitelabel_id = parseInt(pendingWhiteLabelId);
+        console.log(`\u2705 GOOGLE OAuth - Stored login_whitelabel_id: ${pendingWhiteLabelId} for user ${user.id}`);
+        delete req.session.pendingWhiteLabelId;
+      }
       const pendingRole = req.session.pendingRole;
       const pendingContext = req.session.pendingContext;
       if (pendingRole && pendingRole !== "white_label_client") {
         try {
           const roleResult = await determineUserRole(pendingContext, pendingRole, req);
           const actualRole = typeof roleResult === "string" ? roleResult : roleResult.role;
-          const whiteLabelId = typeof roleResult === "object" ? roleResult.whiteLabelId : null;
+          const whiteLabelId2 = typeof roleResult === "object" ? roleResult.whiteLabelId : null;
           const updateData = {
-            role: actualRole,
-            whiteLabelId
+            role: actualRole
           };
+          if (actualRole === "affiliate" || actualRole === "super_admin_affiliate") {
+            if (pendingWhiteLabelId) {
+              updateData.affiliateOfWhiteLabelId = parseInt(pendingWhiteLabelId);
+              console.log(`Storing whitelabel_id ${pendingWhiteLabelId} in affiliateOfWhiteLabelId for affiliate`);
+            }
+          } else if (actualRole === "end_user") {
+            updateData.whiteLabelId = whiteLabelId2;
+          }
           if (actualRole === "super_admin_affiliate") {
             const baseName = user.firstName || user.email?.split("@")[0] || user.username || "affiliate";
             updateData.referralCode = await storage.generateUniqueReferralCode(baseName);
             console.log(`Generated referral code for Google OAuth Super Admin Affiliate: ${updateData.referralCode}`);
           }
-          await db.update(users3).set(updateData).where(eq3(users3.id, user.id));
+          await db.update(users).set(updateData).where(eq4(users.id, user.id));
           user.role = actualRole;
           if (updateData.referralCode) {
             user.referralCode = updateData.referralCode;
+          }
+          if (actualRole === "affiliate" || actualRole === "super_admin_affiliate") {
+            user.affiliateOfWhiteLabelId = updateData.affiliateOfWhiteLabelId;
+          } else if (actualRole === "end_user") {
+            user.whiteLabelId = updateData.whiteLabelId;
           }
           if (actualRole === "end_user") {
             try {
@@ -6997,7 +8900,7 @@ function registerAuthRoutes(app2) {
               let domainPath = `${baseDomainPath}-affiliate`;
               let counter = 1;
               while (true) {
-                const [existing] = await db.select().from(whiteLabels3).where(eq3(whiteLabels3.domainPath, domainPath));
+                const [existing] = await db.select().from(whiteLabels).where(eq4(whiteLabels.domainPath, domainPath));
                 if (!existing) break;
                 domainPath = `${baseDomainPath}-affiliate-${counter}`;
                 counter++;
@@ -7022,7 +8925,6 @@ function registerAuthRoutes(app2) {
               console.error("Error creating white-label record for Google OAuth end_user:", error);
             }
           }
-          user.whiteLabelId = whiteLabelId;
         } catch (error) {
           console.error("Failed to update user role:", error);
         }
@@ -7032,10 +8934,10 @@ function registerAuthRoutes(app2) {
       try {
         const sessionToken = req.sessionID;
         const userWhiteLabel = await storage.getWhiteLabelByUserId(user.id);
-        const whiteLabelId = userWhiteLabel?.id || null;
+        const whiteLabelId2 = userWhiteLabel?.id || null;
         await storage.createUserSession({
           userId: user.id,
-          whiteLabelId,
+          whiteLabelId: whiteLabelId2,
           sessionToken,
           isActive: true,
           ipAddress: req.ip,
@@ -7089,7 +8991,6 @@ function registerAuthRoutes(app2) {
       } catch (activityError) {
         console.error("Error creating Google OAuth login activity or session:", activityError);
       }
-      const pendingWhiteLabelId = req.session.pendingWhiteLabelId;
       if (pendingRole === "affiliate" || user.role === "affiliate") {
         try {
           const existingAffiliate = await storage.getAffiliateByUserId(user.id);
@@ -7192,7 +9093,7 @@ function registerAuthRoutes(app2) {
         });
       }
       PasswordResetStorage.recordResetRequest(email, clientIp);
-      const [user] = await db.select().from(users3).where(sql2`lower(email) = ${email}`).limit(1);
+      const [user] = await db.select().from(users).where(sql2`lower(email) = ${email}`).limit(1);
       if (!user) {
         console.log(`Password reset requested for non-existent email: ${email}`);
         return res.json({
@@ -7203,11 +9104,11 @@ function registerAuthRoutes(app2) {
       const { token, hashedToken } = PasswordResetStorage.generateSecureToken();
       const expiresAt = /* @__PURE__ */ new Date();
       expiresAt.setHours(expiresAt.getHours() + 1);
-      await db.delete(passwordResetTokens).where(eq3(passwordResetTokens.userId, user.id));
+      await db.delete(passwordResetTokens).where(eq4(passwordResetTokens.userId, user.id));
       await db.insert(passwordResetTokens).values({
-        hashedToken,
         userId: user.id,
-        expiresAt
+        hashedToken,
+        expiresAt: expiresAt.toISOString()
       });
       const baseUrl = PasswordResetStorage.getSecureBaseUrl();
       const resetUrl = `${baseUrl}/reset-password?token=${token}`;
@@ -7241,7 +9142,7 @@ function registerAuthRoutes(app2) {
         userId: passwordResetTokens.userId,
         expiresAt: passwordResetTokens.expiresAt,
         used: passwordResetTokens.used
-      }).from(passwordResetTokens).where(eq3(passwordResetTokens.hashedToken, hashedToken)).limit(1);
+      }).from(passwordResetTokens).where(eq4(passwordResetTokens.hashedToken, hashedToken)).limit(1);
       if (!resetRecord) {
         console.log(`Password reset attempted with invalid token: ${token.substring(0, 8)}...`);
         return res.status(400).json({ error: "Invalid or expired reset token" });
@@ -7250,25 +9151,23 @@ function registerAuthRoutes(app2) {
         console.log(`Password reset attempted with already used token for user: ${resetRecord.userId}`);
         return res.status(400).json({ error: "Reset token has already been used. Please request a new one." });
       }
-      if (/* @__PURE__ */ new Date() > resetRecord.expiresAt) {
+      if (/* @__PURE__ */ new Date() > new Date(resetRecord.expiresAt)) {
         console.log(`Password reset attempted with expired token for user: ${resetRecord.userId}`);
-        await db.delete(passwordResetTokens).where(eq3(passwordResetTokens.hashedToken, hashedToken));
+        await db.delete(passwordResetTokens).where(eq4(passwordResetTokens.hashedToken, hashedToken));
         return res.status(400).json({ error: "Reset token has expired. Please request a new one." });
       }
       const [user] = await db.select({
-        id: users3.id,
-        email: users3.email,
-        username: users3.username
-      }).from(users3).where(eq3(users3.id, resetRecord.userId)).limit(1);
+        id: users.id,
+        email: users.email,
+        username: users.username
+      }).from(users).where(eq4(users.id, resetRecord.userId)).limit(1);
       if (!user) {
         console.log(`Password reset attempted for non-existent user: ${resetRecord.userId}`);
         return res.status(400).json({ error: "Invalid reset token" });
       }
       const hashedPassword = await hashPassword(newPassword);
-      await db.transaction(async (tx) => {
-        await tx.update(users3).set({ password: hashedPassword }).where(eq3(users3.id, resetRecord.userId));
-        await tx.update(passwordResetTokens).set({ used: true }).where(eq3(passwordResetTokens.hashedToken, hashedToken));
-      });
+      await db.update(users).set({ password: hashedPassword }).where(eq4(users.id, resetRecord.userId));
+      await db.update(passwordResetTokens).set({ used: true }).where(eq4(passwordResetTokens.hashedToken, hashedToken));
       try {
         await storage.invalidateAllUserSessions(resetRecord.userId);
         console.log(`All sessions invalidated for user ${resetRecord.userId} after password reset`);
@@ -7307,7 +9206,7 @@ function registerAuthRoutes(app2) {
   app2.get("/api/logout", (req, res) => {
     console.log("GET logout initiated for user:", req.user ? req.user.username : "anonymous");
     const returnTo = req.query.returnTo;
-    let redirectUrl = "/auth";
+    let redirectUrl = "/login";
     if (returnTo) {
       try {
         const decodedReturnTo = decodeURIComponent(returnTo);
@@ -7321,7 +9220,7 @@ function registerAuthRoutes(app2) {
     req.logout((err) => {
       if (err) {
         console.error("Logout error:", err);
-        return res.redirect("/auth?error=logout_failed");
+        return res.redirect("/login?error=logout_failed");
       }
       res.clearCookie("connect.sid");
       req.session.destroy((err2) => {
@@ -7334,15 +9233,15 @@ function registerAuthRoutes(app2) {
     });
   });
   app2.get("/api/login", (req, res) => {
-    res.redirect("/auth");
+    res.redirect("/login");
   });
 }
 
 // server/whiteLabelCustomizations.ts
 init_db();
+init_schema();
 init_auth();
-import { whiteLabels as whiteLabels4, clientTemplateCustomizations as clientTemplateCustomizations3 } from "@shared/schema";
-import { eq as eq4 } from "drizzle-orm";
+import { eq as eq5 } from "drizzle-orm";
 import fs from "fs";
 import path from "path";
 function registerWhiteLabelCustomizationRoutes(app2) {
@@ -7354,19 +9253,19 @@ function registerWhiteLabelCustomizationRoutes(app2) {
         return res.status(401).json({ error: "User not authenticated" });
       }
       await updateTemplateCode(text);
-      const whiteLabel = await db.select().from(whiteLabels4).where(eq4(whiteLabels4.userId, userId)).limit(1);
+      const whiteLabel = await db.select().from(whiteLabels).where(eq5(whiteLabels.userId, userId)).limit(1);
       if (whiteLabel.length > 0) {
-        const whiteLabelId = whiteLabel[0].id;
+        const whiteLabelId2 = whiteLabel[0].id;
         const customizations = { text, colors };
-        const existingCustomizations = await db.select().from(clientTemplateCustomizations3).where(eq4(clientTemplateCustomizations3.clientId, whiteLabelId)).limit(1);
+        const existingCustomizations = await db.select().from(clientTemplateCustomizations2).where(eq5(clientTemplateCustomizations2.clientId, whiteLabelId2)).limit(1);
         if (existingCustomizations.length > 0) {
-          await db.update(clientTemplateCustomizations3).set({
+          await db.update(clientTemplateCustomizations2).set({
             customConfig: customizations,
             updatedAt: (/* @__PURE__ */ new Date()).toISOString()
-          }).where(eq4(clientTemplateCustomizations3.id, existingCustomizations[0].id));
+          }).where(eq5(clientTemplateCustomizations2.id, existingCustomizations[0].id));
         } else {
-          await db.insert(clientTemplateCustomizations3).values({
-            clientId: whiteLabelId,
+          await db.insert(clientTemplateCustomizations2).values({
+            clientId: whiteLabelId2,
             templateId: 1,
             customConfig: customizations,
             isActive: true,
@@ -7420,15 +9319,15 @@ function registerWhiteLabelCustomizationRoutes(app2) {
   }
   app2.get("/api/white-label-customizations/:whiteLabelId", isAuthenticated, async (req, res) => {
     try {
-      const whiteLabelId = parseInt(req.params.whiteLabelId);
-      const whiteLabel = await db.select().from(whiteLabels4).where(eq4(whiteLabels4.id, whiteLabelId)).limit(1);
+      const whiteLabelId2 = parseInt(req.params.whiteLabelId);
+      const whiteLabel = await db.select().from(whiteLabels).where(eq5(whiteLabels.id, whiteLabelId2)).limit(1);
       if (!whiteLabel.length) {
         return res.status(404).json({ error: "White label not found" });
       }
-      const customizations = await db.select().from(clientTemplateCustomizations3).where(eq4(clientTemplateCustomizations3.clientId, whiteLabelId)).limit(1);
+      const customizations = await db.select().from(clientTemplateCustomizations2).where(eq5(clientTemplateCustomizations2.clientId, whiteLabelId2)).limit(1);
       if (customizations.length === 0) {
         return res.json({
-          whiteLabelId,
+          whiteLabelId: whiteLabelId2,
           customizations: {
             text: {
               heroTitle: "Welcome to Our Platform",
@@ -7451,7 +9350,7 @@ function registerWhiteLabelCustomizationRoutes(app2) {
       }
       res.json({
         id: customizations[0].id,
-        whiteLabelId,
+        whiteLabelId: whiteLabelId2,
         customizations: customizations[0].customConfig
       });
     } catch (error) {
@@ -7461,27 +9360,27 @@ function registerWhiteLabelCustomizationRoutes(app2) {
   });
   app2.post("/api/white-label-customizations/:whiteLabelId", isAuthenticated, async (req, res) => {
     try {
-      const whiteLabelId = parseInt(req.params.whiteLabelId);
+      const whiteLabelId2 = parseInt(req.params.whiteLabelId);
       const { customizations } = req.body;
-      const whiteLabel = await db.select().from(whiteLabels4).where(eq4(whiteLabels4.id, whiteLabelId)).limit(1);
+      const whiteLabel = await db.select().from(whiteLabels).where(eq5(whiteLabels.id, whiteLabelId2)).limit(1);
       if (!whiteLabel.length) {
         return res.status(404).json({ error: "White label not found" });
       }
-      const existingCustomizations = await db.select().from(clientTemplateCustomizations3).where(eq4(clientTemplateCustomizations3.clientId, whiteLabelId)).limit(1);
+      const existingCustomizations = await db.select().from(clientTemplateCustomizations2).where(eq5(clientTemplateCustomizations2.clientId, whiteLabelId2)).limit(1);
       if (existingCustomizations.length > 0) {
-        await db.update(clientTemplateCustomizations3).set({
+        await db.update(clientTemplateCustomizations2).set({
           customConfig: customizations,
           updatedAt: (/* @__PURE__ */ new Date()).toISOString()
-        }).where(eq4(clientTemplateCustomizations3.id, existingCustomizations[0].id));
+        }).where(eq5(clientTemplateCustomizations2.id, existingCustomizations[0].id));
         res.json({
           id: existingCustomizations[0].id,
-          whiteLabelId,
+          whiteLabelId: whiteLabelId2,
           customizations,
           message: "Customizations updated successfully"
         });
       } else {
-        const result = await db.insert(clientTemplateCustomizations3).values({
-          clientId: whiteLabelId,
+        const result = await db.insert(clientTemplateCustomizations2).values({
+          clientId: whiteLabelId2,
           templateId: 1,
           // Default template ID
           customConfig: customizations,
@@ -7491,7 +9390,7 @@ function registerWhiteLabelCustomizationRoutes(app2) {
         });
         res.json({
           id: result.insertId,
-          whiteLabelId,
+          whiteLabelId: whiteLabelId2,
           customizations,
           message: "Customizations created successfully"
         });
@@ -7503,8 +9402,8 @@ function registerWhiteLabelCustomizationRoutes(app2) {
   });
   app2.delete("/api/white-label-customizations/:whiteLabelId", isAuthenticated, async (req, res) => {
     try {
-      const whiteLabelId = parseInt(req.params.whiteLabelId);
-      await db.delete(clientTemplateCustomizations3).where(eq4(clientTemplateCustomizations3.clientId, whiteLabelId));
+      const whiteLabelId2 = parseInt(req.params.whiteLabelId);
+      await db.delete(clientTemplateCustomizations2).where(eq5(clientTemplateCustomizations2.clientId, whiteLabelId2));
       res.json({ message: "Customizations reset to default successfully" });
     } catch (error) {
       console.error("Error deleting white label customizations:", error);
@@ -7811,7 +9710,6 @@ async function signObjectURL({
 
 // server/routes.ts
 init_emailService();
-import { z } from "zod";
 import express from "express";
 import path2 from "path";
 import multer2 from "multer";
@@ -7914,7 +9812,7 @@ async function isAuthenticatedWithDomainSupport(req, res, next) {
       try {
         const userWhiteLabels = await storage.getWhiteLabelsByUserId(user.id);
         const ownsThisDomain = userWhiteLabels.some((wl) => wl.domainPath === domainPath);
-        let whiteLabelId = null;
+        let whiteLabelId2 = null;
         if (ownsThisDomain) {
           const domainSession = await storage.getDomainUserSession(user.id, domainPath);
           console.log("Own domain session check:", domainSession);
@@ -7922,15 +9820,15 @@ async function isAuthenticatedWithDomainSupport(req, res, next) {
             console.log("Own domain session not found or inactive");
             return res.status(401).json({ error: "Not authenticated for your own domain" });
           }
-          whiteLabelId = domainSession.whiteLabelId;
+          whiteLabelId2 = domainSession.whiteLabelId;
         } else {
           console.log(`End-user ${user.id} visiting external domain ${domainPath} as affiliate - allowed with basic auth`);
           const visitedWhiteLabel = await storage.getWhiteLabelByDomainPath(domainPath);
-          whiteLabelId = visitedWhiteLabel ? visitedWhiteLabel.id : null;
+          whiteLabelId2 = visitedWhiteLabel ? visitedWhiteLabel.id : null;
         }
         req.domainContext = {
           domainPath,
-          whiteLabelId
+          whiteLabelId: whiteLabelId2
         };
         console.log("Domain authentication successful");
         return next();
@@ -7980,6 +9878,19 @@ async function registerRoutes(app2) {
   registerAuthRoutes(app2);
   registerWhiteLabelCustomizationRoutes(app2);
   const server = createServer(app2);
+  app2.get("/api/test-users-whitelabel-2", async (req, res) => {
+    try {
+      const users2 = await storage.getUsersByWhiteLabelId(2);
+      res.json({
+        whiteLabelId: 2,
+        userCount: users2.length,
+        users: users2
+      });
+    } catch (error) {
+      console.error("Error fetching users for white label 2:", error);
+      res.status(500).json({ error: "Failed to fetch users" });
+    }
+  });
   app2.get("/test-shoot-registration", (req, res) => {
     res.sendFile(process.cwd() + "/test_shoot_registration.html");
   });
@@ -8279,20 +10190,28 @@ async function registerRoutes(app2) {
       if (!user) {
         return res.status(401).json({ error: "Authentication required" });
       }
+      console.log(`\u{1F50D} /api/affiliates - User role: ${user.role}, User ID: ${user.id}`);
       if (user.role === "super_admin") {
+        console.log("\u{1F4CA} Fetching ALL affiliates for Super Admin");
         const allAffiliates = await storage.getAllAffiliatesForSuperAdmin();
+        console.log(`\u2705 Found ${allAffiliates.length} affiliates for Super Admin`);
         res.json(allAffiliates);
         return;
       }
       if (user.role === "white_label_client") {
         const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
         if (!whiteLabel) {
+          console.log(`\u274C White-label record not found for user ${user.id}`);
           return res.status(404).json({ error: "White-label client not found" });
         }
+        console.log(`\u{1F3E2} White Label Client - whiteLabelId: ${whiteLabel.id}, Business: ${whiteLabel.businessName}`);
         const allAffiliates = await storage.getTopAffiliatesByWhiteLabel(whiteLabel.id, 1e3);
+        console.log(`\u2705 Found ${allAffiliates.length} affiliates for white label ${whiteLabel.id}`);
+        console.log(`\u{1F4CB} Affiliate IDs: ${allAffiliates.map((a) => a.id).join(", ")}`);
         res.json(allAffiliates);
         return;
       }
+      console.log(`\u26D4 Access denied for role: ${user.role}`);
       res.status(403).json({ error: "Access denied. Super Admin or White Label Client role required." });
     } catch (error) {
       console.error("Error fetching affiliates:", error);
@@ -8344,8 +10263,8 @@ async function registerRoutes(app2) {
       if (!user || user.role !== "super_admin") {
         return res.status(403).json({ error: "Super Admin access required" });
       }
-      const purchaseHistory3 = await storage.getMainSitePurchaseHistory();
-      res.json(purchaseHistory3);
+      const purchaseHistory2 = await storage.getMainSitePurchaseHistory();
+      res.json(purchaseHistory2);
     } catch (error) {
       console.error("Error fetching purchase history:", error);
       res.status(500).json({ error: "Failed to fetch purchase history" });
@@ -8378,125 +10297,80 @@ async function registerRoutes(app2) {
       res.status(500).json({ error: "Failed to fetch white-label tracking data" });
     }
   });
-  app2.post("/api/admin/send-invitation", isAuthenticated, async (req, res) => {
+  app2.get("/api/super-admin/analytics/revenue-overview", isAuthenticated, async (req, res) => {
     try {
       const user = req.user;
       if (!user || user.role !== "super_admin") {
         return res.status(403).json({ error: "Super Admin access required" });
       }
-      const invitationSchema = z.object({
-        email: z.string().email("Valid email is required"),
-        firstName: z.string().min(1, "First name is required").max(50),
-        lastName: z.string().min(1, "Last name is required").max(50),
-        businessName: z.string().min(1, "Business name is required").max(100)
-      });
-      const validatedData = invitationSchema.parse(req.body);
-      const superAdminUser = await storage.getUserById(user.id);
-      if (!superAdminUser) {
-        return res.status(500).json({ error: "Super admin user not found" });
-      }
-      const inviterName = `${superAdminUser.firstName || "Super"} ${superAdminUser.lastName || "Admin"}`;
-      const emailSent = await sendWhiteLabelInvitation(
-        validatedData.email,
-        validatedData.firstName,
-        validatedData.lastName,
-        validatedData.businessName,
-        inviterName
-      );
-      if (!emailSent) {
-        return res.status(500).json({ error: "Failed to send invitation email" });
-      }
-      res.json({
-        success: true,
-        message: "Invitation sent successfully",
-        recipient: validatedData.email
-      });
+      const { startDate, endDate } = req.query;
+      const revenueOverview = await storage.getRevenueOverview(startDate, endDate);
+      res.json(revenueOverview);
     } catch (error) {
-      console.error("Send invitation error:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({
-          error: "Validation failed",
-          details: error.errors.map((e) => ({ field: e.path.join("."), message: e.message }))
-        });
-      }
-      res.status(500).json({ error: "Failed to send invitation" });
+      console.error("Error fetching revenue overview:", error);
+      res.status(500).json({ error: "Failed to fetch revenue overview" });
     }
   });
-  app2.post("/api/admin/send-bulk-invitations", isAuthenticated, async (req, res) => {
+  app2.get("/api/super-admin/analytics/white-label-metrics", isAuthenticated, async (req, res) => {
     try {
       const user = req.user;
       if (!user || user.role !== "super_admin") {
         return res.status(403).json({ error: "Super Admin access required" });
       }
-      const bulkInvitationSchema = z.object({
-        invitations: z.array(z.object({
-          email: z.string().email("Valid email is required"),
-          firstName: z.string().min(1, "First name is required").max(50),
-          lastName: z.string().min(1, "Last name is required").max(50),
-          businessName: z.string().min(1, "Business name is required").max(100)
-        })).min(1, "At least one invitation is required").max(100, "Maximum 100 invitations per batch")
-      });
-      const validatedData = bulkInvitationSchema.parse(req.body);
-      const superAdminUser = await storage.getUserById(user.id);
-      if (!superAdminUser) {
-        return res.status(500).json({ error: "Super admin user not found" });
-      }
-      const inviterName = `${superAdminUser.firstName || "Super"} ${superAdminUser.lastName || "Admin"}`;
-      let successCount = 0;
-      let failureCount = 0;
-      const results = [];
-      for (const invitation of validatedData.invitations) {
-        try {
-          const emailSent = await sendWhiteLabelInvitation(
-            invitation.email,
-            invitation.firstName,
-            invitation.lastName,
-            invitation.businessName,
-            inviterName
-          );
-          if (emailSent) {
-            successCount++;
-            results.push({
-              email: invitation.email,
-              status: "success",
-              message: "Invitation sent successfully"
-            });
-          } else {
-            failureCount++;
-            results.push({
-              email: invitation.email,
-              status: "failed",
-              message: "Failed to send email"
-            });
-          }
-        } catch (inviteError) {
-          failureCount++;
-          results.push({
-            email: invitation.email,
-            status: "failed",
-            message: "Error processing invitation"
-          });
-          console.error(`Error sending invitation to ${invitation.email}:`, inviteError);
-        }
-      }
-      res.json({
-        success: true,
-        summary: {
-          total: validatedData.invitations.length,
-          successful: successCount,
-          failed: failureCount
-        },
-        results
-      });
+      const { startDate, endDate } = req.query;
+      const whiteLabelMetrics = await storage.getWhiteLabelMetrics(startDate, endDate);
+      res.json(whiteLabelMetrics);
     } catch (error) {
-      console.error("Send bulk invitations error:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({
-          error: "Validation failed",
-          details: error.errors.map((e) => ({ field: e.path.join("."), message: e.message }))
-        });
+      console.error("Error fetching white-label metrics:", error);
+      res.status(500).json({ error: "Failed to fetch white-label metrics" });
+    }
+  });
+  app2.get("/api/super-admin/analytics/plan-performance", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== "super_admin") {
+        return res.status(403).json({ error: "Super Admin access required" });
       }
-      res.status(500).json({ error: "Failed to send bulk invitations" });
+      const { startDate, endDate } = req.query;
+      const planPerformance = await storage.getPlanPerformance(startDate, endDate);
+      res.json(planPerformance);
+    } catch (error) {
+      console.error("Error fetching plan performance:", error);
+      res.status(500).json({ error: "Failed to fetch plan performance" });
+    }
+  });
+  app2.get("/api/super-admin/analytics/purchase-trends", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== "super_admin") {
+        return res.status(403).json({ error: "Super Admin access required" });
+      }
+      const { startDate, endDate } = req.query;
+      const purchaseTrends = await storage.getPurchaseTrends(startDate, endDate);
+      res.json(purchaseTrends);
+    } catch (error) {
+      console.error("Error fetching purchase trends:", error);
+      res.status(500).json({ error: "Failed to fetch purchase trends" });
+    }
+  });
+  app2.get("/api/super-admin/analytics/comparison-data", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== "super_admin") {
+        return res.status(403).json({ error: "Super Admin access required" });
+      }
+      const { startDate, endDate, compareStartDate, compareEndDate, metrics } = req.query;
+      const comparisonData = await storage.getComparisonData(
+        startDate,
+        endDate,
+        compareStartDate,
+        compareEndDate,
+        metrics?.split(",") || []
+      );
+      res.json(comparisonData);
+    } catch (error) {
+      console.error("Error fetching comparison data:", error);
+      res.status(500).json({ error: "Failed to fetch comparison data" });
     }
   });
   app2.post("/api/announcements", isAuthenticated, async (req, res) => {
@@ -8558,13 +10432,13 @@ async function registerRoutes(app2) {
           if (!user || user.role !== "super_admin" && user.role !== "super_admin_affiliate" && user.role !== "white_label_client") {
             return res.status(403).json({ error: "Unauthorized. Only admins and white-label clients can create announcements." });
           }
-          let whiteLabelId = null;
+          let whiteLabelId2 = null;
           if (user.role === "white_label_client") {
             try {
               const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
               if (whiteLabel) {
-                whiteLabelId = whiteLabel.id;
-                console.log(`Setting whiteLabelId ${whiteLabelId} for announcement from white-label client ${user.id}`);
+                whiteLabelId2 = whiteLabel.id;
+                console.log(`Setting whiteLabelId ${whiteLabelId2} for announcement from white-label client ${user.id}`);
               } else {
                 return res.status(400).json({ error: "White-label account not found for user" });
               }
@@ -8573,7 +10447,7 @@ async function registerRoutes(app2) {
               return res.status(500).json({ error: "Failed to fetch white-label information" });
             }
           } else if (user.role === "super_admin" || user.role === "super_admin_affiliate") {
-            whiteLabelId = null;
+            whiteLabelId2 = null;
             console.log(`Allowing null whiteLabelId for super admin announcement from user ${user.id}`);
           }
           let attachments = [];
@@ -8607,7 +10481,7 @@ async function registerRoutes(app2) {
             title: title.substring(0, 50) + "...",
             status: finalStatus,
             scheduledAt: scheduledDate,
-            whiteLabelId,
+            whiteLabelId: whiteLabelId2,
             userId: user.id
           });
           let parsedTargetedPlanIds = [];
@@ -8632,7 +10506,7 @@ async function registerRoutes(app2) {
             scheduledAt: scheduledDate,
             publishedAt: finalStatus === "published" ? /* @__PURE__ */ new Date() : null,
             userId: user.id,
-            whiteLabelId,
+            whiteLabelId: whiteLabelId2,
             attachments
           };
           if (targetingType) {
@@ -8975,13 +10849,13 @@ async function registerRoutes(app2) {
         targetUserId = req.session.impersonatedUserId;
         console.log("PLANS DEBUG - Using impersonated user ID for plans:", targetUserId);
       }
-      const plans3 = await storage.getPlansByUser(targetUserId);
+      const plans2 = await storage.getPlansByUser(targetUserId);
       const domain = req.query.domain;
       if (domain && user.role === "white_label_client") {
-        const publishedPlans = plans3.filter((plan) => plan.status === "published");
+        const publishedPlans = plans2.filter((plan) => plan.status === "published");
         res.json(publishedPlans);
       } else {
-        res.json(plans3);
+        res.json(plans2);
       }
     } catch (error) {
       console.error("Error fetching plans:", error);
@@ -9073,8 +10947,8 @@ async function registerRoutes(app2) {
         console.log("\u{1F451} SUPER-ADMIN/WHITE-LABEL-CLIENT - Fetching analytics for created plans. User ID:", targetUser.id);
         const superAdminAnalytics = await storage.getSuperAdminPlanAnalytics(targetUser.id);
         console.log("\u{1F4CA} SUPER-ADMIN ANALYTICS RESULT - Found", superAdminAnalytics.length, "plans with analytics");
-        superAdminAnalytics.forEach((plan, index) => {
-          console.log(`  Plan ${index + 1}: "${plan.planName}" - Sales: ${plan.totalSales}, Revenue: $${plan.totalRevenue}, Purchasers: ${plan.recentPurchases?.length || 0}`);
+        superAdminAnalytics.forEach((plan, index2) => {
+          console.log(`  Plan ${index2 + 1}: "${plan.planName}" - Sales: ${plan.totalSales}, Revenue: $${plan.totalRevenue}, Purchasers: ${plan.recentPurchases?.length || 0}`);
         });
         return res.json(superAdminAnalytics);
       }
@@ -9082,7 +10956,7 @@ async function registerRoutes(app2) {
       console.log("\u{1F3E2} WHITE LABEL CHECK - User whiteLabelId:", userWhiteLabelId);
       if (!userWhiteLabelId) {
         console.log("\u{1F50D} SEARCHING FOR OWNED WHITE LABEL - User has no whiteLabelId, checking if they own a business");
-        const ownedWhiteLabel = await db.select({ id: whiteLabels5.id }).from(whiteLabels5).where(eq5(whiteLabels5.userId, targetUser.id)).limit(1);
+        const ownedWhiteLabel = await db.select({ id: whiteLabels.id }).from(whiteLabels).where(eq6(whiteLabels.userId, targetUser.id)).limit(1);
         if (ownedWhiteLabel.length > 0) {
           userWhiteLabelId = ownedWhiteLabel[0].id;
           console.log("\u2705 FOUND OWNED WHITE LABEL - User owns white label business ID:", userWhiteLabelId);
@@ -9092,35 +10966,35 @@ async function registerRoutes(app2) {
       }
       if (userWhiteLabelId) {
         console.log("\u{1F3E2} WHITE LABEL ANALYTICS - Processing analytics for white label ID:", userWhiteLabelId);
-        const userPlans = await db.select().from(plans2).leftJoin(whiteLabels5, eq5(plans2.whiteLabelId, whiteLabels5.id)).where(eq5(plans2.whiteLabelId, userWhiteLabelId));
+        const userPlans = await db.select().from(plans).leftJoin(whiteLabels, eq6(plans.whiteLabelId, whiteLabels.id)).where(eq6(plans.whiteLabelId, userWhiteLabelId));
         console.log("\u{1F4CB} PLANS FOUND - Found", userPlans.length, "plans for white label ID:", userWhiteLabelId);
-        userPlans.forEach((planRow, index) => {
-          console.log(`  Plan ${index + 1}: ID ${planRow.plans.id} - "${planRow.plans.name}"`);
+        userPlans.forEach((planRow, index2) => {
+          console.log(`  Plan ${index2 + 1}: ID ${planRow.plans.id} - "${planRow.plans.name}"`);
         });
         const planAnalytics = await Promise.all(
           userPlans.map(async (planRow) => {
             const plan = planRow.plans;
             console.log(`\u{1F4B0} PROCESSING PURCHASES - Plan "${plan.name}" (ID: ${plan.id})`);
             const allPlanPurchases = await db.select({
-              id: purchaseHistory2.id,
-              userId: purchaseHistory2.userId,
-              planId: purchaseHistory2.planId,
-              amount: purchaseHistory2.amount,
-              transactionId: purchaseHistory2.transactionId,
-              status: purchaseHistory2.status,
-              createdAt: purchaseHistory2.createdAt,
-              whiteLabelId: purchaseHistory2.whiteLabelId,
-              userEmail: users4.email,
-              userFirstName: users4.firstName,
-              userLastName: users4.lastName,
-              businessName: whiteLabels5.businessName
-            }).from(purchaseHistory2).leftJoin(users4, eq5(purchaseHistory2.userId, users4.id)).leftJoin(whiteLabels5, eq5(purchaseHistory2.whiteLabelId, whiteLabels5.id)).where(
+              id: purchaseHistory.id,
+              userId: purchaseHistory.userId,
+              planId: purchaseHistory.planId,
+              amount: purchaseHistory.amount,
+              transactionId: purchaseHistory.transactionId,
+              status: purchaseHistory.status,
+              createdAt: purchaseHistory.createdAt,
+              whiteLabelId: purchaseHistory.whiteLabelId,
+              userEmail: users.email,
+              userFirstName: users.firstName,
+              userLastName: users.lastName,
+              businessName: whiteLabels.businessName
+            }).from(purchaseHistory).leftJoin(users, eq6(purchaseHistory.userId, users.id)).leftJoin(whiteLabels, eq6(purchaseHistory.whiteLabelId, whiteLabels.id)).where(
               and4(
-                eq5(purchaseHistory2.planId, plan.id),
-                eq5(purchaseHistory2.status, "completed"),
-                eq5(purchaseHistory2.whiteLabelId, userWhiteLabelId)
+                eq6(purchaseHistory.planId, plan.id),
+                eq6(purchaseHistory.status, "completed"),
+                eq6(purchaseHistory.whiteLabelId, userWhiteLabelId)
               )
-            ).orderBy(desc2(purchaseHistory2.createdAt));
+            ).orderBy(desc2(purchaseHistory.createdAt));
             console.log(`  \u{1F4CA} PURCHASE DATA - Found ${allPlanPurchases.length} completed purchases for plan "${plan.name}"`);
             const totalSales = allPlanPurchases.length;
             const totalRevenue2 = allPlanPurchases.reduce((sum2, p) => sum2 + parseFloat(p.amount || "0"), 0);
@@ -9251,7 +11125,7 @@ async function registerRoutes(app2) {
       if (!userWhiteLabelId) {
         debugInfo.steps.push("\u{1F50D} SEARCHING FOR OWNED WHITE LABEL - User has no whiteLabelId");
         try {
-          const ownedWhiteLabel = await db.select({ id: whiteLabels5.id, businessName: whiteLabels5.businessName }).from(whiteLabels5).where(eq5(whiteLabels5.userId, targetUser.id)).limit(1);
+          const ownedWhiteLabel = await db.select({ id: whiteLabels.id, businessName: whiteLabels.businessName }).from(whiteLabels).where(eq6(whiteLabels.userId, targetUser.id)).limit(1);
           debugInfo.steps.push(`\u{1F50D} OWNED WHITE LABEL QUERY - Found ${ownedWhiteLabel.length} owned businesses`);
           if (ownedWhiteLabel.length > 0) {
             userWhiteLabelId = ownedWhiteLabel[0].id;
@@ -9267,14 +11141,14 @@ async function registerRoutes(app2) {
         debugInfo.steps.push(`\u{1F3E2} PROCESSING WHITE LABEL ANALYTICS - ID: ${userWhiteLabelId}`);
         try {
           const userPlans = await db.select({
-            planId: plans2.id,
-            planName: plans2.name,
-            planPrice: plans2.price,
-            planStatus: plans2.status,
-            planCreatedAt: plans2.createdAt,
-            planWhiteLabelId: plans2.whiteLabelId,
-            businessName: whiteLabels5.businessName
-          }).from(plans2).leftJoin(whiteLabels5, eq5(plans2.whiteLabelId, whiteLabels5.id)).where(eq5(plans2.whiteLabelId, userWhiteLabelId));
+            planId: plans.id,
+            planName: plans.name,
+            planPrice: plans.price,
+            planStatus: plans.status,
+            planCreatedAt: plans.createdAt,
+            planWhiteLabelId: plans.whiteLabelId,
+            businessName: whiteLabels.businessName
+          }).from(plans).leftJoin(whiteLabels, eq6(plans.whiteLabelId, whiteLabels.id)).where(eq6(plans.whiteLabelId, userWhiteLabelId));
           debugInfo.steps.push(`\u{1F4CB} PLANS QUERY - Found ${userPlans.length} plans for white label ID: ${userWhiteLabelId}`);
           const planDetails = userPlans.map((plan) => ({
             id: plan.planId,
@@ -9291,18 +11165,18 @@ async function registerRoutes(app2) {
             debugInfo.steps.push(`\u{1F4B0} PROCESSING PURCHASES - Plan "${planRow.planName}" (ID: ${planRow.planId})`);
             try {
               const allPlanPurchases = await db.select({
-                id: purchaseHistory2.id,
-                userId: purchaseHistory2.userId,
-                planId: purchaseHistory2.planId,
-                amount: purchaseHistory2.amount,
-                status: purchaseHistory2.status,
-                createdAt: purchaseHistory2.createdAt,
-                whiteLabelId: purchaseHistory2.whiteLabelId
-              }).from(purchaseHistory2).where(
+                id: purchaseHistory.id,
+                userId: purchaseHistory.userId,
+                planId: purchaseHistory.planId,
+                amount: purchaseHistory.amount,
+                status: purchaseHistory.status,
+                createdAt: purchaseHistory.createdAt,
+                whiteLabelId: purchaseHistory.whiteLabelId
+              }).from(purchaseHistory).where(
                 and4(
-                  eq5(purchaseHistory2.planId, planRow.planId),
-                  eq5(purchaseHistory2.status, "completed"),
-                  eq5(purchaseHistory2.whiteLabelId, userWhiteLabelId)
+                  eq6(purchaseHistory.planId, planRow.planId),
+                  eq6(purchaseHistory.status, "completed"),
+                  eq6(purchaseHistory.whiteLabelId, userWhiteLabelId)
                 )
               );
               const totalSales = allPlanPurchases.length;
@@ -9365,8 +11239,8 @@ async function registerRoutes(app2) {
         targetUserId = req.session.impersonatedUserId;
         console.log("PRODUCTS DEBUG - Using impersonated user ID for products:", targetUserId);
       }
-      const products3 = await storage.getProductsByUser(targetUserId);
-      res.json(products3);
+      const products2 = await storage.getProductsByUser(targetUserId);
+      res.json(products2);
     } catch (error) {
       console.error("Error fetching products:", error);
       res.status(500).json({ error: "Failed to fetch products" });
@@ -9445,8 +11319,8 @@ async function registerRoutes(app2) {
         targetUserId = req.session.impersonatedUserId;
         console.log("CATEGORIES DEBUG - Using impersonated user ID for categories:", targetUserId);
       }
-      const categories3 = await storage.getCategories(targetUserId);
-      res.json(categories3);
+      const categories2 = await storage.getCategories(targetUserId);
+      res.json(categories2);
     } catch (error) {
       console.error("Error fetching categories:", error);
       res.status(500).json({ error: "Failed to fetch categories" });
@@ -9455,11 +11329,16 @@ async function registerRoutes(app2) {
   app2.post("/api/categories", isAuthenticated, async (req, res) => {
     try {
       const user = req.user;
-      const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
-      if (!whiteLabel) {
-        return res.status(404).json({ error: "White label not found" });
+      let categoryData;
+      if (user.role === "super_admin") {
+        categoryData = { ...req.body, createdBy: user.id };
+      } else {
+        const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
+        if (!whiteLabel) {
+          return res.status(404).json({ error: "White label not found" });
+        }
+        categoryData = { ...req.body, whiteLabelId: whiteLabel.id, createdBy: user.id };
       }
-      const categoryData = { ...req.body, whiteLabelId: whiteLabel.id, createdBy: user.id };
       const category = await storage.createCategory(categoryData);
       res.json(category);
     } catch (error) {
@@ -9500,9 +11379,8 @@ async function registerRoutes(app2) {
       const planData = {
         ...req.body,
         createdBy: user.id,
-        // Frontend now controls isMainSitePlan based on status (draft/schedule = false, publish = true)
-        // Only override if not provided by frontend and user is super admin
-        isMainSitePlan: req.body.hasOwnProperty("isMainSitePlan") ? req.body.isMainSitePlan : user.role === "super_admin",
+        // CRITICAL: Only Super Admin can create main site plans, White Label clients create plans for their own sites
+        isMainSitePlan: user.role === "super_admin",
         // Handle accesses array for Super Admin
         accesses: user.role === "super_admin" && req.body.accesses ? req.body.accesses : void 0,
         // Handle allowAffiliatePromotion field
@@ -9561,6 +11439,8 @@ async function registerRoutes(app2) {
       }
       const updateData = {
         ...req.body,
+        // CRITICAL: Ensure isMainSitePlan is always based on user role, cannot be changed via frontend
+        isMainSitePlan: user.role === "super_admin",
         // Handle allowAffiliatePromotion field
         allowAffiliatePromotion: req.body.hasOwnProperty("allowAffiliatePromotion") ? req.body.allowAffiliatePromotion : void 0,
         // Set timestamps based on status changes
@@ -9589,6 +11469,71 @@ async function registerRoutes(app2) {
     } catch (error) {
       console.error("Error deleting plan:", error);
       res.status(500).json({ error: "Failed to delete plan" });
+    }
+  });
+  app2.post("/api/admin/fix-plans", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (user.role !== "super_admin") {
+        return res.status(403).json({ error: "Super Admin access required" });
+      }
+      console.log("\u{1F527} Starting plan isMainSitePlan fix...");
+      const allPlans = await storage.getPlans();
+      console.log(`Found ${allPlans.length} total plans to check`);
+      const fixes = [];
+      for (const plan of allPlans) {
+        const creator = await storage.getUserById(plan.createdBy);
+        if (!creator) {
+          console.log(`\u26A0\uFE0F  Plan ${plan.id} (${plan.name}): Creator not found (${plan.createdBy})`);
+          fixes.push({
+            planId: plan.id,
+            planName: plan.name,
+            status: "error",
+            message: "Creator not found"
+          });
+          continue;
+        }
+        const correctValue = creator.role === "super_admin";
+        if (plan.isMainSitePlan !== correctValue) {
+          console.log(`\u{1F527} Fixing Plan ${plan.id} (${plan.name}):`);
+          console.log(`   Creator: ${creator.username} (${creator.role})`);
+          console.log(`   Current: isMainSitePlan = ${plan.isMainSitePlan}`);
+          console.log(`   Correct: isMainSitePlan = ${correctValue}`);
+          await storage.updatePlan(plan.id, { isMainSitePlan: correctValue });
+          console.log(`   \u2705 Updated!`);
+          fixes.push({
+            planId: plan.id,
+            planName: plan.name,
+            creator: creator.username,
+            creatorRole: creator.role,
+            oldValue: plan.isMainSitePlan,
+            newValue: correctValue,
+            status: "fixed"
+          });
+        } else {
+          console.log(`\u2713 Plan ${plan.id} (${plan.name}) is already correct (creator: ${creator.role}, isMainSitePlan: ${plan.isMainSitePlan})`);
+          fixes.push({
+            planId: plan.id,
+            planName: plan.name,
+            creator: creator.username,
+            creatorRole: creator.role,
+            value: plan.isMainSitePlan,
+            status: "already_correct"
+          });
+        }
+      }
+      console.log("\n\u2705 Plan fix complete!");
+      res.json({
+        success: true,
+        totalPlans: allPlans.length,
+        fixed: fixes.filter((f) => f.status === "fixed").length,
+        alreadyCorrect: fixes.filter((f) => f.status === "already_correct").length,
+        errors: fixes.filter((f) => f.status === "error").length,
+        details: fixes
+      });
+    } catch (error) {
+      console.error("Error fixing plans:", error);
+      res.status(500).json({ error: "Failed to fix plans" });
     }
   });
   app2.delete("/api/announcements/:id", isAuthenticated, async (req, res) => {
@@ -9643,8 +11588,8 @@ async function registerRoutes(app2) {
   });
   app2.get("/api/white-labels", isAuthenticated, async (req, res) => {
     try {
-      const whiteLabels6 = await storage.getWhiteLabels();
-      res.json(whiteLabels6);
+      const whiteLabels2 = await storage.getWhiteLabels();
+      res.json(whiteLabels2);
     } catch (error) {
       console.error("Error fetching white labels:", error);
       res.status(500).json({ error: "Failed to fetch white labels" });
@@ -9656,13 +11601,22 @@ async function registerRoutes(app2) {
       if (!id || isNaN(id)) {
         return res.status(400).json({ error: "Valid ID parameter is required" });
       }
-      const whiteLabel = await storage.getWhiteLabelById(id);
+      let whiteLabel = await storage.getWhiteLabelById(id);
       if (!whiteLabel) {
         return res.status(404).json({ error: "White label not found" });
       }
+      if (!whiteLabel.domainPath && whiteLabel.domain) {
+        console.log(`\u{1F527} AUTO-FIX: Setting domainPath to "${whiteLabel.domain}" for white label ID ${id}`);
+        try {
+          whiteLabel = await storage.updateWhiteLabel(id, { domainPath: whiteLabel.domain });
+          console.log(`\u2705 Successfully updated domainPath for white label ID ${id}`);
+        } catch (updateError) {
+          console.error("Failed to auto-update domainPath:", updateError);
+        }
+      }
       res.json({
         id: whiteLabel.id,
-        domainPath: whiteLabel.domainPath,
+        domainPath: whiteLabel.domainPath || whiteLabel.domain,
         businessName: whiteLabel.businessName,
         userId: whiteLabel.userId
       });
@@ -9921,22 +11875,38 @@ async function registerRoutes(app2) {
   app2.post("/api/admin/send-invitation", isAuthenticated, async (req, res) => {
     try {
       const user = req.user;
-      if (user.role !== "super_admin") {
-        return res.status(403).json({ error: "Only Super Admin can send invitations" });
+      console.log("DEBUG - User object in invitation route:", {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        whiteLabelId: user.whiteLabelId,
+        fullUser: user
+      });
+      if (user.role !== "super_admin" && user.role !== "white_label_client") {
+        return res.status(403).json({ error: "Only Super Admin and White Label Client can send invitations" });
       }
       const { email, businessName, firstName, lastName, inviterName } = req.body;
-      if (!email || !businessName || !firstName || !lastName) {
+      if (!email || !firstName || !lastName) {
         return res.status(400).json({
-          error: "Missing required fields: email, businessName, firstName, lastName"
+          error: "Missing required fields: email, firstName, lastName"
         });
       }
-      const emailService = await Promise.resolve().then(() => (init_emailService(), emailService_exports));
-      const success = await emailService.sendWhiteLabelInvitation(
+      const finalInviterName = inviterName || user.firstName || user.lastName || user.username || "Platform Admin";
+      console.log("DEBUG - Sending invitation with:", {
         email,
         firstName,
         lastName,
-        businessName,
-        inviterName || "Super Admin"
+        finalInviterName,
+        inviterWhiteLabelId: user.whiteLabelId
+      });
+      const emailService = await Promise.resolve().then(() => (init_emailService(), emailService_exports));
+      const success = await emailService.sendUserInvitation(
+        email,
+        firstName,
+        lastName,
+        finalInviterName,
+        user.whiteLabelId
+        // Pass the inviter's white label ID
       );
       if (success) {
         console.log("Invitation sent successfully to:", email);
@@ -9952,8 +11922,8 @@ async function registerRoutes(app2) {
   app2.post("/api/admin/send-bulk-invitations", isAuthenticated, async (req, res) => {
     try {
       const user = req.user;
-      if (user.role !== "super_admin") {
-        return res.status(403).json({ error: "Only Super Admin can send invitations" });
+      if (user.role !== "super_admin" && user.role !== "white_label_client") {
+        return res.status(403).json({ error: "Only Super Admin and White Label Client can send invitations" });
       }
       const { invitations } = req.body;
       if (!invitations || !Array.isArray(invitations) || invitations.length === 0) {
@@ -9964,19 +11934,20 @@ async function registerRoutes(app2) {
       const errors = [];
       const emailService = await Promise.resolve().then(() => (init_emailService(), emailService_exports));
       for (const invitation of invitations) {
-        const { email, businessName, firstName, lastName, inviterName } = invitation;
-        if (!email || !businessName || !firstName || !lastName) {
+        const { email, firstName, lastName, inviterName } = invitation;
+        if (!email || !firstName || !lastName) {
           errorCount++;
           errors.push(`Missing required fields for ${email || "unknown email"}`);
           continue;
         }
         try {
-          const success = await emailService.sendWhiteLabelInvitation(
+          const success = await emailService.sendUserInvitation(
             email,
             firstName,
             lastName,
-            businessName,
-            inviterName || "Super Admin"
+            inviterName || user.firstName || user.lastName || user.username || "Platform Admin",
+            user.whiteLabelId
+            // Pass the inviter's white label ID
           );
           if (success) {
             successCount++;
@@ -10002,6 +11973,92 @@ async function registerRoutes(app2) {
     } catch (error) {
       console.error("Error in bulk invitation sending:", error);
       res.status(500).json({ error: "Failed to send bulk invitations" });
+    }
+  });
+  app2.post("/api/admin/send-user-invitation", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (user.role !== "white_label_client") {
+        return res.status(403).json({ error: "Only White Label Client can send user invitations" });
+      }
+      const { email, firstName, lastName, inviterName } = req.body;
+      if (!email || !firstName || !lastName) {
+        return res.status(400).json({
+          error: "Missing required fields: email, firstName, lastName"
+        });
+      }
+      const emailService = await Promise.resolve().then(() => (init_emailService(), emailService_exports));
+      const success = await emailService.sendUserInvitation(
+        email,
+        firstName,
+        lastName,
+        inviterName || `${user.firstName} ${user.lastName}`,
+        user.whiteLabelId
+      );
+      if (success) {
+        console.log("User invitation sent successfully to:", email);
+        res.json({ success: true, message: "Invitation sent successfully" });
+      } else {
+        throw new Error("Failed to send user invitation email");
+      }
+    } catch (error) {
+      console.error("Error sending user invitation:", error);
+      res.status(500).json({ error: "Failed to send invitation" });
+    }
+  });
+  app2.post("/api/admin/send-bulk-user-invitations", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (user.role !== "white_label_client") {
+        return res.status(403).json({ error: "Only White Label Client can send user invitations" });
+      }
+      const { invitations } = req.body;
+      if (!invitations || !Array.isArray(invitations) || invitations.length === 0) {
+        return res.status(400).json({ error: "Invitations array is required and must not be empty" });
+      }
+      let successCount = 0;
+      let errorCount = 0;
+      const errors = [];
+      const emailService = await Promise.resolve().then(() => (init_emailService(), emailService_exports));
+      for (const invitation of invitations) {
+        const { email, firstName, lastName, inviterName } = invitation;
+        if (!email || !firstName || !lastName) {
+          errorCount++;
+          errors.push(`Missing required fields for ${email || "unknown email"}`);
+          continue;
+        }
+        try {
+          const success = await emailService.sendUserInvitation(
+            email,
+            firstName,
+            lastName,
+            inviterName || `${user.firstName} ${user.lastName}`,
+            user.whiteLabelId
+          );
+          if (success) {
+            successCount++;
+            console.log("Bulk user invitation sent successfully to:", email);
+          } else {
+            errorCount++;
+            errors.push(`Failed to send invitation to ${email}`);
+          }
+        } catch (error) {
+          errorCount++;
+          errors.push(`Error sending to ${email}: ${error.message}`);
+          console.error("Error in bulk user invitation:", error);
+        }
+      }
+      console.log(`Bulk user invitation summary: ${successCount} success, ${errorCount} errors`);
+      res.json({
+        successCount,
+        errorCount,
+        errors: errors.slice(0, 10),
+        // Limit errors shown
+        message: `Sent ${successCount} invitations successfully. ${errorCount} failed.`
+      });
+    } catch (error) {
+      console.error("Error in bulk user invitation sending:", error);
+      res.status(500).json({ error: "Failed to send bulk user invitations" });
     }
   });
   app2.post("/api/domain-paths/validate", isAuthenticatedWithDomainSupport, async (req, res) => {
@@ -10098,7 +12155,7 @@ async function registerRoutes(app2) {
       }
       if (!landingPage) {
         console.log("No domain-specific landing page found, falling back to first active one");
-        const defaultLandingPages = await db.select().from(landingPages).innerJoin(whiteLabels5, eq5(whiteLabels5.defaultLandingPageId, landingPages.id)).where(eq5(whiteLabels5.isActive, true)).limit(1);
+        const defaultLandingPages = await db.select().from(landingPages).innerJoin(whiteLabels, eq6(whiteLabels.defaultLandingPageId, landingPages.id)).where(eq6(whiteLabels.isActive, true)).limit(1);
         if (defaultLandingPages.length === 0) {
           return res.status(404).json({ error: "No default landing page found" });
         }
@@ -10108,7 +12165,7 @@ async function registerRoutes(app2) {
       let customizations = null;
       if (whiteLabel) {
         try {
-          const customizationData = await db.select().from(clientTemplateCustomizations).where(eq5(clientTemplateCustomizations.clientId, whiteLabel.id)).limit(1);
+          const customizationData = await db.select().from(clientTemplateCustomizations).where(eq6(clientTemplateCustomizations.clientId, whiteLabel.id)).limit(1);
           if (customizationData.length > 0) {
             customizations = customizationData[0].customConfig;
           } else {
@@ -10370,9 +12427,9 @@ async function registerRoutes(app2) {
           enabled: true
         }
       };
-      const timestamp = Date.now();
+      const timestamp2 = Date.now();
       const randomSuffix = Math.random().toString(36).substring(2, 15);
-      const clientSecret = `mock_client_secret_${timestamp}_${randomSuffix}`;
+      const clientSecret = `mock_client_secret_${timestamp2}_${randomSuffix}`;
       res.json({
         clientSecret,
         amount: intentData.amount,
@@ -10465,21 +12522,21 @@ async function registerRoutes(app2) {
           details: "Payment token is invalid or expired"
         });
       }
-      let whiteLabelId = req.session?.whiteLabelId;
-      if (!whiteLabelId) {
+      let whiteLabelId2 = req.session?.whiteLabelId;
+      if (!whiteLabelId2) {
         try {
           const userWhiteLabel = await storage.getWhiteLabelByUserId(user.id);
           if (userWhiteLabel) {
-            whiteLabelId = userWhiteLabel.id;
-            console.log("Found existing white-label record:", whiteLabelId);
+            whiteLabelId2 = userWhiteLabel.id;
+            console.log("Found existing white-label record:", whiteLabelId2);
           }
         } catch (error) {
           console.error("Error fetching user white-label:", error);
         }
       }
       const isMainSitePurchase = plan.isMainSitePlan;
-      console.log("Purchase type - isMainSitePlan:", isMainSitePurchase, "hasWhiteLabelId:", !!whiteLabelId);
-      if (isMainSitePurchase && !whiteLabelId) {
+      console.log("Purchase type - isMainSitePlan:", isMainSitePurchase, "hasWhiteLabelId:", !!whiteLabelId2);
+      if (isMainSitePurchase && !whiteLabelId2) {
         console.log("Main site purchase - creating white-label record for user:", user.id);
         try {
           let domainPath = user.username || `user-${user.id}`;
@@ -10521,8 +12578,8 @@ async function registerRoutes(app2) {
             planId: plan.id,
             isActive: true
           });
-          whiteLabelId = newWhiteLabel.id;
-          console.log("Created new white-label record:", whiteLabelId);
+          whiteLabelId2 = newWhiteLabel.id;
+          console.log("Created new white-label record:", whiteLabelId2);
         } catch (error) {
           console.error("Error creating white-label record:", error);
           return res.status(500).json({
@@ -10531,7 +12588,7 @@ async function registerRoutes(app2) {
           });
         }
       }
-      if (!whiteLabelId) {
+      if (!whiteLabelId2) {
         return res.status(400).json({
           error: "Unable to process payment: Business account setup required",
           details: "Please ensure you have a valid business account"
@@ -10550,7 +12607,7 @@ async function registerRoutes(app2) {
           subscription = await storage.createSubscription({
             userId: user.id,
             planId: numericPlanId,
-            whiteLabelId,
+            whiteLabelId: whiteLabelId2,
             status: "active",
             billingCycle: "monthly",
             amount: numericAmount,
@@ -10592,7 +12649,7 @@ async function registerRoutes(app2) {
           const purchaseHistoryData = {
             userId: user.id,
             planId: numericPlanId,
-            whiteLabelId,
+            whiteLabelId: whiteLabelId2,
             amount: numericAmount,
             transactionId,
             // Add transaction ID
@@ -10622,7 +12679,7 @@ async function registerRoutes(app2) {
             stack: error.stack,
             userId: user.id,
             planId: numericPlanId,
-            whiteLabelId,
+            whiteLabelId: whiteLabelId2,
             amount: numericAmount
           });
           if (retryCount >= maxRetries) {
@@ -10632,7 +12689,7 @@ async function registerRoutes(app2) {
               subscriptionId: subscription?.id,
               userId: user.id,
               planId: numericPlanId,
-              whiteLabelId,
+              whiteLabelId: whiteLabelId2,
               amount: numericAmount,
               timestamp: (/* @__PURE__ */ new Date()).toISOString(),
               finalError: error.message
@@ -10647,7 +12704,7 @@ async function registerRoutes(app2) {
         try {
           const sanitizedReferralCode = referralCode.trim().substring(0, 50);
           const affiliate = await storage.getUserByReferralCode(sanitizedReferralCode);
-          if (affiliate && affiliate.role === "super_admin_affiliate") {
+          if (affiliate && (affiliate.role === "super_admin_affiliate" || affiliate.role === "white_label_affiliate")) {
             const commissionPercentage = parseFloat(plan.affiliateCommissionPercentage || "0");
             if (commissionPercentage >= 0 && commissionPercentage <= 100) {
               const commissionAmount = (numericAmount * commissionPercentage / 100).toFixed(2);
@@ -10664,6 +12721,7 @@ async function registerRoutes(app2) {
               console.log("Referral commission created:", {
                 affiliateId: affiliate.id,
                 affiliateEmail: affiliate.email,
+                affiliateRole: affiliate.role,
                 commissionAmount,
                 commissionPercentage,
                 planAmount: numericAmount
@@ -10678,11 +12736,11 @@ async function registerRoutes(app2) {
           console.error("Error processing referral commission:", error);
         }
       }
-      if (whiteLabelId) {
+      if (whiteLabelId2) {
         try {
           await storage.trackEndUserActivity({
             userId: user.id,
-            whiteLabelId,
+            whiteLabelId: whiteLabelId2,
             activityType: "purchase",
             metadata: {
               planId: numericPlanId,
@@ -10780,7 +12838,7 @@ async function registerRoutes(app2) {
         message: "Payment processed successfully",
         subscriptionId: subscription.id,
         userId: user.id,
-        whiteLabelId,
+        whiteLabelId: whiteLabelId2,
         planId: numericPlanId,
         amount: numericAmount
       });
@@ -10969,17 +13027,32 @@ async function registerRoutes(app2) {
       }
       let userId = authenticatedUser.id;
       let user = authenticatedUser;
-      console.log("\u2705 Using authenticated user for purchase:", {
-        userId,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
+      const planOwnerWhiteLabelId = planOwner.whiteLabelId;
+      if (planOwnerWhiteLabelId === null) {
+        console.error("\u274C Plan owner missing whiteLabelId:", {
+          planId,
+          planOwnerId: planOwner.id,
+          planOwnerEmail: planOwner.email,
+          timestamp: (/* @__PURE__ */ new Date()).toISOString()
+        });
+        return res.status(400).json({
+          success: false,
+          error: "Invalid plan configuration",
+          details: "The plan owner account is not properly configured. Please contact support."
+        });
+      }
+      console.log("\u2705 Using plan owner whiteLabelId for purchase:", {
+        buyerId: userId,
+        buyerEmail: user.email,
+        planOwnerId: planOwner.id,
+        planOwnerEmail: planOwner.email,
+        planOwnerWhiteLabelId,
         timestamp: (/* @__PURE__ */ new Date()).toISOString()
       });
       const subscription = await storage.createSubscription({
         userId,
         planId: parseInt(planId),
-        whiteLabelId: plan.whiteLabelId,
+        whiteLabelId: planOwnerWhiteLabelId,
         status: "active",
         billingCycle: "monthly",
         amount: parseFloat(amount),
@@ -10993,7 +13066,7 @@ async function registerRoutes(app2) {
       await storage.createPurchaseHistory({
         userId,
         planId: parseInt(planId),
-        whiteLabelId: plan.whiteLabelId,
+        whiteLabelId: planOwnerWhiteLabelId,
         amount: parseFloat(amount),
         transactionId: nmiResult.transactionId,
         status: "completed",
@@ -11015,11 +13088,12 @@ async function registerRoutes(app2) {
           const sanitizedReferralCode = referralCode.trim().substring(0, 50);
           console.log("\u{1F3AF} Processing referral commission for code:", sanitizedReferralCode);
           const affiliate = await storage.getUserByReferralCode(sanitizedReferralCode);
-          if (affiliate && affiliate.role === "super_admin_affiliate") {
+          if (affiliate && (affiliate.role === "super_admin_affiliate" || affiliate.role === "white_label_affiliate")) {
             const commissionPercentage = parseFloat(plan.affiliateCommissionPercentage || "0");
             console.log("\u{1F4B0} Commission calculation:", {
               affiliateId: affiliate.id,
               affiliateEmail: affiliate.email,
+              affiliateRole: affiliate.role,
               commissionPercentage,
               planAmount: parseFloat(amount)
             });
@@ -11038,6 +13112,7 @@ async function registerRoutes(app2) {
               console.log("\u2705 Referral commission created successfully:", {
                 affiliateId: affiliate.id,
                 affiliateEmail: affiliate.email,
+                affiliateRole: affiliate.role,
                 commissionAmount,
                 commissionPercentage,
                 planAmount: parseFloat(amount),
@@ -11336,12 +13411,15 @@ async function registerRoutes(app2) {
         return res.status(401).json({ error: "Authentication required" });
       }
       const domain = req.query.domain;
+      res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
+      res.set("Pragma", "no-cache");
+      res.set("Expires", "0");
       if (domain) {
-        const plans3 = await storage.getUserPurchasedPlansByDomain(user.id, domain);
-        res.json(plans3);
+        const plans2 = await storage.getUserPurchasedPlansByDomain(user.id, domain);
+        res.json(plans2);
       } else {
-        const plans3 = await storage.getUserPurchasedPlans(user.id);
-        res.json(plans3);
+        const plans2 = await storage.getUserPurchasedPlans(user.id);
+        res.json(plans2);
       }
     } catch (error) {
       console.error("Error fetching user plans:", error);
@@ -11355,8 +13433,8 @@ async function registerRoutes(app2) {
       if (!user) {
         return res.status(401).json({ error: "Authentication required" });
       }
-      const products3 = await storage.getPlanProducts(parseInt(planId));
-      res.json(products3);
+      const products2 = await storage.getPlanProducts(parseInt(planId));
+      res.json(products2);
     } catch (error) {
       console.error("Error fetching plan products:", error);
       res.status(500).json({ error: "Failed to fetch plan products" });
@@ -11369,8 +13447,8 @@ async function registerRoutes(app2) {
       if (!user) {
         return res.status(401).json({ error: "Authentication required" });
       }
-      const categories3 = await storage.getPlanCategories(parseInt(planId));
-      res.json(categories3);
+      const categories2 = await storage.getPlanCategories(parseInt(planId));
+      res.json(categories2);
     } catch (error) {
       console.error("Error fetching plan categories:", error);
       res.status(500).json({ error: "Failed to fetch plan categories" });
@@ -11384,26 +13462,26 @@ async function registerRoutes(app2) {
         return res.status(401).json({ error: "Authentication required" });
       }
       console.log("Fetching user products for user:", user.id, "domain:", domain);
-      const subscriptions3 = await storage.getSubscriptions(user.id);
-      console.log("User subscriptions:", subscriptions3);
-      if (!subscriptions3 || subscriptions3.length === 0) {
-        console.log("No subscriptions found for user:", user.id);
+      const userPlans = domain ? await storage.getUserPurchasedPlansByDomain(user.id, domain) : await storage.getUserPurchasedPlans(user.id);
+      console.log("User plans (filtered by domain):", userPlans.length);
+      if (!userPlans || userPlans.length === 0) {
+        console.log("No plans found for user:", user.id, "on domain:", domain);
         return res.json({ plans: [] });
       }
       const plansWithProducts = [];
-      for (const subscription of subscriptions3) {
+      for (const plan of userPlans) {
         try {
           const [planDetails] = await db.select({
-            id: plans2.id,
-            name: plans2.name,
-            description: plans2.description,
-            monthlyPrice: plans2.monthlyPrice,
-            features: plans2.features,
-            selectedProducts: plans2.selectedProducts,
-            selectedCategories: plans2.selectedCategories
-          }).from(plans2).where(eq5(plans2.id, subscription.plan_id));
+            id: plans.id,
+            name: plans.name,
+            description: plans.description,
+            monthlyPrice: plans.monthlyPrice,
+            features: plans.features,
+            selectedProducts: plans.selectedProducts,
+            selectedCategories: plans.selectedCategories
+          }).from(plans).where(eq6(plans.id, plan.id));
           if (!planDetails) {
-            console.log(`Plan not found for subscription: ${subscription.plan_id}`);
+            console.log(`Plan not found: ${plan.id}`);
             continue;
           }
           console.log(`Processing plan: ${planDetails.name} (ID: ${planDetails.id})`);
@@ -11413,14 +13491,6 @@ async function registerRoutes(app2) {
             description: planDetails.description,
             monthlyPrice: planDetails.monthlyPrice,
             features: planDetails.features,
-            subscription: {
-              id: subscription.id,
-              status: subscription.status,
-              billingCycle: subscription.billing_cycle,
-              amount: subscription.amount,
-              currentPeriodStart: subscription.current_period_start,
-              currentPeriodEnd: subscription.current_period_end
-            },
             categories: []
           };
           if (planDetails.selectedProducts) {
@@ -11431,27 +13501,27 @@ async function registerRoutes(app2) {
                 const productIds = selectedProducts.map((id) => parseInt(id)).filter((id) => !isNaN(id));
                 if (productIds.length > 0) {
                   const productResults = await db.select({
-                    id: products2.id,
-                    whiteLabelId: products2.whiteLabelId,
-                    categoryId: products2.categoryId,
-                    createdBy: products2.createdBy,
-                    name: products2.name,
-                    description: products2.description,
-                    price: products2.price,
-                    type: products2.type,
-                    contentUrl: products2.contentUrl,
-                    accessDuration: products2.accessDuration,
-                    imageUrl: products2.imageUrl,
-                    attachments: products2.attachments,
-                    metadata: products2.metadata,
-                    isActive: products2.isActive,
-                    createdAt: products2.createdAt,
-                    updatedAt: products2.updatedAt,
-                    categoryName: categories2.name,
-                    categoryDescription: categories2.description
-                  }).from(products2).leftJoin(categories2, eq5(products2.categoryId, categories2.id)).where(and4(
-                    inArray2(products2.id, productIds),
-                    eq5(products2.isActive, true)
+                    id: products.id,
+                    whiteLabelId: products.whiteLabelId,
+                    categoryId: products.categoryId,
+                    createdBy: products.createdBy,
+                    name: products.name,
+                    description: products.description,
+                    price: products.price,
+                    type: products.type,
+                    contentUrl: products.contentUrl,
+                    accessDuration: products.accessDuration,
+                    imageUrl: products.imageUrl,
+                    attachments: products.attachments,
+                    metadata: products.metadata,
+                    isActive: products.isActive,
+                    createdAt: products.createdAt,
+                    updatedAt: products.updatedAt,
+                    categoryName: categories.name,
+                    categoryDescription: categories.description
+                  }).from(products).leftJoin(categories, eq6(products.categoryId, categories.id)).where(and4(
+                    inArray2(products.id, productIds),
+                    eq6(products.isActive, true)
                   ));
                   console.log(`Products found for plan ${planDetails.id}:`, productResults.length);
                   const categoriesMap = /* @__PURE__ */ new Map();
@@ -11484,7 +13554,7 @@ async function registerRoutes(app2) {
           }
           plansWithProducts.push(planData);
         } catch (error) {
-          console.error(`Error fetching products for plan ${subscription.plan_id}:`, error);
+          console.error(`Error fetching products for plan ${plan.id}:`, error);
         }
       }
       console.log("Plans with products prepared:", plansWithProducts.length);
@@ -11621,40 +13691,40 @@ async function registerRoutes(app2) {
         return res.status(401).json({ error: "Authentication required" });
       }
       console.log("Fetching user categories for user:", user.id, "domain:", domain);
-      const subscriptions3 = await storage.getSubscriptions(user.id);
-      console.log("User subscriptions:", subscriptions3);
-      if (!subscriptions3 || subscriptions3.length === 0) {
-        console.log("No subscriptions found for user:", user.id);
+      const userPlans = domain ? await storage.getUserPurchasedPlansByDomain(user.id, domain) : await storage.getUserPurchasedPlans(user.id);
+      console.log("User plans (filtered by domain):", userPlans.length);
+      if (!userPlans || userPlans.length === 0) {
+        console.log("No plans found for user:", user.id, "on domain:", domain);
         return res.json([]);
       }
       const allCategories = [];
       const categoryMap = /* @__PURE__ */ new Map();
-      for (const subscription of subscriptions3) {
+      for (const plan of userPlans) {
         try {
-          const planCategories2 = await storage.getPlanCategories(subscription.plan_id);
-          console.log(`Categories for plan ${subscription.plan_id}:`, planCategories2.length);
+          const planCategories2 = await storage.getPlanCategories(plan.id);
+          console.log(`Categories for plan ${plan.id}:`, planCategories2.length);
           for (const category of planCategories2) {
             if (!categoryMap.has(category.id)) {
               const productRows = await db.select({
-                id: products2.id,
-                whiteLabelId: products2.whiteLabelId,
-                categoryId: products2.categoryId,
-                createdBy: products2.createdBy,
-                name: products2.name,
-                description: products2.description,
-                price: products2.price,
-                type: products2.type,
-                contentUrl: products2.contentUrl,
-                accessDuration: products2.accessDuration,
-                imageUrl: products2.imageUrl,
-                attachments: products2.attachments,
-                metadata: products2.metadata,
-                isActive: products2.isActive,
-                createdAt: products2.createdAt,
-                updatedAt: products2.updatedAt
-              }).from(products2).where(and4(
-                eq5(products2.categoryId, category.id),
-                eq5(products2.isActive, true)
+                id: products.id,
+                whiteLabelId: products.whiteLabelId,
+                categoryId: products.categoryId,
+                createdBy: products.createdBy,
+                name: products.name,
+                description: products.description,
+                price: products.price,
+                type: products.type,
+                contentUrl: products.contentUrl,
+                accessDuration: products.accessDuration,
+                imageUrl: products.imageUrl,
+                attachments: products.attachments,
+                metadata: products.metadata,
+                isActive: products.isActive,
+                createdAt: products.createdAt,
+                updatedAt: products.updatedAt
+              }).from(products).where(and4(
+                eq6(products.categoryId, category.id),
+                eq6(products.isActive, true)
               ));
               categoryMap.set(category.id, {
                 ...category,
@@ -11664,13 +13734,13 @@ async function registerRoutes(app2) {
             }
           }
         } catch (error) {
-          console.error(`Error fetching categories for plan ${subscription.plan_id}:`, error);
+          console.error(`Error fetching categories for plan ${plan.id}:`, error);
         }
       }
-      const categories3 = Array.from(categoryMap.values());
+      const categories2 = Array.from(categoryMap.values());
       const rootCategories = [];
       const childCategories = [];
-      categories3.forEach((category) => {
+      categories2.forEach((category) => {
         if (category.parentCategoryId) {
           childCategories.push(category);
         } else {
@@ -11678,7 +13748,7 @@ async function registerRoutes(app2) {
         }
       });
       childCategories.forEach((child) => {
-        const parent = categories3.find((cat) => cat.id === child.parentCategoryId);
+        const parent = categories2.find((cat) => cat.id === child.parentCategoryId);
         if (parent) {
           parent.subcategories.push(child);
         }
@@ -11909,6 +13979,211 @@ async function registerRoutes(app2) {
       res.status(500).json({ error: "Failed to stop impersonation" });
     }
   });
+  app2.get("/api/admin/white-label", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== "super_admin" && user.role !== "white_label_client") {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+      let whiteLabel;
+      if (user.role === "super_admin") {
+        const whiteLabelId2 = req.query.id;
+        if (whiteLabelId2) {
+          whiteLabel = await storage.getWhiteLabelById(parseInt(whiteLabelId2));
+        } else {
+          const whiteLabels2 = await storage.getWhiteLabels();
+          whiteLabel = whiteLabels2[0];
+        }
+      } else {
+        whiteLabel = await storage.getWhiteLabelByUserId(user.id);
+      }
+      if (!whiteLabel) {
+        return res.status(404).json({ error: "White label not found" });
+      }
+      res.json(whiteLabel);
+    } catch (error) {
+      console.error("Error fetching white label data:", error);
+      res.status(500).json({ error: "Failed to fetch white label data" });
+    }
+  });
+  app2.get("/api/admin/user-stats", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== "super_admin" && user.role !== "white_label_client") {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+      let stats;
+      if (user.role === "super_admin") {
+        const allUsers = await storage.getAllUsers();
+        const totalUsers = allUsers.length;
+        const activeUsers = allUsers.filter((u) => u.isActive).length;
+        const endUsers = allUsers.filter((u) => u.role === "end_user").length;
+        const affiliates2 = allUsers.filter((u) => u.role === "white_label_affiliate").length;
+        const whiteLabels2 = allUsers.filter((u) => u.role === "white_label_client").length;
+        stats = {
+          totalUsers,
+          activeUsers,
+          endUsers,
+          affiliates: affiliates2,
+          whiteLabels: whiteLabels2,
+          inactiveUsers: totalUsers - activeUsers
+        };
+      } else {
+        const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
+        if (!whiteLabel) {
+          return res.status(404).json({ error: "White label not found" });
+        }
+        const whiteLabelUsers = await storage.getUsersByWhiteLabelId(whiteLabel.id);
+        const totalUsers = whiteLabelUsers.length;
+        const activeUsers = whiteLabelUsers.filter((u) => u.isActive).length;
+        const endUsers = whiteLabelUsers.filter((u) => u.role === "end_user").length;
+        const affiliates2 = whiteLabelUsers.filter((u) => u.role === "white_label_affiliate").length;
+        stats = {
+          totalUsers,
+          activeUsers,
+          endUsers,
+          affiliates: affiliates2,
+          whiteLabels: 1,
+          // The white label client themselves
+          inactiveUsers: totalUsers - activeUsers
+        };
+      }
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching user stats:", error);
+      res.status(500).json({ error: "Failed to fetch user statistics" });
+    }
+  });
+  app2.get("/api/admin/users", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== "super_admin" && user.role !== "white_label_client") {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+      let users2;
+      if (user.role === "super_admin") {
+        users2 = await storage.getAllUsers();
+      } else {
+        const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
+        if (!whiteLabel) {
+          return res.status(404).json({ error: "White label not found" });
+        }
+        users2 = await storage.getUsersByWhiteLabelId(whiteLabel.id);
+      }
+      const formattedUsers = users2.map((u) => ({
+        id: u.id,
+        username: u.username,
+        email: u.email,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        role: u.role,
+        isActive: u.isActive,
+        status: u.isActive ? "active" : "pending",
+        // Map isActive to status
+        createdAt: u.createdAt,
+        updatedAt: u.updatedAt,
+        whiteLabelId: u.whiteLabelId || u.userOfWhiteLabelId,
+        profileImageUrl: u.profileImageUrl
+      }));
+      res.json(formattedUsers);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ error: "Failed to fetch users" });
+    }
+  });
+  app2.get("/api/admin/user-activities/:userId", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== "super_admin" && user.role !== "white_label_client") {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+      const { userId } = req.params;
+      if (user.role === "white_label_client") {
+        const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
+        if (!whiteLabel) {
+          return res.status(404).json({ error: "White label not found" });
+        }
+        const targetUser = await storage.getUserById(userId);
+        if (!targetUser || targetUser.whiteLabelId !== whiteLabel.id && targetUser.userOfWhiteLabelId !== whiteLabel.id) {
+          return res.status(403).json({ error: "Access denied to this user's activities" });
+        }
+      }
+      const activities2 = await storage.getEndUserActivitiesByUserId(userId);
+      res.json(activities2 || []);
+    } catch (error) {
+      console.error("Error fetching user activities:", error);
+      res.status(500).json({ error: "Failed to fetch user activities" });
+    }
+  });
+  app2.get("/api/admin/user-purchases/:userId", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== "super_admin" && user.role !== "white_label_client") {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+      const { userId } = req.params;
+      if (user.role === "white_label_client") {
+        const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
+        if (!whiteLabel) {
+          return res.status(404).json({ error: "White label not found" });
+        }
+        const targetUser = await storage.getUserById(userId);
+        if (!targetUser || targetUser.whiteLabelId !== whiteLabel.id && targetUser.userOfWhiteLabelId !== whiteLabel.id) {
+          return res.status(403).json({ error: "Access denied to this user's purchases" });
+        }
+      }
+      const purchases = await storage.getPurchasesByUser(userId);
+      res.json(purchases || []);
+    } catch (error) {
+      console.error("Error fetching user purchases:", error);
+      res.status(500).json({ error: "Failed to fetch user purchases" });
+    }
+  });
+  app2.post("/api/admin/create-user", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== "super_admin" && user.role !== "white_label_client") {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+      const { firstName, lastName, username, email, password, role = "end_user", user_of_white_label_id } = req.body;
+      if (!firstName || !lastName || !username || !email || !password) {
+        return res.status(400).json({ error: "All fields are required" });
+      }
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({ error: "Username already exists" });
+      }
+      const existingEmail = await storage.getUserByEmail(email);
+      if (existingEmail) {
+        return res.status(400).json({ error: "Email already exists" });
+      }
+      let whiteLabelId2 = user_of_white_label_id;
+      if (user.role === "white_label_client" && !whiteLabelId2) {
+        const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
+        if (whiteLabel) {
+          whiteLabelId2 = whiteLabel.id;
+        }
+      }
+      const hashedPassword = await bcrypt2.hash(password, 12);
+      const newUser = await storage.createUser({
+        id: crypto3.randomUUID(),
+        // Generate UUID for the id field
+        firstName,
+        lastName,
+        username,
+        email,
+        password: hashedPassword,
+        role,
+        userOfWhiteLabelId: whiteLabelId2,
+        isActive: true
+      });
+      const { password: _, ...userWithoutPassword } = newUser;
+      res.status(201).json(userWithoutPassword);
+    } catch (error) {
+      console.error("Error creating user:", error);
+      res.status(500).json({ error: "Failed to create user" });
+    }
+  });
   app2.get("/api/white-labels/stats", isAuthenticated, async (req, res) => {
     try {
       const user = req.user;
@@ -11925,8 +14200,8 @@ async function registerRoutes(app2) {
 --- Client: ${client.businessName} (ID: ${client.userId}) ---`);
         console.log(`Purchases found: ${purchases.length}`);
         if (purchases.length > 0) {
-          purchases.forEach((p, index) => {
-            console.log(`  Purchase ${index + 1}: ${p.planName} | isMainSitePlan: ${p.isMainSitePlan} | Status: ${p.status}`);
+          purchases.forEach((p, index2) => {
+            console.log(`  Purchase ${index2 + 1}: ${p.planName} | isMainSitePlan: ${p.isMainSitePlan} | Status: ${p.status}`);
           });
           const hasSuperAdminPlan = purchases.some((purchase) => purchase.isMainSitePlan === true);
           if (hasSuperAdminPlan) {
@@ -11959,12 +14234,12 @@ async function registerRoutes(app2) {
   app2.get("/api/white-labels/:whiteLabelId/analytics/stats", isAuthenticated, async (req, res) => {
     try {
       const user = req.user;
-      const { whiteLabelId } = req.params;
+      const { whiteLabelId: whiteLabelId2 } = req.params;
       if (user.role !== "super_admin") {
         return res.status(403).json({ error: "Unauthorized - Super Admin access required" });
       }
-      console.log(`Super Admin ${user.id} requesting analytics for white-label ${whiteLabelId}`);
-      const whiteLabel = await storage.getWhiteLabelById(parseInt(whiteLabelId));
+      console.log(`Super Admin ${user.id} requesting analytics for white-label ${whiteLabelId2}`);
+      const whiteLabel = await storage.getWhiteLabelById(parseInt(whiteLabelId2));
       if (!whiteLabel) {
         return res.status(404).json({ error: "White-label client not found" });
       }
@@ -11973,7 +14248,7 @@ async function registerRoutes(app2) {
       const purchasedUsers = await storage.getPurchasedUsersCountForWhiteLabel(whiteLabel.id);
       const loginCount = await storage.getLoginCountForWhiteLabel(whiteLabel.id);
       const totalRevenue = await storage.getTotalRevenueForWhiteLabel(whiteLabel.id);
-      console.log(`Analytics for white-label ${whiteLabelId}:`, { totalUsers, totalPurchases, purchasedUsers, loginCount, totalRevenue });
+      console.log(`Analytics for white-label ${whiteLabelId2}:`, { totalUsers, totalPurchases, purchasedUsers, loginCount, totalRevenue });
       res.json({
         totalSignups: totalUsers.toString(),
         totalLogins: loginCount.toString(),
@@ -11992,12 +14267,12 @@ async function registerRoutes(app2) {
   app2.get("/api/white-labels/:whiteLabelId/analytics/activities", isAuthenticated, async (req, res) => {
     try {
       const user = req.user;
-      const { whiteLabelId } = req.params;
+      const { whiteLabelId: whiteLabelId2 } = req.params;
       if (user.role !== "super_admin") {
         return res.status(403).json({ error: "Unauthorized - Super Admin access required" });
       }
-      console.log(`Super Admin ${user.id} requesting activities for white-label ${whiteLabelId}`);
-      const whiteLabel = await storage.getWhiteLabelById(parseInt(whiteLabelId));
+      console.log(`Super Admin ${user.id} requesting activities for white-label ${whiteLabelId2}`);
+      const whiteLabel = await storage.getWhiteLabelById(parseInt(whiteLabelId2));
       if (!whiteLabel) {
         return res.status(404).json({ error: "White-label client not found" });
       }
@@ -12021,7 +14296,7 @@ async function registerRoutes(app2) {
         })
       );
       const sortedActivities = formattedActivities.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 50);
-      console.log(`Returning ${sortedActivities.length} activities for white-label ${whiteLabelId}`);
+      console.log(`Returning ${sortedActivities.length} activities for white-label ${whiteLabelId2}`);
       res.json(sortedActivities);
     } catch (error) {
       console.error("Error fetching white-label activities:", error);
@@ -12031,12 +14306,12 @@ async function registerRoutes(app2) {
   app2.get("/api/white-labels/:whiteLabelId/analytics/purchases", isAuthenticated, async (req, res) => {
     try {
       const user = req.user;
-      const { whiteLabelId } = req.params;
+      const { whiteLabelId: whiteLabelId2 } = req.params;
       if (user.role !== "super_admin") {
         return res.status(403).json({ error: "Unauthorized - Super Admin access required" });
       }
-      console.log(`Super Admin ${user.id} requesting purchases for white-label ${whiteLabelId}`);
-      const whiteLabel = await storage.getWhiteLabelById(parseInt(whiteLabelId));
+      console.log(`Super Admin ${user.id} requesting purchases for white-label ${whiteLabelId2}`);
+      const whiteLabel = await storage.getWhiteLabelById(parseInt(whiteLabelId2));
       if (!whiteLabel) {
         return res.status(404).json({ error: "White-label client not found" });
       }
@@ -12062,7 +14337,7 @@ async function registerRoutes(app2) {
         })
       );
       const sortedPurchases = formattedPurchases.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      console.log(`Returning ${sortedPurchases.length} purchases for white-label ${whiteLabelId}`);
+      console.log(`Returning ${sortedPurchases.length} purchases for white-label ${whiteLabelId2}`);
       res.json(sortedPurchases);
     } catch (error) {
       console.error("Error fetching white-label purchases:", error);
@@ -12089,8 +14364,8 @@ async function registerRoutes(app2) {
   });
   app2.post("/api/affiliate/signup", async (req, res) => {
     try {
-      const { name, email, phone, company, reason, password, whiteLabelId } = req.body;
-      console.log("Affiliate signup request:", { name, email, phone, company, reason, whiteLabelId });
+      const { name, email, phone, company, reason, password, whiteLabelId: whiteLabelId2 } = req.body;
+      console.log("Affiliate signup request:", { name, email, phone, company, reason, whiteLabelId: whiteLabelId2 });
       if (!name || !email || !phone || !password) {
         return res.status(400).json({ error: "Name, email, phone, and password are required" });
       }
@@ -12112,7 +14387,9 @@ async function registerRoutes(app2) {
         password,
         // Store password (in real app, this would be hashed)
         role: "white_label_affiliate",
-        whiteLabelId: whiteLabelId || null,
+        whiteLabelId: whiteLabelId2 || null,
+        affiliateOfWhiteLabelId: whiteLabelId2 || null,
+        // Track which white label the affiliate signed up through
         isActive: true
       });
       console.log("Created new affiliate user:", newUser);
@@ -12554,13 +14831,13 @@ async function registerRoutes(app2) {
       const domainId = parseInt(req.params.id);
       const updateData = req.body;
       if (domainId < 0) {
-        const { domain: domain2, whiteLabelId } = updateData;
+        const { domain: domain2, whiteLabelId: whiteLabelId2 } = updateData;
         if (!domain2) {
           return res.status(400).json({ error: "Domain path is required" });
         }
         console.log(`User ${user.id} (${user.role}) attempting to update white-label domain to: ${domain2}`);
         console.log(`Looking up white-label records for user ${user.id} (role: ${user.role})`);
-        let whiteLabels6;
+        let whiteLabels2;
         if (user.role === "white_label_client") {
           const whiteLabel2 = await storage.getWhiteLabelByUserId(user.id);
           if (!whiteLabel2) {
@@ -12570,10 +14847,10 @@ async function registerRoutes(app2) {
               message: `White-label record for user ID ${user.id} not found`
             });
           }
-          whiteLabels6 = [whiteLabel2];
+          whiteLabels2 = [whiteLabel2];
         } else {
-          whiteLabels6 = await storage.getWhiteLabelsByUserId(user.id);
-          if (whiteLabels6.length === 0) {
+          whiteLabels2 = await storage.getWhiteLabelsByUserId(user.id);
+          if (whiteLabels2.length === 0) {
             console.log(`Can't Find The User_id ${user.id} In affiliate white_labels table`);
             return res.status(404).json({
               error: "Can't Find The User_id In Table",
@@ -12581,28 +14858,28 @@ async function registerRoutes(app2) {
             });
           }
         }
-        console.log(`Found ${whiteLabels6.length} white-label records:`, whiteLabels6.map((wl) => ({ id: wl.id, domainPath: wl.domainPath })));
+        console.log(`Found ${whiteLabels2.length} white-label records:`, whiteLabels2.map((wl) => ({ id: wl.id, domainPath: wl.domainPath })));
         let whiteLabel;
         if (user.role === "white_label_client") {
-          whiteLabel = whiteLabels6[0];
+          whiteLabel = whiteLabels2[0];
         } else {
           let targetWhiteLabelId;
-          if (whiteLabelId) {
-            targetWhiteLabelId = whiteLabelId;
+          if (whiteLabelId2) {
+            targetWhiteLabelId = whiteLabelId2;
           } else {
             targetWhiteLabelId = Math.abs(domainId);
           }
           console.log(`Searching for white-label ID: ${targetWhiteLabelId}`);
-          whiteLabel = whiteLabels6.find((wl) => wl.id === targetWhiteLabelId);
+          whiteLabel = whiteLabels2.find((wl) => wl.id === targetWhiteLabelId);
           if (!whiteLabel) {
-            console.log(`White-label ID ${targetWhiteLabelId} not found. Available IDs: ${whiteLabels6.map((wl) => wl.id).join(", ")}`);
-            if (whiteLabels6.length > 0) {
-              whiteLabel = whiteLabels6[0];
+            console.log(`White-label ID ${targetWhiteLabelId} not found. Available IDs: ${whiteLabels2.map((wl) => wl.id).join(", ")}`);
+            if (whiteLabels2.length > 0) {
+              whiteLabel = whiteLabels2[0];
               console.log(`Using fallback white-label ID: ${whiteLabel.id} (domain: ${whiteLabel.domainPath})`);
             } else {
               return res.status(404).json({
                 error: "White-label entry not found",
-                message: `No white-label records found for user ${user.id}. Available IDs: ${whiteLabels6.map((wl) => wl.id).join(", ")}`
+                message: `No white-label records found for user ${user.id}. Available IDs: ${whiteLabels2.map((wl) => wl.id).join(", ")}`
               });
             }
           }
@@ -12691,9 +14968,10 @@ async function registerRoutes(app2) {
   });
   app2.get("/:domainPath", async (req, res, next) => {
     try {
-      const { domainPath } = req.params;
+      let { domainPath } = req.params;
+      domainPath = decodeURIComponent(domainPath).split("?")[0];
       console.log(`\u{1F50D} FIRST ROUTE HANDLER - Processing domain: ${domainPath}`);
-      if (domainPath.startsWith("api") || domainPath.startsWith("src") || domainPath.startsWith("@") || domainPath.startsWith("node_modules") || domainPath.includes(".") || domainPath === "favicon.ico" || domainPath === "auth" || domainPath === "reset-password" || domainPath === "login" || domainPath === "signup" || domainPath === "pricing" || domainPath === "contact" || domainPath === "white-label" || domainPath === "become-affiliate" || domainPath === "robots.txt" || domainPath === "sitemap.xml" || domainPath === "login" || domainPath === "signup" || domainPath === "dashboard" || domainPath === "super-admin-login" || domainPath === "super-admin" || domainPath === "white-label" || domainPath === "affiliate" || domainPath === "white-label-affiliate" || domainPath === "clients" || domainPath === "plans" || domainPath === "subscriptions" || domainPath === "subscription-plans" || domainPath === "products" || domainPath === "categories" || domainPath === "affiliates" || domainPath === "revenue" || domainPath === "ai-studio" || domainPath === "templates" || domainPath === "integrations" || domainPath === "settings" || domainPath === "landing-builder" || domainPath === "announcements" || domainPath === "news" || domainPath === "analytics" || domainPath === "notifications" || domainPath === "profile" || domainPath === "billing" || domainPath === "support" || domainPath === "help" || domainPath === "admin" || domainPath === "pricing" || domainPath === "become-affiliate" || domainPath === "checkout" || domainPath === "purchase-success" || domainPath === "contact" || domainPath === "commissions" || domainPath === "referrals" || domainPath === "links" || domainPath === "ai-content" || domainPath === "landing-page" || domainPath === "") {
+      if (domainPath.startsWith("api") || domainPath.startsWith("src") || domainPath.startsWith("@") || domainPath.startsWith("node_modules") || domainPath.includes(".") || domainPath === "favicon.ico" || domainPath === "auth" || domainPath === "reset-password" || domainPath === "login" || domainPath === "signup" || domainPath === "pricing" || domainPath === "contact" || domainPath === "white-label" || domainPath === "become-affiliate" || domainPath === "robots.txt" || domainPath === "sitemap.xml" || domainPath === "login" || domainPath === "signup" || domainPath === "dashboard" || domainPath === "super-admin-login" || domainPath === "super-admin" || domainPath === "white-label" || domainPath === "affiliate" || domainPath === "white-label-affiliate" || domainPath === "clients" || domainPath === "users" || domainPath === "plans" || domainPath === "subscriptions" || domainPath === "subscription-plans" || domainPath === "products" || domainPath === "categories" || domainPath === "affiliates" || domainPath === "revenue" || domainPath === "ai-studio" || domainPath === "templates" || domainPath === "integrations" || domainPath === "settings" || domainPath === "landing-builder" || domainPath === "announcements" || domainPath === "news" || domainPath === "analytics" || domainPath === "notifications" || domainPath === "profile" || domainPath === "billing" || domainPath === "support" || domainPath === "help" || domainPath === "admin" || domainPath === "pricing" || domainPath === "become-affiliate" || domainPath === "checkout" || domainPath === "purchase-success" || domainPath === "contact" || domainPath === "commissions" || domainPath === "referrals" || domainPath === "links" || domainPath === "ai-content" || domainPath === "landing-page" || domainPath === "") {
         return next();
       }
       const whiteLabel = await storage.getWhiteLabelByDomainPath(domainPath);
@@ -12715,47 +14993,37 @@ async function registerRoutes(app2) {
           businessName: whiteLabel.business_name,
           userLogo
         };
-        if (!whiteLabel.landingPageCode || whiteLabel.landingPageCode === null) {
-          console.log(`White label ${whiteLabel.id} (${domainPath}) has null landingPageCode - showing Domain Not Available`);
-          return res.status(404).send(`
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>Domain Not Available</title>
-              <style>
-                body { font-family: Arial, sans-serif; text-align: center; margin-top: 100px; }
-                h1 { color: #e74c3c; }
-              </style>
-            </head>
-            <body>
-              <h1>Domain Not Available</h1>
-              <p>This domain is not currently configured.</p>
-            </body>
-            </html>
-          `);
-        }
-        if (whiteLabel.landingPageCode === "default") {
-          console.log(`White label ${whiteLabel.id} (${domainPath}) is configured to use Default template`);
-          try {
-            const defaultTemplate = await storage.getLandingPageByDomainPath("Default");
-            console.log(`Default template fetch result:`, defaultTemplate ? "found" : "not found");
-            if (defaultTemplate && defaultTemplate.elements) {
-              console.log(`Default template has elements, attempting to parse...`);
-              const elements = JSON.parse(defaultTemplate.elements);
-              console.log(`Parsed elements:`, { isArray: Array.isArray(elements), length: Array.isArray(elements) ? elements.length : "not array" });
-              if (Array.isArray(elements) && elements.length > 0) {
-                console.log(`\u2705 Using Default template for white label domain: ${domainPath}`);
-                landingPage = defaultTemplate;
-              } else {
-                console.log(`\u274C Default template elements invalid for domain: ${domainPath}`);
-              }
+        const normalizedLandingPageCode = !whiteLabel.landingPageCode || whiteLabel.landingPageCode === null || whiteLabel.landingPageCode === "NULL" || whiteLabel.landingPageCode === "null" ? null : whiteLabel.landingPageCode;
+        if (normalizedLandingPageCode === "default" || normalizedLandingPageCode === null) {
+          console.log(`White label ${whiteLabel.id} (${domainPath}) is configured to use default landing page`);
+          if (whiteLabel.defaultLandingPageId) {
+            console.log(`Attempting to use white label's default landing page ID: ${whiteLabel.defaultLandingPageId}`);
+            const customLandingPage = await storage.getLandingPage(whiteLabel.defaultLandingPageId);
+            if (customLandingPage && customLandingPage.elements && Array.isArray(customLandingPage.elements) && customLandingPage.elements.length > 0) {
+              console.log(`\u2705 Using white label's default landing page for domain: ${domainPath}`);
+              landingPage = customLandingPage;
             } else {
-              console.log(`\u274C Default template missing or no elements for domain: ${domainPath}`);
+              console.log(`\u274C White label's default landing page has no valid elements`);
             }
-          } catch (error) {
-            console.error("Error fetching Default template for white label:", error);
+          }
+          if (!landingPage) {
+            console.log(`No default landing page set, trying to find by domain path: ${domainPath}`);
+            landingPage = await storage.getLandingPageByDomainPath(domainPath);
+          }
+          if (!landingPage) {
+            console.log(`No landing page found, trying Default template fallback...`);
+            try {
+              const defaultTemplate = await storage.getLandingPageByDomainPath("Default");
+              if (defaultTemplate && defaultTemplate.elements) {
+                const elements = JSON.parse(defaultTemplate.elements);
+                if (Array.isArray(elements) && elements.length > 0) {
+                  console.log(`\u2705 Using Default template for white label domain: ${domainPath}`);
+                  landingPage = defaultTemplate;
+                }
+              }
+            } catch (error) {
+              console.error("Error fetching Default template for white label:", error);
+            }
           }
         } else {
           if (whiteLabel.defaultLandingPageId) {
@@ -12853,9 +15121,9 @@ async function registerRoutes(app2) {
               clientPlans = promotablePlans || [];
               console.log(`Domain ${domainPath}: End-user affiliate domain - showing ${clientPlans.length} promotable plans (client allowed + affiliate enabled) for user ${currentWhiteLabel.userId}`);
             } else {
-              const plans3 = await storage.getPlansByUser(currentWhiteLabel.userId);
-              clientPlans = (plans3 || []).filter((plan) => plan.status === "published");
-              console.log(`Domain ${domainPath}: White-label client's own domain - showing ${clientPlans.length} published plans (${plans3?.length || 0} total) from user ${currentWhiteLabel.userId}`);
+              const plans2 = await storage.getPlansByUser(currentWhiteLabel.userId);
+              clientPlans = (plans2 || []).filter((plan) => plan.status === "published");
+              console.log(`Domain ${domainPath}: White-label client's own domain - showing ${clientPlans.length} published plans (${plans2?.length || 0} total) from user ${currentWhiteLabel.userId}`);
             }
           } else {
             if (domainOwnerUser2 && domainOwnerUser2.role === "super_admin_affiliate") {
@@ -12871,9 +15139,9 @@ async function registerRoutes(app2) {
                 clientPlans = promotablePlans || [];
                 console.log(`Domain ${domainPath}: End-user affiliate domain - showing ${clientPlans.length} promotable plans (client allowed + affiliate enabled) for user ${currentWhiteLabel.userId}`);
               } else {
-                const plans3 = await storage.getPlansByUser(currentWhiteLabel.userId);
-                clientPlans = (plans3 || []).filter((plan) => plan.status === "published");
-                console.log(`Domain ${domainPath}: White-label client's own domain - showing ${clientPlans.length} published plans (${plans3?.length || 0} total) from user ${currentWhiteLabel.userId}`);
+                const plans2 = await storage.getPlansByUser(currentWhiteLabel.userId);
+                clientPlans = (plans2 || []).filter((plan) => plan.status === "published");
+                console.log(`Domain ${domainPath}: White-label client's own domain - showing ${clientPlans.length} published plans (${plans2?.length || 0} total) from user ${currentWhiteLabel.userId}`);
               }
             }
           }
@@ -12882,6 +15150,25 @@ async function registerRoutes(app2) {
         }
       } catch (error) {
         console.error("Error fetching client plans:", error);
+      }
+      const urlParams = new URL(req.url || "", `http://${req.headers.host}`).searchParams;
+      let referralCode = null;
+      referralCode = urlParams.get("ref") || urlParams.get("referralcode") || urlParams.get("referralCode");
+      if (!referralCode) {
+        const standardParams = ["domain", "ref", "referralcode", "referralCode", "context", "plan", "name", "price", "editMode", "customizations"];
+        for (const [key, value] of urlParams.entries()) {
+          if (!standardParams.includes(key) && (value === "" || value === null || value === "null")) {
+            referralCode = key;
+            break;
+          }
+        }
+      }
+      console.log(`\u{1F50D} REFERRAL CODE DETECTION - Domain: ${domainPath}, Referral Code: ${referralCode || "none"}`);
+      if (referralCode && clientPlans.length > 0) {
+        const beforeCount = clientPlans.length;
+        clientPlans = clientPlans.filter((plan) => plan.allowAffiliatePromotion === true);
+        const afterCount = clientPlans.length;
+        console.log(`\u{1F50D} REFERRAL FILTER - Filtered plans from ${beforeCount} to ${afterCount} (showing only plans with allowAffiliatePromotion=true)`);
       }
       console.log("\u{1F50D} ROUTE DEBUG - About to determine domain type for:", domainPath);
       const domainOwnerUser = currentWhiteLabel ? await storage.getUserById(currentWhiteLabel.userId) : null;
@@ -12912,7 +15199,9 @@ async function registerRoutes(app2) {
       console.log("\u{1F50D} ROUTE DEBUG - About to call generateLandingPageHTML");
       const isAuthenticated2 = req.isAuthenticated();
       const authenticatedUser = req.user;
-      const htmlContent = generateLandingPageHTML(landingPage, clientPlans, currentWhiteLabel, isAffiliateDomain, domainOwnerUser, editMode, customizations, isAuthenticated2, authenticatedUser);
+      const loginWhiteLabelId = req.session.login_whitelabel_id || null;
+      console.log("\u{1F50D} LOGIN DOMAIN DEBUG - loginWhiteLabelId from session:", loginWhiteLabelId, "currentWhiteLabelId:", currentWhiteLabel?.id);
+      const htmlContent = generateLandingPageHTML(landingPage, clientPlans, currentWhiteLabel, isAffiliateDomain, domainOwnerUser, editMode, customizations, isAuthenticated2, authenticatedUser, loginWhiteLabelId);
       console.log("\u{1F50D} ROUTE DEBUG - generateLandingPageHTML returned, sending response");
       return res.send(htmlContent);
     } catch (error) {
@@ -12931,35 +15220,47 @@ async function registerRoutes(app2) {
       if (!plan) {
         return res.status(404).json({ error: "Plan not found" });
       }
-      const actualPrice = planPrice || plan.monthlyPrice || "0";
-      let whiteLabelId = req.session?.whiteLabelId;
-      if (!whiteLabelId && req.session?.domainContext) {
-        whiteLabelId = req.session.domainContext.whiteLabelId;
+      const loginWhiteLabelId = req.session.login_whitelabel_id;
+      const planOwnerId = plan.userId;
+      const planOwnerWhiteLabel = await storage.getWhiteLabelByUserId(planOwnerId);
+      if (planOwnerWhiteLabel && loginWhiteLabelId !== planOwnerWhiteLabel.id) {
+        console.log("\u26A0\uFE0F DOMAIN AUTH MISMATCH - User login domain:", loginWhiteLabelId, "Plan owner domain:", planOwnerWhiteLabel.id);
+        return res.status(403).json({
+          error: "Domain authentication required",
+          message: "You must log in through the correct domain to purchase this plan",
+          requiredDomain: planOwnerWhiteLabel.domainPath
+        });
       }
-      if (!whiteLabelId) {
+      console.log("\u2705 DOMAIN AUTH CHECK PASSED - User authenticated on correct domain");
+      const actualPrice = planPrice || plan.monthlyPrice || "0";
+      let whiteLabelId2 = req.session?.whiteLabelId;
+      if (!whiteLabelId2 && req.session?.domainContext) {
+        whiteLabelId2 = req.session.domainContext.whiteLabelId;
+      }
+      if (!whiteLabelId2) {
         console.log("No white label ID found - this might be a direct purchase from main site");
         if (req.user?.role === "white_label_client") {
           const userWhiteLabel = await storage.getWhiteLabelByUserId(req.user.id);
           if (userWhiteLabel) {
-            whiteLabelId = userWhiteLabel.id;
-            console.log("Associated purchase with user own white label:", whiteLabelId);
+            whiteLabelId2 = userWhiteLabel.id;
+            console.log("Associated purchase with user own white label:", whiteLabelId2);
           }
         }
-        if (!whiteLabelId) {
-          whiteLabelId = 1;
+        if (!whiteLabelId2) {
+          whiteLabelId2 = 1;
           console.log("Using default white label ID as fallback");
         }
       }
-      console.log("Checking for existing active subscriptions for white-label ID:", whiteLabelId);
+      console.log("Checking for existing active subscriptions for white-label ID:", whiteLabelId2);
       try {
-        await storage.cancelExistingSubscriptions(whiteLabelId);
+        await storage.cancelExistingSubscriptions(whiteLabelId2);
         console.log("Successfully cancelled existing active subscriptions");
       } catch (error) {
         console.error("Error cancelling existing subscriptions:", error);
       }
       const subscription = await storage.createSubscription({
         userId: req.user?.id,
-        whiteLabelId,
+        whiteLabelId: whiteLabelId2,
         // Corrected field name to match schema
         planId,
         status: status || "active",
@@ -12977,9 +15278,9 @@ async function registerRoutes(app2) {
         // Mock Stripe customer ID
         nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1e3).toISOString()
       });
-      const purchaseHistory3 = await storage.createPurchaseHistory({
+      const purchaseHistory2 = await storage.createPurchaseHistory({
         userId: req.user?.id || "anonymous_user",
-        whiteLabelId,
+        whiteLabelId: whiteLabelId2,
         planId,
         amount: actualPrice,
         transactionId: `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -12996,7 +15297,7 @@ async function registerRoutes(app2) {
       if (referralCode && referralCode.trim() !== "") {
         try {
           const affiliate = await storage.getUserByReferralCode(referralCode.trim());
-          if (affiliate && affiliate.role === "super_admin_affiliate") {
+          if (affiliate && (affiliate.role === "super_admin_affiliate" || affiliate.role === "white_label_affiliate")) {
             const commissionPercentage = parseFloat(plan.affiliateCommissionPercentage || "5");
             const commissionAmount = (parseFloat(actualPrice) * commissionPercentage / 100).toFixed(2);
             await storage.createReferralCommission({
@@ -13012,6 +15313,7 @@ async function registerRoutes(app2) {
             referralCommission = {
               affiliateId: affiliate.id,
               affiliateEmail: affiliate.email,
+              affiliateRole: affiliate.role,
               commissionAmount,
               commissionPercentage
             };
@@ -13069,11 +15371,11 @@ async function registerRoutes(app2) {
         }
       }
       console.log("Subscription created:", subscription);
-      console.log("Purchase history created:", purchaseHistory3);
+      console.log("Purchase history created:", purchaseHistory2);
       res.json({
         success: true,
         subscription,
-        purchaseHistory: purchaseHistory3,
+        purchaseHistory: purchaseHistory2,
         referralCommission,
         message: "Subscription created successfully"
       });
@@ -13090,11 +15392,11 @@ async function registerRoutes(app2) {
       }
       const domain = req.query.domain;
       if (domain) {
-        const subscriptions3 = await storage.getSubscriptionsByDomain(user.id, domain);
-        res.json(subscriptions3);
+        const subscriptions2 = await storage.getSubscriptionsByDomain(user.id, domain);
+        res.json(subscriptions2);
       } else {
-        const subscriptions3 = await storage.getSubscriptions(user.id);
-        res.json(subscriptions3);
+        const subscriptions2 = await storage.getSubscriptions(user.id);
+        res.json(subscriptions2);
       }
     } catch (error) {
       console.error("Error fetching subscriptions:", error);
@@ -13118,9 +15420,9 @@ async function registerRoutes(app2) {
         }
       }
       if (targetUserRole === "white_label_client") {
-        const subscriptions3 = await storage.getSubscriptions(targetUserId);
-        console.log("MY-SUBSCRIPTIONS DEBUG - Found subscriptions for user:", targetUserId, "Count:", subscriptions3.length);
-        res.json(subscriptions3);
+        const subscriptions2 = await storage.getSubscriptions(targetUserId);
+        console.log("MY-SUBSCRIPTIONS DEBUG - Found subscriptions for user:", targetUserId, "Count:", subscriptions2.length);
+        res.json(subscriptions2);
       } else {
         res.json([]);
       }
@@ -13171,10 +15473,14 @@ async function registerRoutes(app2) {
       res.status(500).json({ error: "Failed to update subscription selections" });
     }
   });
-  function generateLandingPageHTML(landingPage, clientPlans, whiteLabel, isAffiliateDomain = false, domainOwnerUser = null, editMode = false, customizations = null, isAuthenticated2 = false, authenticatedUser = null) {
+  function generateLandingPageHTML(landingPage, clientPlans, whiteLabel, isAffiliateDomain = false, domainOwnerUser = null, editMode = false, customizations = null, isAuthenticated2 = false, authenticatedUser = null, loginWhiteLabelId = null) {
     const originalElements = landingPage && landingPage.elements && Array.isArray(landingPage.elements) ? landingPage.elements : [];
     const companyName = whiteLabel?.business_name || "";
     const domainPath = whiteLabel?.domainPath || "dashboard";
+    const currentWhiteLabelId = whiteLabel?.id;
+    const userRole = authenticatedUser?.role;
+    const isEndUser = userRole?.toLowerCase().replace("-", "_") === "end_user";
+    console.log("\u{1F50D} ROLE CHECK - User role:", userRole, "isEndUser:", isEndUser);
     const userLogo = domainOwnerUser?.logoImageUrl;
     console.log("\u{1F50D} LOGO DEBUG - domainOwnerUser:", domainOwnerUser ? { id: domainOwnerUser.id, username: domainOwnerUser.username, logoImageUrl: domainOwnerUser.logoImageUrl } : "null");
     console.log("\u{1F50D} LOGO DEBUG - userLogo:", userLogo);
@@ -13200,7 +15506,7 @@ async function registerRoutes(app2) {
             { text: "Testimonials", url: "#testimonials" },
             { text: "Contact", url: "#contact" }
           ],
-          ctaButton: { text: "\u{1F680} Get Started", url: `/auth?whitelabel_id=${whiteLabel?.id || ""}` }
+          ctaButton: { text: "\u{1F680} Get Started", url: `/login?whitelabel_id=${whiteLabel?.id || ""}` }
         }
       });
     }
@@ -13210,7 +15516,7 @@ async function registerRoutes(app2) {
         content: {
           title: `Transform Your Business with ${companyName}`,
           subtitle: "",
-          ctaButton: { text: "Start Your Journey", url: `/auth?whitelabel_id=${whiteLabel?.id || ""}` },
+          ctaButton: { text: "Start Your Journey", url: `/login?whitelabel_id=${whiteLabel?.id || ""}` },
           secondaryButton: { text: "Learn More", url: "#features" }
         }
       });
@@ -13310,7 +15616,7 @@ async function registerRoutes(app2) {
           ],
           ctaButton: {
             text: "\u{1F680} Start Your Affiliate Journey",
-            url: `/auth?role=affiliate&whitelabel_id=${whiteLabel?.id || ""}`
+            url: `/login?role=affiliate&whitelabel_id=${whiteLabel?.id || ""}`
           }
         }
       });
@@ -13373,8 +15679,8 @@ async function registerRoutes(app2) {
           </div>
           <div style="display: flex; align-items: center; gap: 24px;">
             ${menuHtml}
-            <a href="${isAuthenticated2 ? `/${whiteLabel?.domainPath || "dashboard"}/user` : element.content?.ctaButton?.url || `/auth?whitelabel_id=${whiteLabel?.id || ""}`}" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%); color: white; padding: 12px 24px; border-radius: 50px; font-weight: 700; text-decoration: none; font-size: 14px; box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);">>
-              ${isAuthenticated2 ? "Back to Dashboard" : element.content?.ctaButton?.text || "\u{1F680} Start Free Trial"}
+            <a href="${isEndUser ? `/${whiteLabel?.domainPath || "dashboard"}/user` : element.content?.ctaButton?.url || `/login?whitelabel_id=${whiteLabel?.id || ""}`}" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%); color: white; padding: 12px 24px; border-radius: 50px; font-weight: 700; text-decoration: none; font-size: 14px; box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);">
+              ${isEndUser ? "Back to Dashboard" : element.content?.ctaButton?.text || "\u{1F680} Start Free Trial"}
             </a>
           </div>
         </nav>
@@ -13433,8 +15739,8 @@ async function registerRoutes(app2) {
             </div>
             
             <div class="hero-buttons" style="display: flex; gap: 20px; justify-content: center; align-items: center; flex-wrap: wrap; animation: slideInUp 1s ease-out 0.8s both;">
-              <a href="${isAuthenticated2 ? `/${whiteLabel?.domainPath || "dashboard"}/user` : element.content?.ctaButton?.url || `/auth?whitelabel_id=${whiteLabel?.id || ""}`}" class="btn-primary-hero" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); color: white; padding: 18px 36px; border-radius: 50px; font-weight: 700; font-size: 18px; border: 2px solid rgba(255, 255, 255, 0.3); text-decoration: none; display: inline-flex; align-items: center; gap: 12px; transition: all 0.4s ease; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); position: relative; overflow: hidden;">>
-                <span style="position: relative; z-index: 2;">${isAuthenticated2 ? "Back to Dashboard" : ctaButtonText}</span>
+              <a href="${isEndUser ? `/${whiteLabel?.domainPath || "dashboard"}/user` : element.content?.ctaButton?.url || `/login?whitelabel_id=${whiteLabel?.id || ""}`}" class="btn-primary-hero" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); color: white; padding: 18px 36px; border-radius: 50px; font-weight: 700; font-size: 18px; border: 2px solid rgba(255, 255, 255, 0.3); text-decoration: none; display: inline-flex; align-items: center; gap: 12px; transition: all 0.4s ease; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); position: relative; overflow: hidden;">
+                <span style="position: relative; z-index: 2;">${isEndUser ? "Back to Dashboard" : ctaButtonText}</span>
               </a>
               <a href="${element.content?.secondaryButton?.url || "#demo"}" class="btn-secondary-hero" style="background: transparent; color: white; padding: 18px 36px; border-radius: 50px; font-weight: 600; font-size: 16px; border: 2px solid rgba(255, 255, 255, 0.4); text-decoration: none; display: inline-flex; align-items: center; gap: 12px; transition: all 0.4s ease;">
                 ${element.content?.secondaryButton?.text || "\u{1F4F9} Watch Demo"}
@@ -13474,8 +15780,8 @@ async function registerRoutes(app2) {
           { title: "24/7 Support", description: "Round-the-clock customer support", icon: "clock" },
           { title: "Easy Integration", description: "Simple setup with existing tools", icon: "support" }
         ];
-        const featuresHtml = features.map((feature, index) => `
-        <div class="feature-card" style="background: white; padding: 40px 30px; border-radius: 16px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.4s ease; position: relative; overflow: hidden; border: 1px solid rgba(99, 102, 241, 0.1);" data-aos="fade-up" data-aos-delay="${index * 100}">
+        const featuresHtml = features.map((feature, index2) => `
+        <div class="feature-card" style="background: white; padding: 40px 30px; border-radius: 16px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.4s ease; position: relative; overflow: hidden; border: 1px solid rgba(99, 102, 241, 0.1);" data-aos="fade-up" data-aos-delay="${index2 * 100}">
           <!-- Gradient overlay on hover -->
           <div class="card-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%); opacity: 0; transition: opacity 0.3s ease;"></div>
           
@@ -13523,7 +15829,7 @@ async function registerRoutes(app2) {
       `;
       } else if (element.type === "testimonials") {
         const testimonials = element.content?.testimonials || [];
-        const testimonialsHtml = testimonials.map((testimonial, index) => `
+        const testimonialsHtml = testimonials.map((testimonial, index2) => `
         <div class="testimonial-card scroll-animate-scale" style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: center; position: relative; overflow: hidden; transition: all 0.3s ease;">
           <div class="card-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.05)); opacity: 0; transition: opacity 0.3s ease;"></div>
           <div style="position: relative; z-index: 2;">
@@ -13602,8 +15908,8 @@ async function registerRoutes(app2) {
             </div>
             
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 40px; margin-bottom: 4rem;">
-              ${(element.content?.features || []).map((feature, index) => `
-                <div class="feature-card fade-in-up" style="background: white; padding: 40px 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); text-align: center; transition: all 0.3s ease; border: 1px solid rgba(99, 102, 241, 0.1); animation-delay: ${index * 0.1}s;" onmouseover="this.style.transform='translateY(-10px)'; this.style.boxShadow='0 20px 60px rgba(99, 102, 241, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 40px rgba(0, 0, 0, 0.08)'">
+              ${(element.content?.features || []).map((feature, index2) => `
+                <div class="feature-card fade-in-up" style="background: white; padding: 40px 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); text-align: center; transition: all 0.3s ease; border: 1px solid rgba(99, 102, 241, 0.1); animation-delay: ${index2 * 0.1}s;" onmouseover="this.style.transform='translateY(-10px)'; this.style.boxShadow='0 20px 60px rgba(99, 102, 241, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 40px rgba(0, 0, 0, 0.08)'">
                   <div style="font-size: 3rem; margin-bottom: 1.5rem; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));">
                     ${feature.icon || "\u2B50"}
                   </div>
@@ -13630,7 +15936,7 @@ async function registerRoutes(app2) {
                   Join thousands of successful affiliates who are already earning with our platform. Get started today and unlock your earning potential!
                 </p>
                 
-                <a href="${element.content?.ctaButton?.url || "/auth?role=affiliate"}" class="cta-button" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; padding: 20px 50px; border-radius: 50px; font-weight: 700; text-decoration: none; font-size: 18px; display: inline-flex; align-items: center; gap: 15px; border: 2px solid rgba(255,255,255,0.3); transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.2);" onmouseover="this.style.transform='translateY(-3px) scale(1.05)'; this.style.boxShadow='0 15px 40px rgba(0,0,0,0.3)'; this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 10px 30px rgba(0,0,0,0.2)'; this.style.background='rgba(255,255,255,0.2)'">
+                <a href="${element.content?.ctaButton?.url || "/login?role=affiliate"}" class="cta-button" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; padding: 20px 50px; border-radius: 50px; font-weight: 700; text-decoration: none; font-size: 18px; display: inline-flex; align-items: center; gap: 15px; border: 2px solid rgba(255,255,255,0.3); transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.2);" onmouseover="this.style.transform='translateY(-3px) scale(1.05)'; this.style.boxShadow='0 15px 40px rgba(0,0,0,0.3)'; this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 10px 30px rgba(0,0,0,0.2)'; this.style.background='rgba(255,255,255,0.2)'">
                   <span>${element.content?.ctaButton?.text || "\u{1F680} Start Your Affiliate Journey"}</span>
                 </a>
               </div>
@@ -13707,8 +16013,8 @@ async function registerRoutes(app2) {
                 <h3 style="font-size: 2rem; font-weight: 700; margin-bottom: 1rem; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Ready to Get Started?</h3>
                 <p style="font-size: 1.1rem; color: rgba(255,255,255,0.9); margin-bottom: 2rem; line-height: 1.6;">Join thousands of satisfied customers who have transformed their business with our solutions.</p>
                 
-                <a href="${isAuthenticated2 ? `/${whiteLabel?.domainPath || "dashboard"}/user` : element.content?.ctaButton?.url || `/auth?whitelabel_id=${whiteLabel?.id || ""}`}" class="cta-button" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%); color: white; padding: 20px 40px; border-radius: 50px; font-weight: 700; text-decoration: none; font-size: 18px; display: inline-flex; align-items: center; gap: 12px; box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4); transition: all 0.3s ease; position: relative; overflow: hidden;" onmouseover="this.style.transform='translateY(-3px) scale(1.05)'; this.style.boxShadow='0 15px 40px rgba(99, 102, 241, 0.6)'" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 10px 30px rgba(99, 102, 241, 0.4)'">>
-                  <span style="position: relative; z-index: 1;">${isAuthenticated2 ? "Back to Dashboard" : element.content?.ctaButton?.text || "\u{1F680} Start Your Journey"}</span>
+                <a href="${isEndUser ? `/${whiteLabel?.domainPath || "dashboard"}/user` : element.content?.ctaButton?.url || `/login?whitelabel_id=${whiteLabel?.id || ""}`}" class="cta-button" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%); color: white; padding: 20px 40px; border-radius: 50px; font-weight: 700; text-decoration: none; font-size: 18px; display: inline-flex; align-items: center; gap: 12px; box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4); transition: all 0.3s ease; position: relative; overflow: hidden;" onmouseover="this.style.transform='translateY(-3px) scale(1.05)'; this.style.boxShadow='0 15px 40px rgba(99, 102, 241, 0.6)'" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 10px 30px rgba(99, 102, 241, 0.4)'">
+                  <span style="position: relative; z-index: 1;">${isEndUser ? "Back to Dashboard" : element.content?.ctaButton?.text || "\u{1F680} Start Your Journey"}</span>
                   <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 100%); opacity: 0; transition: opacity 0.3s ease;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'"></div>
                 </a>
               </div>
@@ -13743,10 +16049,10 @@ async function registerRoutes(app2) {
           </section>
         `;
         }
-        const plansHtml = (clientPlans || []).map((plan, index) => {
+        const plansHtml = (clientPlans || []).map((plan, index2) => {
           const price = plan.monthlyPrice || plan.monthly_price || plan.price;
           const displayPrice = price ? "$" + price : "Contact for Pricing";
-          const isPopular = index === 1 || plan.popular;
+          const isPopular = index2 === 1 || plan.popular;
           let features = [];
           try {
             if (plan.features && typeof plan.features === "string") {
@@ -13800,10 +16106,42 @@ async function registerRoutes(app2) {
               </div>
             `}
           </div>
-          <button onclick="navigateToCheckout('${plan.id}', '${plan.name}', '${price || 0}')" 
-                  style="width: 100%; background: ${isPopular ? "linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%)" : "#f8fafc"}; color: ${isPopular ? "white" : "#6366f1"}; padding: 16px 24px; border: ${isPopular ? "none" : "2px solid #6366f1"}; border-radius: 50px; font-weight: 700; cursor: pointer; font-size: 16px; transition: all 0.3s ease; box-shadow: ${isPopular ? "0 8px 25px rgba(99, 102, 241, 0.4)" : "none"};">
-            ${isPopular ? "\u{1F680} Get Started Now" : "Choose Plan"}
-          </button>
+          ${!isAuthenticated2 ? `
+            <!-- User NOT logged in - Show "Join First" button -->
+            <div style="margin-bottom: 1rem;">
+              <div style="background: #fef3c7; border: 2px solid #fbbf24; border-radius: 12px; padding: 12px; margin-bottom: 12px;">
+                <p style="color: #92400e; font-size: 14px; font-weight: 600; margin: 0;">
+                  \u{1F510} Join First Then Purchase
+                </p>
+              </div>
+              <a href="/login?whitelabel_id=${currentWhiteLabelId}" 
+                 style="display: block; width: 100%; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%); color: white; padding: 16px 24px; border: none; border-radius: 50px; font-weight: 700; text-align: center; text-decoration: none; font-size: 16px; transition: all 0.3s ease; box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);">
+                \u{1F680} Join Now
+              </a>
+            </div>
+          ` : !isEndUser ? `
+            <!-- User logged in with non-end_user role - Show logout/re-login prompt -->
+            <div style="margin-bottom: 1rem;">
+              <div style="background: #fee2e2; border: 2px solid #ef4444; border-radius: 12px; padding: 12px; margin-bottom: 12px;">
+                <p style="color: #991b1b; font-size: 13px; font-weight: 600; margin: 0 0 8px 0;">
+                  \u26A0\uFE0F You already login on the system with other role
+                </p>
+                <p style="color: #7f1d1d; font-size: 12px; margin: 0;">
+                  Please click on Continue and relogin clearly.
+                </p>
+              </div>
+              <button onclick="handleDomainLogout()" 
+                      style="width: 100%; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 16px 24px; border: none; border-radius: 50px; font-weight: 700; cursor: pointer; font-size: 16px; transition: all 0.3s ease; box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);">
+                \u{1F504} Continue
+              </button>
+            </div>
+          ` : `
+            <!-- User authenticated as end_user - Normal purchase button -->
+            <button onclick="navigateToCheckout('${plan.id}', '${plan.name}', '${price || 0}')" 
+                    style="width: 100%; background: ${isPopular ? "linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%)" : "#f8fafc"}; color: ${isPopular ? "white" : "#6366f1"}; padding: 16px 24px; border: ${isPopular ? "none" : "2px solid #6366f1"}; border-radius: 50px; font-weight: 700; cursor: pointer; font-size: 16px; transition: all 0.3s ease; box-shadow: ${isPopular ? "0 8px 25px rgba(99, 102, 241, 0.4)" : "none"};">
+              ${isPopular ? "\u{1F680} Get Started Now" : "Choose Plan"}
+            </button>
+          `}
         </div>
       `;
         }).join("");
@@ -13871,20 +16209,23 @@ async function registerRoutes(app2) {
       } else if (element.type === "footer") {
         const links = element.content?.links || [];
         const socialMedia = element.content?.socialMedia || [];
-        const linksHtml = links.map((category) => `
-        <div style="margin-bottom: 2rem;">
-          <h4 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: #1a202c;">${category.category}</h4>
-          <ul style="list-style: none; padding: 0; margin: 0;">
-            ${category.items.map((item) => `
-              <li style="margin-bottom: 8px;">
-                <a href="${item.url}" style="color: #6b7280; text-decoration: none; font-size: 0.9rem; transition: color 0.3s ease;">
-                  ${item.text}
-                </a>
-              </li>
-            `).join("")}
-          </ul>
-        </div>
-      `).join("");
+        const linksHtml = links.map((category) => {
+          const items = category?.items || [];
+          return `
+          <div style="margin-bottom: 2rem;">
+            <h4 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: #1a202c;">${category?.category || ""}</h4>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              ${items.map((item) => `
+                <li style="margin-bottom: 8px;">
+                  <a href="${item.url}" style="color: #6b7280; text-decoration: none; font-size: 0.9rem; transition: color 0.3s ease;">
+                    ${item.text}
+                  </a>
+                </li>
+              `).join("")}
+            </ul>
+          </div>
+        `;
+        }).join("");
         const socialHtml = socialMedia.map((social) => `
         <a href="${social.url}" style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: #f3f4f6; border-radius: 50%; color: #6b7280; text-decoration: none; font-size: 1.2rem; transition: all 0.3s ease; margin-right: 12px;">
           ${social.icon}
@@ -14946,7 +17287,7 @@ async function registerRoutes(app2) {
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">Expiry Date</label>
-                <input type="text" class="form-input" id="expiryDate" placeholder="MM/YY" required>
+                <input type="text" class="form-input" id="expiryDate" placeholder="MM/YY" maxlength="5" required>
               </div>
               <div class="form-group">
                 <label class="form-label">CVV</label>
@@ -15400,28 +17741,18 @@ async function registerRoutes(app2) {
         };
         
         window.formatExpiryDate = function(input) {
-          let value = input.value.replace(/D/g, '');
+          // Remove all non-digits
+          const v = input.value.replace(/D/g, '');
           
           // Limit to 4 digits (MMYY)
-          if (value.length > 4) {
-            value = value.substring(0, 4);
-          }
+          const limited = v.substring(0, 4);
           
-          // Add slash after month (MM/)
-          if (value.length >= 2) {
-            value = value.substring(0, 2) + '/' + value.substring(2, 4);
+          // Add slash after 2 digits
+          if (limited.length >= 2) {
+            input.value = limited.substring(0, 2) + '/' + limited.substring(2);
+          } else {
+            input.value = limited;
           }
-          
-          // Validate month (01-12)
-          if (value.length >= 2) {
-            const month = parseInt(value.substring(0, 2));
-            if (month < 1 || month > 12) {
-              // Reset to valid month if invalid
-              value = value.length > 2 ? '12/' + value.substring(3) : '12';
-            }
-          }
-          
-          input.value = value;
         };
         
         window.openLoginModal = function() {
@@ -15480,6 +17811,24 @@ async function registerRoutes(app2) {
               window.location.reload();
             })
             .catch(console.error);
+        };
+        
+        // Domain-specific logout and redirect
+        window.handleDomainLogout = function() {
+          const whiteLabelId = ${currentWhiteLabelId || "null"};
+          
+          // Logout the user
+          fetch('/api/logout', { method: 'POST' })
+            .then(response => response.json())
+            .then(() => {
+              // Redirect to auth page with correct whitelabel_id
+              window.location.href = \`/auth?whitelabel_id=\${whiteLabelId}\`;
+            })
+            .catch(err => {
+              console.error('Domain logout error:', err);
+              // Still redirect even if logout fails
+              window.location.href = \`/auth?whitelabel_id=\${whiteLabelId}\`;
+            });
         };
         
         // Authentication status check
@@ -15800,7 +18149,7 @@ async function registerRoutes(app2) {
       if (!user || user.role !== "super_admin_affiliate") {
         return res.status(403).json({ error: "Access denied. Super Admin Affiliate role required." });
       }
-      const superAdminAnnouncements = await storage.getSuperAdminAnnouncements();
+      const superAdminAnnouncements = await storage.getSuperAdminAnnouncements(user.id);
       res.json(superAdminAnnouncements);
     } catch (error) {
       console.error("Error fetching Super Admin announcements:", error);
@@ -15866,10 +18215,10 @@ async function registerRoutes(app2) {
       const userReferralCode = currentUser?.referralCode;
       const commissionData = await Promise.all(
         mainSitePlans.map(async (plan) => {
-          const commissions2 = await db.select().from(referralCommissions2).where(
+          const commissions2 = await db.select().from(referralCommissions).where(
             and4(
-              eq5(referralCommissions2.affiliateId, user.id),
-              eq5(referralCommissions2.planId, plan.id)
+              eq6(referralCommissions.affiliateId, user.id),
+              eq6(referralCommissions.planId, plan.id)
             )
           );
           const totalPurchases = commissions2.length;
@@ -16065,11 +18414,279 @@ async function registerRoutes(app2) {
       res.status(500).json({ error: "Failed to fetch payment history" });
     }
   });
+  app2.get("/api/white-label-affiliate/plans", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== "white_label_affiliate") {
+        return res.status(403).json({ error: "Access denied. White Label Affiliate role required." });
+      }
+      const whiteLabelIdToUse = user.affiliateOfWhiteLabelId || user.whiteLabelId;
+      if (!whiteLabelIdToUse) {
+        return res.status(400).json({ error: "No white label association found for this affiliate" });
+      }
+      const whiteLabel = await storage.getWhiteLabelById(whiteLabelIdToUse);
+      if (!whiteLabel) {
+        return res.status(404).json({ error: "Associated white label not found" });
+      }
+      const allPlans = await storage.getPlansByUser(whiteLabel.userId);
+      const affiliatePromotablePlans = allPlans.filter(
+        (plan) => plan.allowAffiliatePromotion === true && plan.status === "published"
+      );
+      res.json(affiliatePromotablePlans);
+    } catch (error) {
+      console.error("Error fetching white label plans for affiliate:", error);
+      res.status(500).json({ error: "Failed to fetch white label plans" });
+    }
+  });
+  app2.get("/api/white-label-affiliate/announcements", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== "white_label_affiliate") {
+        return res.status(403).json({ error: "Access denied. White Label Affiliate role required." });
+      }
+      const whiteLabelIdToUse = user.affiliateOfWhiteLabelId || user.whiteLabelId;
+      if (!whiteLabelIdToUse) {
+        return res.status(400).json({ error: "No white label association found for this affiliate" });
+      }
+      const whiteLabel = await storage.getWhiteLabelById(whiteLabelIdToUse);
+      if (!whiteLabel) {
+        return res.status(404).json({ error: "Associated white label not found" });
+      }
+      const announcements3 = await storage.getAnnouncementsByWhiteLabelId(whiteLabel.id, user.id);
+      res.json(announcements3);
+    } catch (error) {
+      console.error("Error fetching white label announcements:", error);
+      res.status(500).json({ error: "Failed to fetch announcements" });
+    }
+  });
+  app2.post("/api/white-label-affiliate/announcements/:id/like", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      const { id } = req.params;
+      if (!user || user.role !== "white_label_affiliate") {
+        return res.status(403).json({ error: "Access denied. White Label Affiliate role required." });
+      }
+      await storage.likeAnnouncement(parseInt(id), user.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error liking announcement:", error);
+      res.status(500).json({ error: "Failed to like announcement" });
+    }
+  });
+  app2.get("/api/white-label-affiliate/referral-code", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== "white_label_affiliate") {
+        return res.status(403).json({ error: "Access denied. White Label Affiliate role required." });
+      }
+      const currentUser = await storage.getUserById(user.id);
+      res.json({
+        referralCode: currentUser?.referralCode || null,
+        hasReferralCode: !!currentUser?.referralCode
+      });
+    } catch (error) {
+      console.error("Error fetching referral code:", error);
+      res.status(500).json({ error: "Failed to fetch referral code" });
+    }
+  });
+  app2.put("/api/white-label-affiliate/referral-code", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      const { referralCode } = req.body;
+      if (!user || user.role !== "white_label_affiliate") {
+        return res.status(403).json({ error: "Access denied. White Label Affiliate role required." });
+      }
+      if (!referralCode || referralCode.trim() === "") {
+        return res.status(400).json({ error: "Referral code is required" });
+      }
+      const cleanCode = referralCode.toLowerCase().replace(/[^a-z0-9]/g, "");
+      const isAvailable = await storage.checkReferralCodeAvailability(cleanCode, user.id);
+      if (!isAvailable) {
+        return res.status(400).json({
+          error: "Referral code not available",
+          status: "unavailable"
+        });
+      }
+      await storage.updateUserReferralCode(user.id, cleanCode);
+      res.json({
+        referralCode: cleanCode,
+        status: "updated",
+        message: "Referral code updated successfully"
+      });
+    } catch (error) {
+      console.error("Error updating referral code:", error);
+      res.status(500).json({ error: "Failed to update referral code" });
+    }
+  });
+  app2.post("/api/white-label-affiliate/check-referral-code", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      const { referralCode } = req.body;
+      if (!user || user.role !== "white_label_affiliate") {
+        return res.status(403).json({ error: "Access denied. White Label Affiliate role required." });
+      }
+      if (!referralCode) {
+        return res.status(400).json({ error: "Referral code is required" });
+      }
+      const cleanCode = referralCode.toLowerCase().replace(/[^a-z0-9]/g, "");
+      const currentUser = await storage.getUserById(user.id);
+      if (currentUser?.referralCode && currentUser.referralCode.toLowerCase() === cleanCode) {
+        return res.json({
+          status: "current",
+          message: "Your Current Referral Code"
+        });
+      }
+      console.log("Checking availability for referral code:", cleanCode, "excluding user:", user.id);
+      const isAvailable = await storage.checkReferralCodeAvailability(cleanCode, user.id);
+      console.log("Referral code availability result:", isAvailable);
+      res.json({
+        status: isAvailable ? "available" : "unavailable",
+        message: isAvailable ? "Available" : "Not Available"
+      });
+    } catch (error) {
+      console.error("Error checking referral code:", error);
+      res.status(500).json({ error: "Failed to check referral code" });
+    }
+  });
+  app2.post("/api/white-label-affiliate/save-referral-code", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      const { referralCode } = req.body;
+      if (!user || user.role !== "white_label_affiliate") {
+        return res.status(403).json({ error: "Access denied. White Label Affiliate role required." });
+      }
+      if (!referralCode) {
+        return res.status(400).json({ error: "Referral code is required" });
+      }
+      const cleanCode = referralCode.toLowerCase().replace(/[^a-z0-9]/g, "");
+      const isAvailable = await storage.checkReferralCodeAvailability(cleanCode, user.id);
+      if (!isAvailable) {
+        return res.status(400).json({
+          error: "Referral code not available",
+          status: "unavailable"
+        });
+      }
+      await storage.updateUserReferralCode(user.id, cleanCode);
+      res.json({
+        referralCode: cleanCode,
+        status: "updated",
+        message: "Referral code updated successfully"
+      });
+    } catch (error) {
+      console.error("Error updating referral code:", error);
+      res.status(500).json({ error: "Failed to update referral code" });
+    }
+  });
+  app2.get("/api/white-label-affiliate/payment-account", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== "white_label_affiliate") {
+        return res.status(403).json({ error: "Access denied. White Label Affiliate role required." });
+      }
+      const paymentAccount = await storage.getAffiliatePaymentAccount(user.id);
+      res.json(paymentAccount);
+    } catch (error) {
+      console.error("Error fetching payment account:", error);
+      res.status(500).json({ error: "Failed to fetch payment account" });
+    }
+  });
+  app2.post("/api/white-label-affiliate/payment-account", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      const { bankName, accountOwnerName, accountNumber, accountType } = req.body;
+      if (!user || user.role !== "white_label_affiliate") {
+        return res.status(403).json({ error: "Access denied. White Label Affiliate role required." });
+      }
+      if (!bankName || !accountOwnerName || !accountNumber || !accountType) {
+        return res.status(400).json({ error: "All fields are required" });
+      }
+      const newAccount = await storage.createPaymentAccount({
+        userId: user.id,
+        bankName,
+        accountOwnerName,
+        accountNumber,
+        accountType
+      });
+      res.json(newAccount);
+    } catch (error) {
+      console.error("Error creating payment account:", error);
+      res.status(500).json({ error: "Failed to create payment account" });
+    }
+  });
+  app2.put("/api/white-label-affiliate/payment-account", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      const { bankName, accountOwnerName, accountNumber, accountType } = req.body;
+      if (!user || user.role !== "white_label_affiliate") {
+        return res.status(403).json({ error: "Access denied. White Label Affiliate role required." });
+      }
+      if (!bankName || !accountOwnerName || !accountNumber || !accountType) {
+        return res.status(400).json({ error: "All fields are required" });
+      }
+      const updatedAccount = await storage.updatePaymentAccount(user.id, {
+        bankName,
+        accountOwnerName,
+        accountNumber,
+        accountType
+      });
+      res.json(updatedAccount);
+    } catch (error) {
+      console.error("Error updating payment account:", error);
+      res.status(500).json({ error: "Failed to update payment account" });
+    }
+  });
+  app2.get("/api/white-label-affiliate/payment-history", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== "white_label_affiliate") {
+        return res.status(403).json({ error: "Access denied. White Label Affiliate role required." });
+      }
+      console.log(`\u{1F4B0} Fetching payment history for white_label_affiliate: ${user.id} (${user.email})`);
+      const payments = await storage.getAffiliatePayments(user.id);
+      console.log(`\u{1F4B0} Found ${payments.length} payments for affiliate ${user.id}:`, payments);
+      const totalPaid = await storage.getTotalPaidToAffiliate(user.id);
+      console.log(`\u{1F4B0} Total paid to affiliate ${user.id}: $${totalPaid}`);
+      res.json(payments);
+    } catch (error) {
+      console.error("Error fetching payment history:", error);
+      res.status(500).json({ error: "Failed to fetch payment history" });
+    }
+  });
+  app2.get("/api/white-label-affiliate/commissions", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== "white_label_affiliate") {
+        return res.status(403).json({ error: "Access denied. White Label Affiliate role required." });
+      }
+      const commissions2 = await storage.getAffiliateCommissions(user.id);
+      res.json(commissions2);
+    } catch (error) {
+      console.error("Error fetching commissions:", error);
+      res.status(500).json({ error: "Failed to fetch commissions" });
+    }
+  });
+  app2.get("/api/white-label-affiliate/referrals", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== "white_label_affiliate") {
+        return res.status(403).json({ error: "Access denied. White Label Affiliate role required." });
+      }
+      const currentUser = await storage.getUserById(user.id);
+      if (!currentUser?.referralCode) {
+        return res.json([]);
+      }
+      const referrals = await storage.getUsersByReferralCode(currentUser.referralCode);
+      res.json(referrals);
+    } catch (error) {
+      console.error("Error fetching referrals:", error);
+      res.status(500).json({ error: "Failed to fetch referrals" });
+    }
+  });
   app2.get("/api/affiliate-payment-summary", isAuthenticated, async (req, res) => {
     try {
       const user = req.user;
-      if (!user || user.role !== "super_admin" && user.role !== "super_admin_affiliate") {
-        return res.status(403).json({ error: "Access denied. Super Admin or Super Admin Affiliate role required." });
+      if (!user || user.role !== "super_admin" && user.role !== "super_admin_affiliate" && user.role !== "white_label_client") {
+        return res.status(403).json({ error: "Access denied. Super Admin, Super Admin Affiliate, or White Label Client role required." });
       }
       const paymentSummary = await storage.getAffiliatePaymentSummary(user.id);
       res.json(paymentSummary);
@@ -16083,9 +18700,9 @@ async function registerRoutes(app2) {
       const user = req.user;
       const { affiliateId } = req.params;
       console.log(`\u{1F3AF} API Request: Get payment account for affiliate ${affiliateId} by user ${user.id} (${user.role})`);
-      if (!user || user.role !== "super_admin" && user.role !== "super_admin_affiliate") {
+      if (!user || user.role !== "super_admin" && user.role !== "super_admin_affiliate" && user.role !== "white_label_client") {
         console.log(`\u274C Access denied for user ${user?.id} with role ${user?.role}`);
-        return res.status(403).json({ error: "Access denied. Super Admin or Super Admin Affiliate role required." });
+        return res.status(403).json({ error: "Access denied. Super Admin, Super Admin Affiliate, or White Label Client role required." });
       }
       console.log(`\u2705 Access granted, calling storage.getAffiliatePaymentAccount(${affiliateId})`);
       const paymentAccount = await storage.getAffiliatePaymentAccount(affiliateId);
@@ -16100,8 +18717,11 @@ async function registerRoutes(app2) {
     try {
       const user = req.user;
       const { affiliateId, amount, paymentMethod, transactionProofUrl, description } = req.body;
-      if (!user || user.role !== "super_admin" && user.role !== "super_admin_affiliate") {
-        return res.status(403).json({ error: "Access denied. Super Admin or Super Admin Affiliate role required." });
+      console.log("\u{1F4B0} PAYMENT DEBUG - User:", user.role, user.id);
+      console.log("\u{1F4B0} PAYMENT DEBUG - Request body:", JSON.stringify(req.body, null, 2));
+      console.log("\u{1F4B0} PAYMENT DEBUG - transactionProofUrl:", transactionProofUrl);
+      if (!user || user.role !== "super_admin" && user.role !== "super_admin_affiliate" && user.role !== "white_label_client") {
+        return res.status(403).json({ error: "Access denied. Super Admin, Super Admin Affiliate, or White Label Client role required." });
       }
       if (!affiliateId || !amount) {
         return res.status(400).json({ error: "Affiliate ID and amount are required" });
@@ -16166,8 +18786,8 @@ async function registerRoutes(app2) {
   app2.post("/api/upload-payment-proof", isAuthenticated, upload.single("proofImage"), async (req, res) => {
     try {
       const user = req.user;
-      if (!user || user.role !== "super_admin" && user.role !== "super_admin_affiliate") {
-        return res.status(403).json({ error: "Access denied. Super Admin or Super Admin Affiliate role required." });
+      if (!user || user.role !== "super_admin" && user.role !== "super_admin_affiliate" && user.role !== "white_label_client") {
+        return res.status(403).json({ error: "Access denied. Super Admin, Super Admin Affiliate, or White Label Client role required." });
       }
       if (!req.file) {
         return res.status(400).json({ error: "No proof image uploaded" });
@@ -16183,8 +18803,14 @@ async function registerRoutes(app2) {
     try {
       const user = req.user;
       const { affiliateId } = req.params;
-      if (!user || user.role !== "super_admin") {
-        return res.status(403).json({ error: "Access denied. Super Admin role required." });
+      if (!user || user.role !== "super_admin" && user.role !== "white_label_client") {
+        return res.status(403).json({ error: "Access denied. Super Admin or White Label Client role required." });
+      }
+      if (user.role === "white_label_client") {
+        const affiliate = await storage.getUserById(affiliateId);
+        if (!affiliate || affiliate.whiteLabelId !== user.whiteLabelId && affiliate.affiliateOfWhiteLabelId !== user.whiteLabelId) {
+          return res.status(403).json({ error: "Access denied. You can only view your own affiliates' payment history." });
+        }
       }
       const payments = await storage.getAffiliatePayments(affiliateId);
       res.json(payments);
@@ -16223,10 +18849,10 @@ async function registerRoutes(app2) {
         return res.status(400).json({ error: "Current password is incorrect" });
       }
       const hashedNewPassword = await hashPassword2(newPassword);
-      await db.update(users4).set({
+      await db.update(users).set({
         password: hashedNewPassword,
         updatedAt: /* @__PURE__ */ new Date()
-      }).where(eq5(users4.id, targetUserId));
+      }).where(eq6(users.id, targetUserId));
       console.log(`Password updated successfully for user ${targetUserId} (${currentUser.username})`);
       res.json({
         success: true,
@@ -16283,7 +18909,7 @@ async function registerRoutes(app2) {
           console.log("PROFILE-UPDATE DEBUG - Updating profile for impersonated user:", targetUserId);
         }
       }
-      await db.update(users4).set({
+      await db.update(users).set({
         firstName: firstName || targetUser.firstName,
         lastName: lastName || targetUser.lastName,
         email: email || targetUser.email,
@@ -16291,8 +18917,8 @@ async function registerRoutes(app2) {
         company: company || targetUser.company,
         profileImageUrl: profileImageUrl || targetUser.profileImageUrl,
         updatedAt: /* @__PURE__ */ new Date()
-      }).where(eq5(users4.id, targetUserId));
-      const [updatedUser] = await db.select().from(users4).where(eq5(users4.id, targetUserId)).limit(1);
+      }).where(eq6(users.id, targetUserId));
+      const [updatedUser] = await db.select().from(users).where(eq6(users.id, targetUserId)).limit(1);
       console.log(`Profile updated successfully for user ${targetUserId} (${updatedUser.username})`);
       res.json({
         success: true,
@@ -16414,10 +19040,10 @@ async function registerRoutes(app2) {
             targetUserId = req.session.impersonatedUserId;
             console.log("PROFILE-UPLOAD DEBUG - Using impersonated user ID for profile upload:", targetUserId);
           }
-          await db.update(users4).set({
+          await db.update(users).set({
             profileImageUrl: fileUrl,
             updatedAt: /* @__PURE__ */ new Date()
-          }).where(eq5(users4.id, targetUserId));
+          }).where(eq6(users.id, targetUserId));
           console.log(`Profile image updated for user ${targetUserId}: ${fileUrl}`);
         } catch (dbError) {
           console.error("Database update error:", dbError);
@@ -16456,17 +19082,17 @@ async function registerRoutes(app2) {
     try {
       const user = req.user;
       const purchases = await db.select({
-        amount: purchaseHistory2.amount,
-        createdAt: purchaseHistory2.createdAt
-      }).from(purchaseHistory2).where(
+        amount: purchaseHistory.amount,
+        createdAt: purchaseHistory.createdAt
+      }).from(purchaseHistory).where(
         and4(
-          eq5(purchaseHistory2.status, "completed"),
-          user.role === "super_admin" ? void 0 : eq5(
-            purchaseHistory2.whiteLabelId,
+          eq6(purchaseHistory.status, "completed"),
+          user.role === "super_admin" ? void 0 : eq6(
+            purchaseHistory.whiteLabelId,
             (await storage.getWhiteLabelByUserId(user.id))?.id || 0
           )
         )
-      ).orderBy(purchaseHistory2.createdAt);
+      ).orderBy(purchaseHistory.createdAt);
       const monthlyData = purchases.reduce((acc, purchase) => {
         const date = new Date(purchase.createdAt);
         const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
@@ -16488,21 +19114,21 @@ async function registerRoutes(app2) {
     try {
       const user = req.user;
       const planStats = await db.select({
-        planName: plans2.name,
+        planName: plans.name,
         count: sql3`count(*)`
-      }).from(subscriptions2).innerJoin(plans2, eq5(subscriptions2.planId, plans2.id)).where(
+      }).from(subscriptions).innerJoin(plans, eq6(subscriptions.planId, plans.id)).where(
         and4(
-          eq5(subscriptions2.status, "active"),
-          user.role === "super_admin" ? void 0 : eq5(
-            subscriptions2.whiteLabelId,
+          eq6(subscriptions.status, "active"),
+          user.role === "super_admin" ? void 0 : eq6(
+            subscriptions.whiteLabelId,
             (await storage.getWhiteLabelByUserId(user.id))?.id || 0
           )
         )
-      ).groupBy(plans2.name);
-      const distributionData = planStats.map((stat, index) => ({
+      ).groupBy(plans.name);
+      const distributionData = planStats.map((stat, index2) => ({
         name: stat.planName,
         value: stat.count,
-        color: ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"][index % 5]
+        color: ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"][index2 % 5]
       }));
       res.json(distributionData);
     } catch (error) {
@@ -16516,21 +19142,21 @@ async function registerRoutes(app2) {
       console.log("\u{1F4C8} PLAN PERFORMANCE REQUEST - User ID:", user.id, "Role:", user.role, "Email:", user.email);
       console.log("\u{1F50D} PLAN PERFORMANCE QUERY - Fetching plan sales data...");
       const planPerformance = await db.select({
-        planName: plans2.name,
-        totalSales: sql3`count(${purchaseHistory2.id})`,
-        totalRevenue: sql3`sum(cast(${purchaseHistory2.amount} as decimal))`
-      }).from(plans2).leftJoin(
-        purchaseHistory2,
+        planName: plans.name,
+        totalSales: sql3`count(${purchaseHistory.id})`,
+        totalRevenue: sql3`sum(cast(${purchaseHistory.amount} as decimal))`
+      }).from(plans).leftJoin(
+        purchaseHistory,
         and4(
-          eq5(plans2.id, purchaseHistory2.planId),
-          eq5(purchaseHistory2.status, "completed")
+          eq6(plans.id, purchaseHistory.planId),
+          eq6(purchaseHistory.status, "completed")
         )
       ).where(
-        user.role === "super_admin" ? void 0 : eq5(plans2.createdBy, user.id)
-      ).groupBy(plans2.id, plans2.name).having(sql3`count(${purchaseHistory2.id}) > 0`);
+        user.role === "super_admin" ? void 0 : eq6(plans.createdBy, user.id)
+      ).groupBy(plans.id, plans.name).having(sql3`count(${purchaseHistory.id}) > 0`);
       console.log("\u{1F4CA} PLAN PERFORMANCE RAW DATA - Found", planPerformance.length, "plans with sales");
-      planPerformance.forEach((plan, index) => {
-        console.log(`  Plan ${index + 1}: "${plan.planName}" - Sales: ${plan.totalSales}, Revenue: $${plan.totalRevenue}`);
+      planPerformance.forEach((plan, index2) => {
+        console.log(`  Plan ${index2 + 1}: "${plan.planName}" - Sales: ${plan.totalSales}, Revenue: $${plan.totalRevenue}`);
       });
       const performanceData = planPerformance.map((plan) => ({
         name: plan.planName,
@@ -16733,10 +19359,10 @@ async function registerRoutes(app2) {
         }
         const logoUrl = `/uploads/brand-logos/${req.file.filename}`;
         try {
-          await db.update(users4).set({ logoImageUrl: logoUrl }).where(eq5(users4.id, targetUserId));
-          const userWhiteLabel = await db.select().from(whiteLabels5).where(eq5(whiteLabels5.userId, targetUserId)).limit(1);
+          await db.update(users).set({ logoImageUrl: logoUrl }).where(eq6(users.id, targetUserId));
+          const userWhiteLabel = await db.select().from(whiteLabels).where(eq6(whiteLabels.userId, targetUserId)).limit(1);
           if (userWhiteLabel.length > 0) {
-            await db.update(whiteLabels5).set({ logoUrl }).where(eq5(whiteLabels5.id, userWhiteLabel[0].id));
+            await db.update(whiteLabels).set({ logoUrl }).where(eq6(whiteLabels.id, userWhiteLabel[0].id));
           }
           console.log(`Brand logo updated for user ${targetUserId}: ${logoUrl}`);
           res.json({ logoUrl });
@@ -16756,7 +19382,7 @@ async function registerRoutes(app2) {
       if (!username) {
         return res.json({ available: false });
       }
-      const existingUser = await db.select().from(users4).where(eq5(users4.username, username)).limit(1);
+      const existingUser = await db.select().from(users).where(eq6(users.username, username)).limit(1);
       res.json({ available: existingUser.length === 0 });
     } catch (error) {
       console.error("Error checking username:", error);
@@ -16769,7 +19395,7 @@ async function registerRoutes(app2) {
       if (!domainPath) {
         return res.json({ available: false });
       }
-      const existingDomain = await db.select().from(whiteLabels5).where(eq5(whiteLabels5.domainPath, domainPath)).limit(1);
+      const existingDomain = await db.select().from(whiteLabels).where(eq6(whiteLabels.domainPath, domainPath)).limit(1);
       res.json({ available: existingDomain.length === 0 });
     } catch (error) {
       console.error("Error checking domain:", error);
@@ -16778,7 +19404,7 @@ async function registerRoutes(app2) {
   });
   app2.get("/api/business-plans", async (req, res) => {
     try {
-      const businessPlans = await db.select().from(plans2).where(eq5(plans2.status, "published")).orderBy(plans2.monthlyPrice);
+      const businessPlans = await db.select().from(plans).where(eq6(plans.status, "published")).orderBy(plans.monthlyPrice);
       res.json(businessPlans);
     } catch (error) {
       console.error("Error fetching business plans:", error);
@@ -16790,7 +19416,7 @@ async function registerRoutes(app2) {
       const { businessInfo, brandingInfo, planSelection } = req.body;
       console.log("Provision request received:", { businessInfo: businessInfo?.businessName, brandingInfo: brandingInfo?.domainPath });
       const hashedPassword = await bcrypt2.hash(businessInfo.password, 10);
-      const insertResult = await db.insert(users4).values({
+      const insertResult = await db.insert(users).values({
         id: crypto3.randomUUID(),
         // Generate UUID for the id field
         username: businessInfo.username.toLowerCase(),
@@ -16802,7 +19428,7 @@ async function registerRoutes(app2) {
         password: hashedPassword,
         role: "white_label_client"
       });
-      const [newUser] = await db.select().from(users4).where(eq5(users4.username, businessInfo.username.toLowerCase())).limit(1);
+      const [newUser] = await db.select().from(users).where(eq6(users.username, businessInfo.username.toLowerCase())).limit(1);
       console.log("User created:", newUser.id);
       if (newUser.email) {
         setImmediate(async () => {
@@ -16818,13 +19444,13 @@ async function registerRoutes(app2) {
       let finalDomainPath = brandingInfo.domainPath.toLowerCase();
       let counter = 1;
       while (true) {
-        const [existingDomain] = await db.select().from(whiteLabels5).where(eq5(whiteLabels5.domainPath, finalDomainPath)).limit(1);
+        const [existingDomain] = await db.select().from(whiteLabels).where(eq6(whiteLabels.domainPath, finalDomainPath)).limit(1);
         if (!existingDomain) break;
         finalDomainPath = `${brandingInfo.domainPath.toLowerCase()}-${counter}`;
         counter++;
       }
       console.log(`Using domain path: ${finalDomainPath} (original: ${brandingInfo.domainPath})`);
-      const businessInsertResult = await db.insert(whiteLabels5).values({
+      const businessInsertResult = await db.insert(whiteLabels).values({
         userId: newUser.id,
         businessName: businessInfo.businessName,
         domainPath: finalDomainPath,
@@ -16834,7 +19460,7 @@ async function registerRoutes(app2) {
         secondaryColor: brandingInfo.secondaryColor || "#64748B",
         isActive: true
       });
-      const newBusinessResult = await db.select().from(whiteLabels5).where(eq5(whiteLabels5.userId, newUser.id)).limit(1);
+      const newBusinessResult = await db.select().from(whiteLabels).where(eq6(whiteLabels.userId, newUser.id)).limit(1);
       console.log("White label business creation result:", newBusinessResult);
       console.log("newBusinessResult length:", newBusinessResult.length);
       console.log("First item:", newBusinessResult?.[0]);
@@ -16844,10 +19470,10 @@ async function registerRoutes(app2) {
         throw new Error("Failed to create white-label business record - no result returned");
       }
       console.log("Business created successfully:", newBusiness.id);
-      await db.update(users4).set({
+      await db.update(users).set({
         whiteLabelId: newBusiness.id,
         updatedAt: /* @__PURE__ */ new Date()
-      }).where(eq5(users4.id, newUser.id));
+      }).where(eq6(users.id, newUser.id));
       console.log("Skipping subscription and announcement creation for simplified setup");
       await new Promise((resolve, reject) => {
         req.login({ id: newUser.id, username: newUser.username, role: "white_label_client" }, (err) => {
@@ -16880,16 +19506,16 @@ async function registerRoutes(app2) {
         return res.status(403).json({ error: "Access denied" });
       }
       const businesses = await db.select({
-        id: whiteLabels5.id,
-        businessName: whiteLabels5.businessName,
-        industry: whiteLabels5.industry,
-        domainPath: whiteLabels5.domainPath,
-        ownerFirstName: whiteLabels5.ownerFirstName,
-        ownerLastName: whiteLabels5.ownerLastName,
-        ownerEmail: whiteLabels5.ownerEmail,
-        isActive: whiteLabels5.isActive,
-        createdAt: whiteLabels5.createdAt
-      }).from(whiteLabels5).orderBy(desc2(whiteLabels5.createdAt));
+        id: whiteLabels.id,
+        businessName: whiteLabels.businessName,
+        industry: whiteLabels.industry,
+        domainPath: whiteLabels.domainPath,
+        ownerFirstName: whiteLabels.ownerFirstName,
+        ownerLastName: whiteLabels.ownerLastName,
+        ownerEmail: whiteLabels.ownerEmail,
+        isActive: whiteLabels.isActive,
+        createdAt: whiteLabels.createdAt
+      }).from(whiteLabels).orderBy(desc2(whiteLabels.createdAt));
       res.json(businesses);
     } catch (error) {
       console.error("Error fetching businesses:", error);
@@ -16903,28 +19529,28 @@ async function registerRoutes(app2) {
       if (user.role !== "super_admin") {
         return res.status(403).json({ error: "Access denied" });
       }
-      const [business] = await db.select().from(whiteLabels5).where(eq5(whiteLabels5.id, parseInt(businessId)));
+      const [business] = await db.select().from(whiteLabels).where(eq6(whiteLabels.id, parseInt(businessId)));
       if (!business) {
         return res.status(404).json({ error: "Business not found" });
       }
-      const userCount = await db.select({ count: sql3`count(*)` }).from(users4).where(eq5(users4.whiteLabelId, business.id));
-      const monthlyRevenue = await db.select({ total: sql3`coalesce(sum(${purchaseHistory2.amount}), 0)` }).from(purchaseHistory2).innerJoin(users4, eq5(purchaseHistory2.userId, users4.id)).where(and4(
-        eq5(users4.whiteLabelId, business.id),
-        sql3`${purchaseHistory2.createdAt} >= date_trunc('month', current_date)`
+      const userCount = await db.select({ count: sql3`count(*)` }).from(users).where(eq6(users.whiteLabelId, business.id));
+      const monthlyRevenue = await db.select({ total: sql3`coalesce(sum(${purchaseHistory.amount}), 0)` }).from(purchaseHistory).innerJoin(users, eq6(purchaseHistory.userId, users.id)).where(and4(
+        eq6(users.whiteLabelId, business.id),
+        sql3`${purchaseHistory.createdAt} >= date_trunc('month', current_date)`
       ));
-      const activePlans = await db.select({ count: sql3`count(*)` }).from(plans2).where(and4(
-        eq5(plans2.userId, business.userId),
-        eq5(plans2.status, "published")
+      const activePlans = await db.select({ count: sql3`count(*)` }).from(plans).where(and4(
+        eq6(plans.userId, business.userId),
+        eq6(plans.status, "published")
       ));
       const endUsers = await db.select({
-        id: users4.id,
-        firstName: users4.firstName,
-        lastName: users4.lastName,
-        email: users4.email,
-        createdAt: users4.createdAt
-      }).from(users4).where(and4(
-        eq5(users4.whiteLabelId, business.id),
-        eq5(users4.role, "end_user")
+        id: users.id,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        email: users.email,
+        createdAt: users.createdAt
+      }).from(users).where(and4(
+        eq6(users.whiteLabelId, business.id),
+        eq6(users.role, "end_user")
       )).limit(10);
       res.json({
         ...business,
@@ -17093,6 +19719,147 @@ async function registerRoutes(app2) {
       res.status(500).json({ error: error.message || "Failed to generate content" });
     }
   });
+  app2.get("/api/test-users-whitelabel-2", async (req, res) => {
+    try {
+      const users2 = await storage.getUsersByWhiteLabelId(2);
+      res.json({
+        whiteLabelId: 2,
+        userCount: users2.length,
+        users: users2
+      });
+    } catch (error) {
+      console.error("Error fetching users for white label ID 2:", error);
+      res.status(500).json({ error: "Failed to fetch users" });
+    }
+  });
+  app2.get("/api/debug-admin-users", async (req, res) => {
+    try {
+      const whiteLabel = await storage.getWhiteLabelById(2);
+      if (!whiteLabel) {
+        return res.status(404).json({ error: "White label not found" });
+      }
+      console.log("White label found:", whiteLabel);
+      const users2 = await storage.getUsersByWhiteLabelId(whiteLabel.id);
+      console.log("Users found for white label:", users2);
+      const formattedUsers = users2.map((u) => ({
+        id: u.id,
+        username: u.username,
+        email: u.email,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        role: u.role,
+        isActive: u.isActive,
+        status: u.isActive ? "active" : "pending",
+        // Map isActive to status
+        createdAt: u.createdAt,
+        updatedAt: u.updatedAt,
+        whiteLabelId: u.whiteLabelId || u.userOfWhiteLabelId,
+        profileImageUrl: u.profileImageUrl
+      }));
+      res.json({
+        whiteLabel,
+        users: formattedUsers,
+        userCount: formattedUsers.length
+      });
+    } catch (error) {
+      console.error("Error in debug endpoint:", error);
+      res.status(500).json({ error: "Failed to fetch debug data" });
+    }
+  });
+  app2.get("/api/test-admin-users-exact", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      console.log("\u{1F50D} Test endpoint - User:", user);
+      if (!user || user.role !== "super_admin" && user.role !== "white_label_client") {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+      let users2;
+      if (user.role === "super_admin") {
+        users2 = await storage.getAllUsers();
+      } else {
+        const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
+        console.log("\u{1F50D} Test endpoint - WhiteLabel:", whiteLabel);
+        if (!whiteLabel) {
+          return res.status(404).json({ error: "White label not found" });
+        }
+        users2 = await storage.getUsersByWhiteLabelId(whiteLabel.id);
+        console.log("\u{1F50D} Test endpoint - Raw users:", users2);
+      }
+      const formattedUsers = users2.map((u) => ({
+        id: u.id,
+        username: u.username,
+        email: u.email,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        role: u.role,
+        isActive: u.isActive,
+        status: u.isActive ? "active" : "pending",
+        // Map isActive to status
+        createdAt: u.createdAt,
+        updatedAt: u.updatedAt,
+        whiteLabelId: u.whiteLabelId || u.userOfWhiteLabelId,
+        profileImageUrl: u.profileImageUrl
+      }));
+      console.log("\u{1F50D} Test endpoint - Formatted users:", formattedUsers);
+      res.json(formattedUsers);
+    } catch (error) {
+      console.error("Test endpoint error:", error);
+      res.status(500).json({ error: "Failed to fetch users" });
+    }
+  });
+  app2.get("/api/test-check-testingwhuser", async (req, res) => {
+    try {
+      const [testUser] = await db.select().from(users).where(eq6(users.username, "testingwhuser")).limit(1);
+      if (!testUser) {
+        return res.status(404).json({ error: "testingwhuser not found" });
+      }
+      res.json(testUser);
+    } catch (error) {
+      console.error("Error checking testingwhuser:", error);
+      res.status(500).json({ error: "Failed to check testingwhuser" });
+    }
+  });
+  app2.get("/api/test-admin-users-as-testingwhuser", async (req, res) => {
+    try {
+      const [testUser] = await db.select().from(users).where(eq6(users.username, "testingwhuser")).limit(1);
+      if (!testUser) {
+        return res.status(404).json({ error: "testingwhuser not found" });
+      }
+      let whiteLabelId2 = testUser.whiteLabelId || testUser.userOfWhiteLabelId;
+      if (!whiteLabelId2) {
+        return res.status(404).json({ error: "No white label association found for testingwhuser" });
+      }
+      const [whiteLabel] = await db.select().from(whiteLabels).where(eq6(whiteLabels.id, whiteLabelId2)).limit(1);
+      if (!whiteLabel) {
+        return res.status(404).json({ error: "White label not found" });
+      }
+      const usersList = await storage.getUsersByWhiteLabelId(whiteLabelId2);
+      const formattedUsers = usersList.map((user) => ({
+        ...user,
+        whiteLabelId: user.whiteLabelId || user.userOfWhiteLabelId,
+        userOfWhiteLabelId: user.userOfWhiteLabelId
+      }));
+      res.json({
+        testUser: {
+          id: testUser.id,
+          username: testUser.username,
+          role: testUser.role,
+          whiteLabelId: testUser.whiteLabelId,
+          userOfWhiteLabelId: testUser.userOfWhiteLabelId,
+          effectiveWhiteLabelId: whiteLabelId2
+        },
+        whiteLabel: {
+          id: whiteLabel.id,
+          name: whiteLabel.name
+        },
+        userCount: formattedUsers.length,
+        users: formattedUsers
+      });
+    } catch (error) {
+      console.error("Error testing admin users as testingwhuser:", error);
+      res.status(500).json({ error: "Failed to test admin users" });
+    }
+  });
   return server;
 }
 
@@ -17185,8 +19952,9 @@ async function setupVite(app2, server) {
   });
   app2.use(vite.middlewares);
   app2.use("*", async (req, res, next) => {
-    const url = req.originalUrl;
-    console.log(`\u{1F50D} VITE MIDDLEWARE - Processing request: ${url}`);
+    console.log(`\u{1F50D} VITE DEBUG - req.originalUrl: ${req.originalUrl}`);
+    const url = decodeURIComponent(req.originalUrl);
+    console.log(`\u{1F50D} VITE MIDDLEWARE - Processing request (decoded): ${url}`);
     if (url.startsWith("/api/")) {
       console.log(`\u{1F50D} VITE DEBUG - Skipping API route: ${url}`);
       return next();
@@ -17213,6 +19981,7 @@ async function setupVite(app2, server) {
       "analytics",
       "products",
       "categories",
+      "users",
       "integrations",
       "ai-content",
       "landing-builder",
@@ -17411,7 +20180,7 @@ app.use((req, res, next) => {
     } else {
       serveStatic(app);
     }
-    const port = process.env.PORT || 3e3;
+    const port = Number(process.env.PORT) || 5e3;
     server.listen(port, () => {
       log(`serving on port ${port}`);
     });

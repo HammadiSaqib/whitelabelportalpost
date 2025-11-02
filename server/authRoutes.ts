@@ -473,9 +473,30 @@ export function registerAuthRoutes(app: Express) {
   };
 
   // Local signup
-  app.post("/api/auth/signup", async (req, res) => {
+  app.post("/api/auth/signup", upload.single('profileImage'), async (req, res) => {
     try {
-      const { firstName, lastName, username, password, role: requestedRole, context, whitelabel_id } = req.body;
+      const { firstName, lastName, username, password, email, verificationCode, role: requestedRole, context, whitelabel_id } = req.body;
+      
+      // Verify the email code first
+      if (!email || !verificationCode) {
+        return res.status(400).json({ error: "Email and verification code are required" });
+      }
+
+      const lowercaseEmail = email.toLowerCase();
+      console.log('Local Signup - Verifying code for email:', lowercaseEmail);
+      console.log('Local Signup - Verification code:', verificationCode);
+      
+      const verificationResult = VerificationStorage.verify(lowercaseEmail, verificationCode.toString());
+      console.log('Local Signup - Verification result:', verificationResult);
+      
+      if (!verificationResult.valid) {
+        return res.status(400).json({ 
+          success: false,
+          verified: false,
+          message: verificationResult.message || 'Incorrect verification code',
+          attempts: verificationResult.attempts 
+        });
+      }
       
       // Check if username already exists (using lowercase)
       const lowercaseUsername = username.toLowerCase();
@@ -487,10 +508,41 @@ export function registerAuthRoutes(app: Express) {
       }
 
       // Determine actual role based on context
-      const roleResult = await determineUserRole(context, requestedRole, req);
-      const actualRole = typeof roleResult === 'string' ? roleResult : roleResult.role;
-      const whitelabelClientId = typeof roleResult === 'object' ? roleResult.whitelabelClientId : null;
-      const whiteLabelId = typeof roleResult === 'object' ? roleResult.whiteLabelId : null;
+      let actualRole = 'end_user'; // Default for regular signup
+      let whitelabelClientId = null;
+      let whiteLabelId = null;
+      
+      // If whitelabel_id is provided, this is a whitelabel end user
+      if (whitelabel_id) {
+        const parsedWhiteLabelId = parseInt(whitelabel_id);
+        console.log(`Local Signup - Processing whitelabel_id: ${whitelabel_id} (parsed: ${parsedWhiteLabelId})`);
+        
+        // Verify this white-label client exists
+        const [whiteLabelEntry] = await db
+          .select({
+            id: whiteLabels.id,
+            userId: whiteLabels.userId,
+            businessName: whiteLabels.businessName,
+            domainPath: whiteLabels.domainPath
+          })
+          .from(whiteLabels)
+          .where(eq(whiteLabels.id, parsedWhiteLabelId));
+
+        if (whiteLabelEntry) {
+          console.log(`Local Signup - Assigning end-user to white-label client: ${whiteLabelEntry.businessName} (ID: ${parsedWhiteLabelId})`);
+          actualRole = 'end_user';
+          whitelabelClientId = whiteLabelEntry.userId;
+          whiteLabelId = whiteLabelEntry.id;
+        } else {
+          console.log(`Local Signup - Warning: whitelabel_id ${parsedWhiteLabelId} not found, proceeding as regular end_user`);
+        }
+      } else {
+        // Try the original role determination for backward compatibility
+        const roleResult = await determineUserRole(context, requestedRole, req);
+        actualRole = typeof roleResult === 'string' ? roleResult : roleResult.role;
+        whitelabelClientId = typeof roleResult === 'object' ? roleResult.whitelabelClientId : null;
+        whiteLabelId = typeof roleResult === 'object' ? roleResult.whiteLabelId : null;
+      }
 
       // Hash password
       const hashedPassword = await hashPassword(password);
@@ -500,6 +552,7 @@ export function registerAuthRoutes(app: Express) {
         username: lowercaseUsername,
         firstName,
         lastName,
+        email: lowercaseEmail,
         password: hashedPassword,
         role: actualRole,
         authProvider: "local"
@@ -508,13 +561,16 @@ export function registerAuthRoutes(app: Express) {
       // Store whitelabel_id in correct column based on role
       if (actualRole === 'affiliate' || actualRole === 'super_admin_affiliate') {
         // For affiliates, store in affiliateOfWhiteLabelId
-        if (whitelabel_id) {
-          userData.affiliateOfWhiteLabelId = parseInt(whitelabel_id);
-          console.log(`Local Signup - Storing whitelabel_id ${whitelabel_id} in affiliateOfWhiteLabelId for affiliate`);
+        if (whiteLabelId) {
+          userData.affiliateOfWhiteLabelId = whiteLabelId;
+          console.log(`Local Signup - Storing whiteLabelId ${whiteLabelId} in affiliateOfWhiteLabelId for affiliate`);
         }
       } else if (actualRole === 'end_user') {
-        // For end users, store in whiteLabelId
-        userData.whiteLabelId = whiteLabelId;
+        // For end users, store in userOfWhiteLabelId
+        if (whiteLabelId) {
+          userData.userOfWhiteLabelId = whiteLabelId;
+          console.log(`Local Signup - Storing whiteLabelId ${whiteLabelId} in userOfWhiteLabelId for end user`);
+        }
       } else {
         // For other roles (white_label_client, etc.), store in whiteLabelId if available
         userData.whiteLabelId = whiteLabelId;
@@ -697,7 +753,7 @@ export function registerAuthRoutes(app: Express) {
       console.log('Request headers content-type:', req.headers['content-type']);
       console.log('All request headers:', req.headers);
       
-      const { firstName, lastName, username, password, email, referralUrl, verificationCode, role, domainPath } = req.body;
+      const { firstName, lastName, username, password, email, referralUrl, verificationCode, role, domainPath, whiteLabelId } = req.body;
       const profileImageFile = req.file;
       
       console.log('Extracted fields:');
@@ -705,6 +761,9 @@ export function registerAuthRoutes(app: Express) {
       console.log('- lastName:', lastName);
       console.log('- username:', username);
       console.log('- email:', email);
+      console.log('- role:', role);
+      console.log('- whiteLabelId:', whiteLabelId);
+      console.log('- whiteLabelId type:', typeof whiteLabelId);
       console.log('- verificationCode:', verificationCode);
       console.log('- verificationCode type:', typeof verificationCode);
       console.log('- verificationCode length:', verificationCode?.length);
@@ -772,8 +831,8 @@ export function registerAuthRoutes(app: Express) {
       // Determine role - use from request body or default to super_admin_affiliate
       const userRole = role && role.toLowerCase() === 'end-user' ? 'end_user' : 'super_admin_affiliate';
 
-      // Create user with specified role
-      const newUser = await createUser({
+      // Prepare user data
+      const userData: any = {
         username: lowercaseUsername,
         firstName,
         lastName,
@@ -784,7 +843,24 @@ export function registerAuthRoutes(app: Express) {
         referralCode,
         referralUrl: referralUrl || null,
         profileImage: profileImagePath
-      });
+      };
+
+      // Set whiteLabelId based on role and availability
+      if (whiteLabelId) {
+        const parsedWhiteLabelId = parseInt(whiteLabelId);
+        if (userRole === 'end_user') {
+          // For end users, set userOfWhiteLabelId
+          userData.userOfWhiteLabelId = parsedWhiteLabelId;
+          console.log(`Setting userOfWhiteLabelId to ${parsedWhiteLabelId} for end user`);
+        } else {
+          // For affiliates, set affiliateOfWhiteLabelId
+          userData.affiliateOfWhiteLabelId = parsedWhiteLabelId;
+          console.log(`Setting affiliateOfWhiteLabelId to ${parsedWhiteLabelId} for affiliate`);
+        }
+      }
+
+      // Create user with specified role
+      const newUser = await createUser(userData);
 
       // Auto-login the user
       req.logIn(newUser, (err) => {

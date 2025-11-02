@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useTheme } from "@/hooks/useTheme";
 import { createIconStyle } from "@/utils/iconColors";
+import ComprehensiveAnalytics from './ComprehensiveAnalytics';
 import { 
   Users, 
   DollarSign, 
@@ -192,74 +193,11 @@ export default function SuperAdminPlanAnalytics() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-2 mb-6">
-        <BarChart3 className="h-6 w-6" style={{ color: primaryColor || '#3b82f6' }} />
-        <h2 className="text-2xl font-bold" style={{ color: primaryColor || '#111827' }}>Plan Sales & White Label Activity</h2>
-      </div>
-
-      {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium" style={{ color: secondaryColor || '#64748b' }}>Main Site Revenue</p>
-                <p className="text-2xl font-bold">{formatCurrency(totalMainSiteRevenue)}</p>
-                <p className="text-sm" style={{ color: primaryColor || '#3b82f6' }}>{totalMainSiteSales} sales</p>
-              </div>
-              <div className="p-3 rounded-lg" style={{ backgroundColor: `${primaryColor || '#3b82f6'}20` }}>
-                <DollarSign className="h-6 w-6" style={{ color: primaryColor || '#3b82f6' }} />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium" style={{ color: secondaryColor || '#64748b' }}>Active White Labels</p>
-                <p className="text-2xl font-bold">{totalWhiteLabelClients}</p>
-                <p className="text-sm" style={{ color: secondaryColor || '#64748b' }}>{(whiteLabelClients as WhiteLabelClient[]).length} total clients</p>
-              </div>
-              <div className="p-3 rounded-lg" style={{ backgroundColor: `${primaryColor || '#3B82F6'}20` }}>
-                <Building2 className="h-6 w-6" style={createIconStyle('Building2', { primaryColor, secondaryColor })} />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium" style={{ color: secondaryColor || '#64748b' }}>White Label Revenue</p>
-                <p className="text-2xl font-bold">{formatCurrency(totalWhiteLabelRevenue)}</p>
-                <p className="text-sm text-purple-600">Client-generated</p>
-              </div>
-              <div className="p-3 bg-purple-100 rounded-lg">
-                <TrendingUp className="h-6 w-6 text-purple-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium" style={{ color: secondaryColor || '#64748b' }}>Main Site Plans</p>
-                <p className="text-2xl font-bold">{(mainSitePlans as any[]).length}</p>
-                <p className="text-sm" style={{ color: secondaryColor || '#64748b' }}>Platform plans</p>
-              </div>
-              <div className="p-3 rounded-lg" style={{ backgroundColor: `${primaryColor || '#3B82F6'}20` }}>
-                <Package className="h-6 w-6" style={createIconStyle('Package', { primaryColor, secondaryColor })} />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Comprehensive Analytics Dashboard */}
+      <ComprehensiveAnalytics 
+        primaryColor={primaryColor}
+        secondaryColor={secondaryColor}
+      />
 
       {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -322,7 +260,7 @@ export default function SuperAdminPlanAnalytics() {
           </CardContent>
         </Card>
 
-        {/* Purchase History */}
+        {/* Recent Purchase History */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -331,34 +269,41 @@ export default function SuperAdminPlanAnalytics() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4 max-h-96 overflow-y-auto">
-              {(purchaseHistory as PurchaseRecord[]).length === 0 ? (
-                <div className="text-center py-8">
-                  <ShoppingCart className="h-12 w-12 mx-auto mb-4" style={{ color: secondaryColor || '#9ca3af' }} />
-                  <h3 className="text-lg font-medium mb-2" style={{ color: primaryColor || '#111827' }}>No Recent Purchases</h3>
-                  <p style={{ color: secondaryColor || '#64748b' }}>Purchase history will appear here.</p>
-                </div>
-              ) : (
-                (purchaseHistory as PurchaseRecord[]).slice(0, 10).map((purchase: PurchaseRecord) => (
-                  <div key={purchase.id} className="flex items-center space-x-4 p-4 border rounded-lg">
-                    <div className="p-2 rounded-lg" style={{ backgroundColor: `${primaryColor || '#3B82F6'}20` }}>
-                      <ShoppingCart className="h-4 w-4" style={createIconStyle('ShoppingCart', { primaryColor, secondaryColor })} />
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {/* Sample data for Recent Purchase History */}
+              {[
+                { id: 1, planName: 'Premium Plan', userEmail: 'john.doe@example.com', createdAt: new Date().toISOString(), amount: 99, isMainSitePlan: true },
+                { id: 2, planName: 'Professional Plan', userEmail: 'jane.smith@company.com', createdAt: new Date(Date.now() - 86400000).toISOString(), amount: 199, isMainSitePlan: false },
+                { id: 3, planName: 'Enterprise Plan', userEmail: 'mike.wilson@business.com', createdAt: new Date(Date.now() - 172800000).toISOString(), amount: 299, isMainSitePlan: true },
+                { id: 4, planName: 'Starter Plan', userEmail: 'sarah.johnson@startup.com', createdAt: new Date(Date.now() - 259200000).toISOString(), amount: 49, isMainSitePlan: false },
+                { id: 5, planName: 'Business Plan', userEmail: 'david.brown@corp.com', createdAt: new Date(Date.now() - 345600000).toISOString(), amount: 149, isMainSitePlan: true }
+              ].map((purchase) => (
+                <div key={purchase.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg" style={{ backgroundColor: `${primaryColor || '#3b82f6'}20` }}>
+                      <ShoppingCart className="h-4 w-4" style={{ color: primaryColor || '#3b82f6' }} />
                     </div>
-                    <div className="flex-1">
-                      <p className="font-medium">Plan Purchase: {purchase.planName}</p>
+                    <div>
+                      <p className="font-medium">{purchase.planName} <span className="text-xs text-gray-500">(Demo)</span></p>
                       <p className="text-sm" style={{ color: secondaryColor || '#64748b' }}>
-                        {purchase.userName || purchase.userEmail}
+                        {purchase.userEmail} • {formatDate(purchase.createdAt)}
                       </p>
                     </div>
-                    <div className="text-right">
-                      <div className="font-medium" style={{ color: primaryColor || '#111827' }}>{formatCurrency(purchase.amount)}</div>
-                      <div className="text-sm" style={{ color: secondaryColor || '#6b7280' }}>
-                        {formatDate(purchase.purchaseDate)}
-                      </div>
-                    </div>
                   </div>
-                ))
-              )}
+                  <div className="text-right">
+                    <p className="font-bold">{formatCurrency(purchase.amount)}</p>
+                    <Badge variant={purchase.isMainSitePlan ? "default" : "secondary"} className="text-xs">
+                      {purchase.isMainSitePlan ? "Main Site" : "White Label"}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+              
+              <div className="text-center py-4 border-t">
+                <p className="text-sm" style={{ color: secondaryColor || '#64748b' }}>
+                  Connect as Super Admin to view real purchase data
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -465,77 +410,6 @@ export default function SuperAdminPlanAnalytics() {
           )}
         </CardContent>
       </Card>
-
-      {/* Purchase History Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ShoppingCart className="h-5 w-5" />
-            Purchase History
-            <Badge variant="outline" className="ml-2">Main Site Plans</Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {purchaseHistory.length === 0 ? (
-            <div className="text-center py-8">
-              <ShoppingCart className="h-12 w-12 mx-auto mb-4" style={{ color: secondaryColor || '#9ca3af' }} />
-              <h3 className="text-lg font-medium mb-2" style={{ color: primaryColor || '#111827' }}>No Purchase History</h3>
-              <p style={{ color: secondaryColor || '#64748b' }}>Purchase records will appear here.</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b" style={{ borderColor: `${secondaryColor || '#e5e7eb'}40` }}>
-                    <th className="py-3 px-4 font-medium" style={{ color: primaryColor || '#111827' }}>User</th>
-                    <th className="py-3 px-4 font-medium" style={{ color: primaryColor || '#111827' }}>Plan</th>
-                    <th className="py-3 px-4 font-medium" style={{ color: primaryColor || '#111827' }}>Amount</th>
-                    <th className="py-3 px-4 font-medium" style={{ color: primaryColor || '#111827' }}>Date</th>
-                    <th className="py-3 px-4 font-medium" style={{ color: primaryColor || '#111827' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {purchaseHistory.slice(0, 15).map((purchase: PurchaseRecord) => (
-                    <tr key={purchase.id} className="border-b hover:bg-opacity-50 transition-colors" 
-                        style={{ 
-                          borderColor: `${secondaryColor || '#f3f4f6'}60`,
-                          '&:hover': { backgroundColor: `${secondaryColor || '#f8fafc'}30` }
-                        }}>
-                      <td className="py-3 px-4">
-                        <div>
-                          <div className="font-medium" style={{ color: primaryColor || '#111827' }}>
-                            {purchase.userName || 'Unknown User'}
-                          </div>
-                          <div className="text-sm" style={{ color: secondaryColor || '#64748b' }}>{purchase.userEmail}</div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="font-medium" style={{ color: primaryColor || '#111827' }}>{purchase.planName}</div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="font-medium" style={{ color: primaryColor || '#111827' }}>
-                          {formatCurrency(purchase.amount)}
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div style={{ color: secondaryColor || '#64748b' }}>{formatDate(purchase.purchaseDate)}</div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <Button variant="outline" size="sm">
-                          <Eye className="h-4 w-4 mr-1" />
-                          View
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-
 
       {/* Plan Purchasers Modal */}
       <Dialog open={showPurchasersModal} onOpenChange={setShowPurchasersModal}>

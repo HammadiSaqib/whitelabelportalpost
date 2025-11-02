@@ -12,7 +12,7 @@ import { setupAuth, isAuthenticated } from "./auth";
 import { registerAuthRoutes } from "./authRoutes";
 import { registerWhiteLabelCustomizationRoutes } from "./whiteLabelCustomizations";
 import { ObjectStorageService } from "./objectStorage";
-import { sendWelcomeEmail, sendWhiteLabelInvitation } from "./emailService";
+import { sendWelcomeEmail, sendWhiteLabelInvitation, sendUserInvitation } from "./emailService";
 import { z } from "zod";
 import express from "express";
 import path from "path";
@@ -280,6 +280,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerWhiteLabelCustomizationRoutes(app);
   
   const server = createServer(app);
+  
+  // Temporary endpoint to test getUsersByWhiteLabelId for white label ID 2
+  app.get('/api/test-users-whitelabel-2', async (req, res) => {
+    try {
+      const users = await storage.getUsersByWhiteLabelId(2);
+      res.json({
+        whiteLabelId: 2,
+        userCount: users.length,
+        users: users
+      });
+    } catch (error) {
+      console.error('Error fetching users for white label 2:', error);
+      res.status(500).json({ error: 'Failed to fetch users' });
+    }
+  });
   
   // Test page for domain registration
   app.get('/test-shoot-registration', (req, res) => {
@@ -841,162 +856,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Send single white-label invitation
-  app.post('/api/admin/send-invitation', isAuthenticated, async (req, res) => {
+  // Comprehensive Analytics Endpoints for Super-Admin Dashboard
+  app.get('/api/super-admin/analytics/revenue-overview', isAuthenticated, async (req, res) => {
     try {
       const user = req.user;
-      
-      // Strict super admin role validation
       if (!user || user.role !== 'super_admin') {
         return res.status(403).json({ error: 'Super Admin access required' });
       }
 
-      // Input validation with zod
-      const invitationSchema = z.object({
-        email: z.string().email('Valid email is required'),
-        firstName: z.string().min(1, 'First name is required').max(50),
-        lastName: z.string().min(1, 'Last name is required').max(50),
-        businessName: z.string().min(1, 'Business name is required').max(100)
-      });
-
-      const validatedData = invitationSchema.parse(req.body);
+      const { startDate, endDate } = req.query;
+      const revenueOverview = await storage.getRevenueOverview(startDate as string, endDate as string);
       
-      // Get super admin user details for invitation
-      const superAdminUser = await storage.getUserById(user.id);
-      if (!superAdminUser) {
-        return res.status(500).json({ error: 'Super admin user not found' });
-      }
-
-      const inviterName = `${superAdminUser.firstName || 'Super'} ${superAdminUser.lastName || 'Admin'}`;
-
-      // Send invitation email
-      const emailSent = await sendWhiteLabelInvitation(
-        validatedData.email,
-        validatedData.firstName,
-        validatedData.lastName,
-        validatedData.businessName,
-        inviterName
-      );
-
-      if (!emailSent) {
-        return res.status(500).json({ error: 'Failed to send invitation email' });
-      }
-
-      res.json({ 
-        success: true, 
-        message: 'Invitation sent successfully',
-        recipient: validatedData.email
-      });
-
+      res.json(revenueOverview);
     } catch (error) {
-      console.error('Send invitation error:', error);
-      
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
-          error: 'Validation failed', 
-          details: error.errors.map(e => ({ field: e.path.join('.'), message: e.message }))
-        });
+      console.error('Error fetching revenue overview:', error);
+      res.status(500).json({ error: 'Failed to fetch revenue overview' });
+    }
+  });
+
+  app.get('/api/super-admin/analytics/white-label-metrics', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Super Admin access required' });
       }
+
+      const { startDate, endDate } = req.query;
+      const whiteLabelMetrics = await storage.getWhiteLabelMetrics(startDate as string, endDate as string);
       
-      res.status(500).json({ error: 'Failed to send invitation' });
+      res.json(whiteLabelMetrics);
+    } catch (error) {
+      console.error('Error fetching white-label metrics:', error);
+      res.status(500).json({ error: 'Failed to fetch white-label metrics' });
+    }
+  });
+
+  app.get('/api/super-admin/analytics/plan-performance', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Super Admin access required' });
+      }
+
+      const { startDate, endDate } = req.query;
+      const planPerformance = await storage.getPlanPerformance(startDate as string, endDate as string);
+      
+      res.json(planPerformance);
+    } catch (error) {
+      console.error('Error fetching plan performance:', error);
+      res.status(500).json({ error: 'Failed to fetch plan performance' });
+    }
+  });
+
+  app.get('/api/super-admin/analytics/purchase-trends', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Super Admin access required' });
+      }
+
+      const { startDate, endDate } = req.query;
+      const purchaseTrends = await storage.getPurchaseTrends(startDate as string, endDate as string);
+      
+      res.json(purchaseTrends);
+    } catch (error) {
+      console.error('Error fetching purchase trends:', error);
+      res.status(500).json({ error: 'Failed to fetch purchase trends' });
+    }
+  });
+
+  app.get('/api/super-admin/analytics/comparison-data', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Super Admin access required' });
+      }
+
+      const { startDate, endDate, compareStartDate, compareEndDate, metrics } = req.query;
+      const comparisonData = await storage.getComparisonData(
+        startDate as string, 
+        endDate as string,
+        compareStartDate as string,
+        compareEndDate as string,
+        (metrics as string)?.split(',') || []
+      );
+      
+      res.json(comparisonData);
+    } catch (error) {
+      console.error('Error fetching comparison data:', error);
+      res.status(500).json({ error: 'Failed to fetch comparison data' });
     }
   });
 
   // Send bulk white-label invitations
-  app.post('/api/admin/send-bulk-invitations', isAuthenticated, async (req, res) => {
-    try {
-      const user = req.user;
-      
-      // Strict super admin role validation
-      if (!user || user.role !== 'super_admin') {
-        return res.status(403).json({ error: 'Super Admin access required' });
-      }
-
-      // Input validation for bulk invitations
-      const bulkInvitationSchema = z.object({
-        invitations: z.array(z.object({
-          email: z.string().email('Valid email is required'),
-          firstName: z.string().min(1, 'First name is required').max(50),
-          lastName: z.string().min(1, 'Last name is required').max(50),
-          businessName: z.string().min(1, 'Business name is required').max(100)
-        })).min(1, 'At least one invitation is required').max(100, 'Maximum 100 invitations per batch')
-      });
-
-      const validatedData = bulkInvitationSchema.parse(req.body);
-      
-      // Get super admin user details for invitation
-      const superAdminUser = await storage.getUserById(user.id);
-      if (!superAdminUser) {
-        return res.status(500).json({ error: 'Super admin user not found' });
-      }
-
-      const inviterName = `${superAdminUser.firstName || 'Super'} ${superAdminUser.lastName || 'Admin'}`;
-
-      // Process invitations with individual error tracking
-      let successCount = 0;
-      let failureCount = 0;
-      const results = [];
-
-      for (const invitation of validatedData.invitations) {
-        try {
-          const emailSent = await sendWhiteLabelInvitation(
-            invitation.email,
-            invitation.firstName,
-            invitation.lastName,
-            invitation.businessName,
-            inviterName
-          );
-
-          if (emailSent) {
-            successCount++;
-            results.push({
-              email: invitation.email,
-              status: 'success',
-              message: 'Invitation sent successfully'
-            });
-          } else {
-            failureCount++;
-            results.push({
-              email: invitation.email,
-              status: 'failed',
-              message: 'Failed to send email'
-            });
-          }
-        } catch (inviteError) {
-          failureCount++;
-          results.push({
-            email: invitation.email,
-            status: 'failed',
-            message: 'Error processing invitation'
-          });
-          console.error(`Error sending invitation to ${invitation.email}:`, inviteError);
-        }
-      }
-
-      res.json({
-        success: true,
-        summary: {
-          total: validatedData.invitations.length,
-          successful: successCount,
-          failed: failureCount
-        },
-        results: results
-      });
-
-    } catch (error) {
-      console.error('Send bulk invitations error:', error);
-      
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
-          error: 'Validation failed', 
-          details: error.errors.map(e => ({ field: e.path.join('.'), message: e.message }))
-        });
-      }
-      
-      res.status(500).json({ error: 'Failed to send bulk invitations' });
-    }
-  });
-
   // Create announcement with file upload support (authenticated)
   app.post('/api/announcements', isAuthenticated, async (req, res) => {
     try {
@@ -2247,12 +2199,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/categories', isAuthenticated, async (req, res) => {
     try {
       const user = req.user;
-      const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
-      if (!whiteLabel) {
-        return res.status(404).json({ error: 'White label not found' });
+      
+      let categoryData;
+      
+      // Super admin can create categories without a white label
+      if (user.role === 'super_admin') {
+        categoryData = { ...req.body, createdBy: user.id };
+      } else {
+        // Regular users need a white label
+        const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
+        if (!whiteLabel) {
+          return res.status(404).json({ error: 'White label not found' });
+        }
+        categoryData = { ...req.body, whiteLabelId: whiteLabel.id, createdBy: user.id };
       }
       
-      const categoryData = { ...req.body, whiteLabelId: whiteLabel.id, createdBy: user.id };
       const category = await storage.createCategory(categoryData);
       res.json(category);
     } catch (error) {
@@ -2937,27 +2898,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user;
       
-      // Only Super Admin can send invitations
-      if (user.role !== 'super_admin') {
-        return res.status(403).json({ error: 'Only Super Admin can send invitations' });
+      console.log('DEBUG - User object in invitation route:', {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        whiteLabelId: user.whiteLabelId,
+        fullUser: user
+      });
+      
+      // Allow Super Admin and White Label Client to send invitations
+      if (user.role !== 'super_admin' && user.role !== 'white_label_client') {
+        return res.status(403).json({ error: 'Only Super Admin and White Label Client can send invitations' });
       }
       
       const { email, businessName, firstName, lastName, inviterName } = req.body;
       
-      if (!email || !businessName || !firstName || !lastName) {
+      if (!email || !firstName || !lastName) {
         return res.status(400).json({ 
-          error: 'Missing required fields: email, businessName, firstName, lastName' 
+          error: 'Missing required fields: email, firstName, lastName' 
         });
       }
       
-      // Send invitation email
-      const emailService = await import('./emailService.js');
-      const success = await emailService.sendWhiteLabelInvitation(
+      const finalInviterName = inviterName || user.firstName || user.lastName || user.username || 'Platform Admin';
+      
+      console.log('DEBUG - Sending invitation with:', {
         email,
         firstName,
         lastName,
-        businessName,
-        inviterName || 'Super Admin'
+        finalInviterName,
+        inviterWhiteLabelId: user.whiteLabelId
+      });
+      
+      // Send invitation email for end-users
+      const emailService = await import('./emailService.js');
+      const success = await emailService.sendUserInvitation(
+        email,
+        firstName,
+        lastName,
+        finalInviterName,
+        user.whiteLabelId // Pass the inviter's white label ID
       );
       
       if (success) {
@@ -2977,9 +2956,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user;
       
-      // Only Super Admin can send invitations
-      if (user.role !== 'super_admin') {
-        return res.status(403).json({ error: 'Only Super Admin can send invitations' });
+      // Allow Super Admin and White Label Client to send invitations
+      if (user.role !== 'super_admin' && user.role !== 'white_label_client') {
+        return res.status(403).json({ error: 'Only Super Admin and White Label Client can send invitations' });
       }
       
       const { invitations } = req.body;
@@ -2996,21 +2975,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const emailService = await import('./emailService.js');
       
       for (const invitation of invitations) {
-        const { email, businessName, firstName, lastName, inviterName } = invitation;
+        const { email, firstName, lastName, inviterName } = invitation;
         
-        if (!email || !businessName || !firstName || !lastName) {
+        if (!email || !firstName || !lastName) {
           errorCount++;
           errors.push(`Missing required fields for ${email || 'unknown email'}`);
           continue;
         }
         
         try {
-          const success = await emailService.sendWhiteLabelInvitation(
+          const success = await emailService.sendUserInvitation(
             email,
             firstName,
             lastName,
-            businessName,
-            inviterName || 'Super Admin'
+            inviterName || user.firstName || user.lastName || user.username || 'Platform Admin',
+            user.whiteLabelId // Pass the inviter's white label ID
           );
           
           if (success) {
@@ -3038,6 +3017,115 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error in bulk invitation sending:', error);
       res.status(500).json({ error: 'Failed to send bulk invitations' });
+    }
+  });
+
+  // Send single user invitation (White Label Client only)
+  app.post('/api/admin/send-user-invitation', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      
+      // Only White Label Client can send user invitations
+      if (user.role !== 'white_label_client') {
+        return res.status(403).json({ error: 'Only White Label Client can send user invitations' });
+      }
+      
+      const { email, firstName, lastName, inviterName } = req.body;
+      
+      if (!email || !firstName || !lastName) {
+        return res.status(400).json({ 
+          error: 'Missing required fields: email, firstName, lastName' 
+        });
+      }
+      
+      // Send user invitation email
+      const emailService = await import('./emailService.js');
+      const success = await emailService.sendUserInvitation(
+        email,
+        firstName,
+        lastName,
+        inviterName || `${user.firstName} ${user.lastName}`,
+        user.whiteLabelId
+      );
+      
+      if (success) {
+        console.log('User invitation sent successfully to:', email);
+        res.json({ success: true, message: 'Invitation sent successfully' });
+      } else {
+        throw new Error('Failed to send user invitation email');
+      }
+    } catch (error) {
+      console.error('Error sending user invitation:', error);
+      res.status(500).json({ error: 'Failed to send invitation' });
+    }
+  });
+
+  // Send bulk user invitations (White Label Client only)
+  app.post('/api/admin/send-bulk-user-invitations', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      
+      // Only White Label Client can send user invitations
+      if (user.role !== 'white_label_client') {
+        return res.status(403).json({ error: 'Only White Label Client can send user invitations' });
+      }
+      
+      const { invitations } = req.body;
+      
+      if (!invitations || !Array.isArray(invitations) || invitations.length === 0) {
+        return res.status(400).json({ error: 'Invitations array is required and must not be empty' });
+      }
+      
+      let successCount = 0;
+      let errorCount = 0;
+      const errors = [];
+      
+      // Send invitations one by one
+      const emailService = await import('./emailService.js');
+      
+      for (const invitation of invitations) {
+        const { email, firstName, lastName, inviterName } = invitation;
+        
+        if (!email || !firstName || !lastName) {
+          errorCount++;
+          errors.push(`Missing required fields for ${email || 'unknown email'}`);
+          continue;
+        }
+        
+        try {
+          const success = await emailService.sendUserInvitation(
+            email,
+            firstName,
+            lastName,
+            inviterName || `${user.firstName} ${user.lastName}`,
+            user.whiteLabelId
+          );
+          
+          if (success) {
+            successCount++;
+            console.log('Bulk user invitation sent successfully to:', email);
+          } else {
+            errorCount++;
+            errors.push(`Failed to send invitation to ${email}`);
+          }
+        } catch (error) {
+          errorCount++;
+          errors.push(`Error sending to ${email}: ${error.message}`);
+          console.error('Error in bulk user invitation:', error);
+        }
+      }
+      
+      console.log(`Bulk user invitation summary: ${successCount} success, ${errorCount} errors`);
+      
+      res.json({
+        successCount,
+        errorCount,
+        errors: errors.slice(0, 10), // Limit errors shown
+        message: `Sent ${successCount} invitations successfully. ${errorCount} failed.`
+      });
+    } catch (error) {
+      console.error('Error in bulk user invitation sending:', error);
+      res.status(500).json({ error: 'Failed to send bulk user invitations' });
     }
   });
 
@@ -4270,31 +4358,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let userId = authenticatedUser.id;
       let user = authenticatedUser;
       
-      // Get full user details including whiteLabelId
-      const fullUser = await storage.getUserById(userId);
-      const buyerWhiteLabelId = fullUser?.whiteLabelId || null;
+      // Get plan owner's whiteLabelId (this is what should be used for the subscription)
+      const planOwnerWhiteLabelId = planOwner.whiteLabelId;
       
-      // Validate that buyer has a white label ID
-      if (buyerWhiteLabelId === null) {
-        console.error('❌ Buyer missing whiteLabelId:', {
-          userId,
-          email: user.email,
-          role: user.role,
+      // Validate that plan owner has a white label ID
+      if (planOwnerWhiteLabelId === null) {
+        console.error('❌ Plan owner missing whiteLabelId:', {
+          planId,
+          planOwnerId: planOwner.id,
+          planOwnerEmail: planOwner.email,
           timestamp: new Date().toISOString()
         });
         return res.status(400).json({ 
           success: false,
-          error: 'Invalid account configuration',
-          details: 'Your account is not properly configured for purchases. Please contact support.'
+          error: 'Invalid plan configuration',
+          details: 'The plan owner account is not properly configured. Please contact support.'
         });
       }
       
-      console.log('✅ Using authenticated user for purchase:', {
-        userId: userId,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        whiteLabelId: buyerWhiteLabelId,
+      console.log('✅ Using plan owner whiteLabelId for purchase:', {
+        buyerId: userId,
+        buyerEmail: user.email,
+        planOwnerId: planOwner.id,
+        planOwnerEmail: planOwner.email,
+        planOwnerWhiteLabelId: planOwnerWhiteLabelId,
         timestamp: new Date().toISOString()
       });
 
@@ -4302,7 +4389,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const subscription = await storage.createSubscription({
         userId: userId,
         planId: parseInt(planId),
-        whiteLabelId: buyerWhiteLabelId,
+        whiteLabelId: planOwnerWhiteLabelId,
         status: 'active',
         billingCycle: 'monthly',
         amount: parseFloat(amount),
@@ -4318,7 +4405,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.createPurchaseHistory({
         userId: userId,
         planId: parseInt(planId),
-        whiteLabelId: buyerWhiteLabelId,
+        whiteLabelId: planOwnerWhiteLabelId,
         amount: parseFloat(amount),
         transactionId: nmiResult.transactionId,
         status: 'completed',
@@ -5507,6 +5594,265 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get white label data for admin
+  app.get('/api/admin/white-label', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || (user.role !== 'super_admin' && user.role !== 'white_label_client')) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      let whiteLabel;
+      if (user.role === 'super_admin') {
+        // Super admin can see all white labels or a specific one
+        const whiteLabelId = req.query.id;
+        if (whiteLabelId) {
+          whiteLabel = await storage.getWhiteLabelById(parseInt(whiteLabelId as string));
+        } else {
+          const whiteLabels = await storage.getWhiteLabels();
+          whiteLabel = whiteLabels[0]; // Return first one for now
+        }
+      } else {
+        // White label client sees their own
+        whiteLabel = await storage.getWhiteLabelByUserId(user.id);
+      }
+
+      if (!whiteLabel) {
+        return res.status(404).json({ error: 'White label not found' });
+      }
+
+      res.json(whiteLabel);
+    } catch (error) {
+      console.error('Error fetching white label data:', error);
+      res.status(500).json({ error: 'Failed to fetch white label data' });
+    }
+  });
+
+  // Get user statistics for admin
+  app.get('/api/admin/user-stats', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || (user.role !== 'super_admin' && user.role !== 'white_label_client')) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      let stats;
+      if (user.role === 'super_admin') {
+        // Super admin sees all users
+        const allUsers = await storage.getAllUsers();
+        const totalUsers = allUsers.length;
+        const activeUsers = allUsers.filter(u => u.isActive).length;
+        const endUsers = allUsers.filter(u => u.role === 'end_user').length;
+        const affiliates = allUsers.filter(u => u.role === 'white_label_affiliate').length;
+        const whiteLabels = allUsers.filter(u => u.role === 'white_label_client').length;
+
+        stats = {
+          totalUsers,
+          activeUsers,
+          endUsers,
+          affiliates,
+          whiteLabels,
+          inactiveUsers: totalUsers - activeUsers
+        };
+      } else {
+        // White label client sees their users
+        const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
+        if (!whiteLabel) {
+          return res.status(404).json({ error: 'White label not found' });
+        }
+
+        const whiteLabelUsers = await storage.getUsersByWhiteLabelId(whiteLabel.id);
+        const totalUsers = whiteLabelUsers.length;
+        const activeUsers = whiteLabelUsers.filter(u => u.isActive).length;
+        const endUsers = whiteLabelUsers.filter(u => u.role === 'end_user').length;
+        const affiliates = whiteLabelUsers.filter(u => u.role === 'white_label_affiliate').length;
+
+        stats = {
+          totalUsers,
+          activeUsers,
+          endUsers,
+          affiliates,
+          whiteLabels: 1, // The white label client themselves
+          inactiveUsers: totalUsers - activeUsers
+        };
+      }
+
+      res.json(stats);
+    } catch (error) {
+      console.error('Error fetching user stats:', error);
+      res.status(500).json({ error: 'Failed to fetch user statistics' });
+    }
+  });
+
+  // Get users list for admin
+  app.get('/api/admin/users', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || (user.role !== 'super_admin' && user.role !== 'white_label_client')) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      let users;
+      if (user.role === 'super_admin') {
+        // Super admin sees all users
+        users = await storage.getAllUsers();
+      } else {
+        // White label client sees their users
+        const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
+        if (!whiteLabel) {
+          return res.status(404).json({ error: 'White label not found' });
+        }
+        users = await storage.getUsersByWhiteLabelId(whiteLabel.id);
+      }
+
+      // Format users for frontend
+      const formattedUsers = users.map(u => ({
+        id: u.id,
+        username: u.username,
+        email: u.email,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        role: u.role,
+        isActive: u.isActive,
+        status: u.isActive ? 'active' : 'pending', // Map isActive to status
+        createdAt: u.createdAt,
+        updatedAt: u.updatedAt,
+        whiteLabelId: u.whiteLabelId || u.userOfWhiteLabelId,
+        profileImageUrl: u.profileImageUrl
+      }));
+
+      res.json(formattedUsers);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      res.status(500).json({ error: 'Failed to fetch users' });
+    }
+  });
+
+  // Get user activities for admin
+  app.get('/api/admin/user-activities/:userId', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || (user.role !== 'super_admin' && user.role !== 'white_label_client')) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      const { userId } = req.params;
+      
+      // Check if user has permission to view this user's activities
+      if (user.role === 'white_label_client') {
+        const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
+        if (!whiteLabel) {
+          return res.status(404).json({ error: 'White label not found' });
+        }
+        
+        const targetUser = await storage.getUserById(userId);
+        if (!targetUser || (targetUser.whiteLabelId !== whiteLabel.id && targetUser.userOfWhiteLabelId !== whiteLabel.id)) {
+          return res.status(403).json({ error: 'Access denied to this user\'s activities' });
+        }
+      }
+
+      // Get activities from end_user_activities table
+      const activities = await storage.getEndUserActivitiesByUserId(userId);
+      
+      res.json(activities || []);
+    } catch (error) {
+      console.error('Error fetching user activities:', error);
+      res.status(500).json({ error: 'Failed to fetch user activities' });
+    }
+  });
+
+  // Get user purchases for admin
+  app.get('/api/admin/user-purchases/:userId', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || (user.role !== 'super_admin' && user.role !== 'white_label_client')) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      const { userId } = req.params;
+      
+      // Check if user has permission to view this user's purchases
+      if (user.role === 'white_label_client') {
+        const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
+        if (!whiteLabel) {
+          return res.status(404).json({ error: 'White label not found' });
+        }
+        
+        const targetUser = await storage.getUserById(userId);
+        if (!targetUser || (targetUser.whiteLabelId !== whiteLabel.id && targetUser.userOfWhiteLabelId !== whiteLabel.id)) {
+          return res.status(403).json({ error: 'Access denied to this user\'s purchases' });
+        }
+      }
+
+      const purchases = await storage.getPurchasesByUser(userId);
+      
+      res.json(purchases || []);
+    } catch (error) {
+      console.error('Error fetching user purchases:', error);
+      res.status(500).json({ error: 'Failed to fetch user purchases' });
+    }
+  });
+
+  // Create new user for admin
+  app.post('/api/admin/create-user', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || (user.role !== 'super_admin' && user.role !== 'white_label_client')) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      const { firstName, lastName, username, email, password, role = 'end_user', user_of_white_label_id } = req.body;
+
+      // Validate required fields
+      if (!firstName || !lastName || !username || !email || !password) {
+        return res.status(400).json({ error: 'All fields are required' });
+      }
+
+      // Check if username or email already exists
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({ error: 'Username already exists' });
+      }
+
+      const existingEmail = await storage.getUserByEmail(email);
+      if (existingEmail) {
+        return res.status(400).json({ error: 'Email already exists' });
+      }
+
+      // Determine white label ID
+      let whiteLabelId = user_of_white_label_id;
+      if (user.role === 'white_label_client' && !whiteLabelId) {
+        const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
+        if (whiteLabel) {
+          whiteLabelId = whiteLabel.id;
+        }
+      }
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 12);
+
+      // Create user
+      const newUser = await storage.createUser({
+        id: crypto.randomUUID(), // Generate UUID for the id field
+        firstName,
+        lastName,
+        username,
+        email,
+        password: hashedPassword,
+        role,
+        userOfWhiteLabelId: whiteLabelId,
+        isActive: true
+      });
+
+      // Return user without password
+      const { password: _, ...userWithoutPassword } = newUser;
+      res.status(201).json(userWithoutPassword);
+    } catch (error) {
+      console.error('Error creating user:', error);
+      res.status(500).json({ error: 'Failed to create user' });
+    }
+  });
+
   // Get white-label clients with updated stats (super admin only)
   app.get('/api/white-labels/stats', isAuthenticated, async (req, res) => {
     try {
@@ -6605,6 +6951,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           domainPath === 'affiliate' ||
           domainPath === 'white-label-affiliate' ||
           domainPath === 'clients' ||
+          domainPath === 'users' ||
           domainPath === 'plans' ||
           domainPath === 'subscriptions' ||
           domainPath === 'subscription-plans' ||
@@ -12192,6 +12539,178 @@ function generateLandingPageHTML(landingPage: any, clientPlans: any[], whiteLabe
     } catch (error: any) {
       console.error('❌ AI Content Generation Error:', error);
       res.status(500).json({ error: error.message || 'Failed to generate content' });
+    }
+  });
+
+  // Temporary endpoint to test getUsersByWhiteLabelId for white label ID 2
+  app.get('/api/test-users-whitelabel-2', async (req, res) => {
+    try {
+      const users = await storage.getUsersByWhiteLabelId(2);
+      res.json({
+        whiteLabelId: 2,
+        userCount: users.length,
+        users: users
+      });
+    } catch (error) {
+      console.error('Error fetching users for white label ID 2:', error);
+      res.status(500).json({ error: 'Failed to fetch users' });
+    }
+  });
+
+  // Debug endpoint to test admin users endpoint for white label client
+  app.get('/api/debug-admin-users', async (req, res) => {
+    try {
+      // Simulate white label client with id 2
+      const whiteLabel = await storage.getWhiteLabelById(2);
+      if (!whiteLabel) {
+        return res.status(404).json({ error: 'White label not found' });
+      }
+      
+      console.log('White label found:', whiteLabel);
+      const users = await storage.getUsersByWhiteLabelId(whiteLabel.id);
+      console.log('Users found for white label:', users);
+      
+      // Format users for frontend (same as /api/admin/users)
+      const formattedUsers = users.map(u => ({
+        id: u.id,
+        username: u.username,
+        email: u.email,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        role: u.role,
+        isActive: u.isActive,
+        status: u.isActive ? 'active' : 'pending', // Map isActive to status
+        createdAt: u.createdAt,
+        updatedAt: u.updatedAt,
+        whiteLabelId: u.whiteLabelId || u.userOfWhiteLabelId,
+        profileImageUrl: u.profileImageUrl
+      }));
+
+      res.json({
+        whiteLabel: whiteLabel,
+        users: formattedUsers,
+        userCount: formattedUsers.length
+      });
+    } catch (error) {
+      console.error('Error in debug endpoint:', error);
+      res.status(500).json({ error: 'Failed to fetch debug data' });
+    }
+  });
+
+  // Test endpoint to debug admin users response with authentication
+  app.get('/api/test-admin-users-exact', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      console.log('🔍 Test endpoint - User:', user);
+      
+      if (!user || (user.role !== 'super_admin' && user.role !== 'white_label_client')) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      let users;
+      if (user.role === 'super_admin') {
+        // Super admin sees all users
+        users = await storage.getAllUsers();
+      } else {
+        // White label client sees their users
+        const whiteLabel = await storage.getWhiteLabelByUserId(user.id);
+        console.log('🔍 Test endpoint - WhiteLabel:', whiteLabel);
+        if (!whiteLabel) {
+          return res.status(404).json({ error: 'White label not found' });
+        }
+        users = await storage.getUsersByWhiteLabelId(whiteLabel.id);
+        console.log('🔍 Test endpoint - Raw users:', users);
+      }
+
+      // Format users for frontend
+      const formattedUsers = users.map(u => ({
+        id: u.id,
+        username: u.username,
+        email: u.email,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        role: u.role,
+        isActive: u.isActive,
+        status: u.isActive ? 'active' : 'pending', // Map isActive to status
+        createdAt: u.createdAt,
+        updatedAt: u.updatedAt,
+        whiteLabelId: u.whiteLabelId || u.userOfWhiteLabelId,
+        profileImageUrl: u.profileImageUrl
+      }));
+
+      console.log('🔍 Test endpoint - Formatted users:', formattedUsers);
+      res.json(formattedUsers);
+    } catch (error) {
+      console.error('Test endpoint error:', error);
+      res.status(500).json({ error: 'Failed to fetch users' });
+    }
+  });
+
+  // Temporary endpoint to check testingwhuser details
+  app.get('/api/test-check-testingwhuser', async (req, res) => {
+    try {
+      const [testUser] = await db.select().from(users).where(eq(users.username, 'testingwhuser')).limit(1);
+      if (!testUser) {
+        return res.status(404).json({ error: 'testingwhuser not found' });
+      }
+      res.json(testUser);
+    } catch (error) {
+      console.error('Error checking testingwhuser:', error);
+      res.status(500).json({ error: 'Failed to check testingwhuser' });
+    }
+  });
+
+  // Temporary endpoint to test /api/admin/users as testingwhuser
+  app.get('/api/test-admin-users-as-testingwhuser', async (req, res) => {
+    try {
+      // Find the testingwhuser using direct database query
+      const [testUser] = await db.select().from(users).where(eq(users.username, 'testingwhuser')).limit(1);
+      if (!testUser) {
+        return res.status(404).json({ error: 'testingwhuser not found' });
+      }
+
+      // Check if they own a white label or belong to one
+      let whiteLabelId = testUser.whiteLabelId || testUser.userOfWhiteLabelId;
+      
+      if (!whiteLabelId) {
+        return res.status(404).json({ error: 'No white label association found for testingwhuser' });
+      }
+
+      // Get the white label details
+      const [whiteLabel] = await db.select().from(whiteLabels).where(eq(whiteLabels.id, whiteLabelId)).limit(1);
+      if (!whiteLabel) {
+        return res.status(404).json({ error: 'White label not found' });
+      }
+
+      // Simulate the same logic as /api/admin/users for white_label_client
+      const usersList = await storage.getUsersByWhiteLabelId(whiteLabelId);
+      
+      // Format users the same way as the real endpoint
+      const formattedUsers = usersList.map((user: any) => ({
+        ...user,
+        whiteLabelId: user.whiteLabelId || user.userOfWhiteLabelId,
+        userOfWhiteLabelId: user.userOfWhiteLabelId
+      }));
+
+      res.json({
+        testUser: {
+          id: testUser.id,
+          username: testUser.username,
+          role: testUser.role,
+          whiteLabelId: testUser.whiteLabelId,
+          userOfWhiteLabelId: testUser.userOfWhiteLabelId,
+          effectiveWhiteLabelId: whiteLabelId
+        },
+        whiteLabel: {
+          id: whiteLabel.id,
+          name: whiteLabel.name
+        },
+        userCount: formattedUsers.length,
+        users: formattedUsers
+      });
+    } catch (error) {
+      console.error('Error testing admin users as testingwhuser:', error);
+      res.status(500).json({ error: 'Failed to test admin users' });
     }
   });
 

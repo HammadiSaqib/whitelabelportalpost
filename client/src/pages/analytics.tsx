@@ -304,96 +304,229 @@ export default function AnalyticsPage() {
           {/* Charts Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Revenue Trend Chart */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Revenue Trend</CardTitle>
-                <p className="text-sm" style={{ color: primaryColor || '#3b82f6', opacity: 0.7 }}>Monthly revenue growth over time</p>
+            <Card className="bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden backdrop-blur-sm">
+              <CardHeader className="bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 border-b border-slate-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-lg font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent">Revenue Trend</CardTitle>
+                    <p className="text-sm mt-1 opacity-80" style={{ color: primaryColor || '#3b82f6' }}>Monthly revenue growth over time</p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="h-2 w-2 bg-emerald-400 rounded-full animate-pulse shadow-lg"></div>
+                    <span className="text-xs text-emerald-600 font-semibold">Live Data</span>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={processedRevenueData}>
-                    <defs>
-                      <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor={primaryColor || "#3b82f6"} stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor={primaryColor || "#3b82f6"} stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Area 
-                      type="monotone" 
-                      dataKey="revenue" 
-                      stroke={primaryColor || "#3b82f6"} 
-                      fillOpacity={1} 
-                      fill="url(#colorRevenue)" 
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+              <CardContent className="p-6 bg-gradient-to-br from-white to-slate-50">
+                <div className="bg-gradient-to-br from-white via-slate-50 to-blue-50 rounded-xl border border-slate-200 shadow-inner p-4">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <AreaChart data={processedRevenueData}>
+                      <defs>
+                        <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor={primaryColor || "#3b82f6"} stopOpacity={0.9}/>
+                          <stop offset="95%" stopColor={primaryColor || "#3b82f6"} stopOpacity={0.1}/>
+                        </linearGradient>
+                        <filter id="shadow">
+                          <feDropShadow dx="0" dy="2" stdDeviation="4" floodOpacity="0.3" />
+                        </filter>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" strokeWidth={1} opacity={0.8} />
+                      <XAxis 
+                        dataKey="month" 
+                        tick={{ fontSize: 12, fontWeight: 600, fill: '#475569' }}
+                        axisLine={{ stroke: '#cbd5e1', strokeWidth: 2 }}
+                        tickLine={{ stroke: '#cbd5e1', strokeWidth: 1 }}
+                      />
+                      <YAxis 
+                        tick={{ fontSize: 12, fontWeight: 600, fill: '#475569' }}
+                        axisLine={{ stroke: '#cbd5e1', strokeWidth: 2 }}
+                        tickLine={{ stroke: '#cbd5e1', strokeWidth: 1 }}
+                      />
+                      <Tooltip 
+                        contentStyle={{
+                          backgroundColor: 'white',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '12px',
+                          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                          fontSize: '14px',
+                          fontWeight: '600'
+                        }}
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="revenue" 
+                        stroke={primaryColor || "#3b82f6"} 
+                        strokeWidth={3}
+                        fillOpacity={1} 
+                        fill="url(#colorRevenue)" 
+                        filter="url(#shadow)"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
 
             {/* Plan Purchase Activity Chart */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Plan Purchase Activity</CardTitle>
-                <p className="text-sm text-muted-foreground">Daily plan creation and purchase metrics</p>
+            <Card className="bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden backdrop-blur-sm">
+              <CardHeader className="bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 border-b border-slate-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-lg font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent">Plan Purchase Activity</CardTitle>
+                    <p className="text-sm mt-1 opacity-80 text-slate-600">Daily plan creation and purchase metrics</p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="h-2 w-2 bg-blue-400 rounded-full animate-pulse shadow-lg"></div>
+                    <span className="text-xs text-blue-600 font-semibold">Real-time</span>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={activityData}>
-                    <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="plans" stroke={secondaryColor || "#10b981"} strokeWidth={2} />
-                    <Line type="monotone" dataKey="purchases" stroke={primaryColor || "#3b82f6"} strokeWidth={2} />
-                    <Line type="monotone" dataKey="revenue" stroke="#f59e0b" strokeWidth={2} />
-                  </LineChart>
-                </ResponsiveContainer>
+              <CardContent className="p-6 bg-gradient-to-br from-white to-slate-50">
+                <div className="bg-gradient-to-br from-white via-slate-50 to-blue-50 rounded-xl border border-slate-200 shadow-inner p-4">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={activityData}>
+                      <defs>
+                        <filter id="lineShadow">
+                          <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.2" />
+                        </filter>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" strokeWidth={1} opacity={0.8} />
+                      <XAxis 
+                        dataKey="date" 
+                        tick={{ fontSize: 12, fontWeight: 600, fill: '#475569' }}
+                        axisLine={{ stroke: '#cbd5e1', strokeWidth: 2 }}
+                        tickLine={{ stroke: '#cbd5e1', strokeWidth: 1 }}
+                      />
+                      <YAxis 
+                        tick={{ fontSize: 12, fontWeight: 600, fill: '#475569' }}
+                        axisLine={{ stroke: '#cbd5e1', strokeWidth: 2 }}
+                        tickLine={{ stroke: '#cbd5e1', strokeWidth: 1 }}
+                      />
+                      <Tooltip 
+                        contentStyle={{
+                          backgroundColor: 'white',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '12px',
+                          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                          fontSize: '14px',
+                          fontWeight: '600'
+                        }}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="plans" 
+                        stroke={secondaryColor || "#10b981"} 
+                        strokeWidth={3} 
+                        dot={{ fill: secondaryColor || "#10b981", strokeWidth: 2, r: 5, filter: "url(#lineShadow)" }}
+                        activeDot={{ r: 7, stroke: secondaryColor || "#10b981", strokeWidth: 3, fill: "white" }}
+                        filter="url(#lineShadow)"
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="purchases" 
+                        stroke={primaryColor || "#3b82f6"} 
+                        strokeWidth={3}
+                        dot={{ fill: primaryColor || "#3b82f6", strokeWidth: 2, r: 5, filter: "url(#lineShadow)" }}
+                        activeDot={{ r: 7, stroke: primaryColor || "#3b82f6", strokeWidth: 3, fill: "white" }}
+                        filter="url(#lineShadow)"
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="revenue" 
+                        stroke="#f59e0b" 
+                        strokeWidth={3}
+                        dot={{ fill: "#f59e0b", strokeWidth: 2, r: 5, filter: "url(#lineShadow)" }}
+                        activeDot={{ r: 7, stroke: "#f59e0b", strokeWidth: 3, fill: "white" }}
+                        filter="url(#lineShadow)"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
 
             {/* Monthly Growth */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Monthly Growth</CardTitle>
-                <p className="text-sm text-muted-foreground">Plan purchase revenue growth</p>
+            <Card className="bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden backdrop-blur-sm">
+              <CardHeader className="bg-gradient-to-r from-slate-50 via-green-50 to-emerald-50 border-b border-slate-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-lg font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent">Monthly Growth</CardTitle>
+                    <p className="text-sm mt-1 opacity-80 text-slate-600">Plan purchase revenue growth</p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="h-2 w-2 bg-green-400 rounded-full animate-pulse shadow-lg"></div>
+                    <span className="text-xs text-green-600 font-semibold">Growth</span>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={processedRevenueData}>
-                    <defs>
-                      <linearGradient id="colorGrowth" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor={secondaryColor || "#10b981"} stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor={secondaryColor || "#10b981"} stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Area 
-                      type="monotone" 
-                      dataKey="revenue" 
-                      stroke={secondaryColor || "#10b981"} 
-                      fillOpacity={1} 
-                      fill="url(#colorGrowth)" 
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+              <CardContent className="p-6 bg-gradient-to-br from-white to-slate-50">
+                <div className="bg-gradient-to-br from-white via-green-50 to-emerald-50 rounded-xl border border-slate-200 shadow-inner p-4">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <AreaChart data={processedRevenueData}>
+                      <defs>
+                        <linearGradient id="colorGrowth" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor={secondaryColor || "#10b981"} stopOpacity={0.9}/>
+                          <stop offset="95%" stopColor={secondaryColor || "#10b981"} stopOpacity={0.1}/>
+                        </linearGradient>
+                        <filter id="growthShadow">
+                          <feDropShadow dx="0" dy="2" stdDeviation="4" floodOpacity="0.3" />
+                        </filter>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0fdf4" strokeWidth={1} opacity={0.8} />
+                      <XAxis 
+                        dataKey="month" 
+                        tick={{ fontSize: 12, fontWeight: 600, fill: '#475569' }}
+                        axisLine={{ stroke: '#cbd5e1', strokeWidth: 2 }}
+                        tickLine={{ stroke: '#cbd5e1', strokeWidth: 1 }}
+                      />
+                      <YAxis 
+                        tick={{ fontSize: 12, fontWeight: 600, fill: '#475569' }}
+                        axisLine={{ stroke: '#cbd5e1', strokeWidth: 2 }}
+                        tickLine={{ stroke: '#cbd5e1', strokeWidth: 1 }}
+                      />
+                      <Tooltip 
+                        contentStyle={{
+                          backgroundColor: 'white',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '12px',
+                          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                          fontSize: '14px',
+                          fontWeight: '600'
+                        }}
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="revenue" 
+                        stroke={secondaryColor || "#10b981"} 
+                        strokeWidth={3}
+                        fillOpacity={1} 
+                        fill="url(#colorGrowth)" 
+                        filter="url(#growthShadow)"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
 
             {/* Plan Performance */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Plan Performance</CardTitle>
-                <p className="text-sm text-muted-foreground">Sales performance by plan</p>
+            <Card className="bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden backdrop-blur-sm">
+              <CardHeader className="bg-gradient-to-r from-slate-50 via-purple-50 to-indigo-50 border-b border-slate-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-lg font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent">Plan Performance</CardTitle>
+                    <p className="text-sm mt-1 opacity-80 text-slate-600">Sales performance by plan</p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="h-2 w-2 bg-purple-400 rounded-full animate-pulse shadow-lg"></div>
+                    <span className="text-xs text-purple-600 font-semibold">Performance</span>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent>
-                <CustomBarChart data={chartPlanData} />
+              <CardContent className="p-6 bg-gradient-to-br from-white to-slate-50">
+                <div className="bg-gradient-to-br from-white via-purple-50 to-indigo-50 rounded-xl border border-slate-200 shadow-inner p-4">
+                  <CustomBarChart data={chartPlanData} />
+                </div>
               </CardContent>
             </Card>
           </div>

@@ -53,6 +53,7 @@ export default function Sidebar({ isMobileOpen = false, onMobileToggle }: Sideba
           { name: "Products", href: "/products", icon: Package },
           { name: "Collections", href: "/categories", icon: Folder },
           ...(userRole === 'super_admin' ? [{ name: "Organization", href: "/clients", icon: Users }] : []),
+          ...(userRole === 'white_label_client' ? [{ name: "Users", href: "/users", icon: Users }] : []),
           { name: "Affiliates", href: "/affiliates", icon: Handshake },
         ]
       },
@@ -95,7 +96,7 @@ export default function Sidebar({ isMobileOpen = false, onMobileToggle }: Sideba
       
       {/* Sidebar */}
       <aside className={`
-        fixed lg:static inset-y-0 left-0 z-50 lg:z-auto
+        fixed lg:static inset-y-0 left-0 z-50
         w-72 bg-sidebar border-r border-sidebar-border
         flex flex-col transition-transform duration-300 ease-in-out
         ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}

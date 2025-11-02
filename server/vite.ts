@@ -64,7 +64,7 @@ export async function setupVite(app: Express, server: Server) {
     const standardAppRoutes = [
       'auth', 'dashboard', 'profile', 'settings', 'admin', 'plans', 'billing', 'pricing', 
       'become-affiliate', 'white-label', 'contact', 'reset-password', 'subscriptions', 
-      'clients', 'affiliates', 'analytics', 'products', 'categories', 'integrations', 
+      'clients', 'affiliates', 'analytics', 'products', 'categories', 'users', 'integrations', 
       'ai-content', 'landing-builder', 'referrals', 'affiliate-commissions', 'links', 
       'news', 'announcements', 'announcements-simple', 'affiliate-dashboard', 
       'business-auth', 'business-signup', 'commission-rules', 'system-settings', 

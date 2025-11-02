@@ -243,7 +243,7 @@ export default function ClientsPage() {
 
   // CSV Template Download
   const downloadCsvTemplate = () => {
-    const csvContent = "email,businessName,firstName,lastName\nexample@company.com,Example Company,John,Doe\n";
+    const csvContent = "email,firstName,lastName\nexample@company.com,John,Doe\n";
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -274,8 +274,8 @@ export default function ClientsPage() {
       const lines = text.split('\n').filter(line => line.trim());
       const headers = lines[0].split(',').map(h => h.trim());
       
-      if (!headers.includes('email') || !headers.includes('businessName') || !headers.includes('firstName') || !headers.includes('lastName')) {
-        setUploadStatus('CSV must contain columns: email, businessName, firstName, lastName');
+      if (!headers.includes('email') || !headers.includes('firstName') || !headers.includes('lastName')) {
+        setUploadStatus('CSV must contain columns: email, firstName, lastName');
         setCsvData([]);
         return;
       }
@@ -379,6 +379,7 @@ export default function ClientsPage() {
 
     const invitations = csvData.map(row => ({
       ...row,
+      businessName: row.businessName || `${row.firstName} ${row.lastName}'s Business`,
       inviterName: `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.username || 'Super Admin'
     }));
 
@@ -1099,7 +1100,7 @@ export default function ClientsPage() {
                     <div>
                       <h4 className="font-medium text-amber-900">CSV Format Instructions</h4>
                       <p className="text-sm text-amber-700 mt-1">
-                        Your CSV file must contain these columns: <code className="bg-amber-100 px-1 rounded">email</code>, <code className="bg-amber-100 px-1 rounded">businessName</code>, <code className="bg-amber-100 px-1 rounded">firstName</code>, <code className="bg-amber-100 px-1 rounded">lastName</code>
+                        Your CSV file must contain these columns: <code className="bg-amber-100 px-1 rounded">email</code>, <code className="bg-amber-100 px-1 rounded">firstName</code>, <code className="bg-amber-100 px-1 rounded">lastName</code>
                       </p>
                       <Button 
                         variant="link" 

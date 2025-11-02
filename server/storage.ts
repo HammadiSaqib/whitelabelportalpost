@@ -130,6 +130,7 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserById(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: UpsertUser): Promise<User>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateUser(userId: string, updates: Partial<UpsertUser>): Promise<User>;
@@ -492,6 +493,11 @@ export class DatabaseStorage implements IStorage {
 
   async getUserByEmail(email: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
     return user;
   }
 
@@ -1093,6 +1099,9 @@ export class DatabaseStorage implements IStorage {
       try {
         console.log('Creating default landing page for new white-label:', newWhiteLabel.businessName);
         
+        // Import default settings
+        const { defaultLandingPageSettings } = await import('./defaultLandingPage');
+        
         const defaultLandingPage = await this.createLandingPage({
           userId: newWhiteLabel.userId,
           name: `${newWhiteLabel.businessName} - Default Landing Page`,
@@ -1138,6 +1147,7 @@ export class DatabaseStorage implements IStorage {
               size: { width: 100, height: 40 }
             }
           ],
+          settings: defaultLandingPageSettings,
           isPublished: true,
           domainPath: newWhiteLabel.domainPath
         });
@@ -1499,7 +1509,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCategories(userId: string): Promise<Category[]> {
-    // Get user's white label and return categories
+    // Get user to check role
+    const user = await this.getUser(userId);
+    if (!user) {
+      return [];
+    }
+
+    // Super admin can see all categories (platform owner privilege)
+    if (user.role === 'super_admin') {
+      return await db
+        .select()
+        .from(categories)
+        .orderBy(categories.name);
+    }
+
+    // Regular users need a white label
     const whiteLabel = await this.getWhiteLabelByUserId(userId);
     if (!whiteLabel) {
       return [];
@@ -1509,7 +1533,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(categories)
       .where(eq(categories.whiteLabelId, whiteLabel.id))
-      .orderBy(categories.parentCategoryId, categories.name);
+      .orderBy(categories.name);
   }
 
   async createCategory(category: InsertCategory): Promise<Category> {
@@ -6312,6 +6336,387 @@ export class DatabaseStorage implements IStorage {
 
       return { success: false, error: error.message };
     }
+  }
+
+  // Admin user management methods
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(users.createdAt);
+  }
+
+  async getUsersByWhiteLabelId(whiteLabelId: number): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .where(eq(users.userOfWhiteLabelId, whiteLabelId))
+      .orderBy(users.createdAt);
+  }
+
+  async getEndUserActivitiesByUserId(userId: string): Promise<EndUserActivity[]> {
+    return await db
+      .select()
+      .from(endUserActivities)
+      .where(eq(endUserActivities.userId, userId))
+      .orderBy(endUserActivities.createdAt);
+  }
+
+  async getUserPurchasesByUserId(userId: string): Promise<PurchaseHistory[]> {
+    return await db
+      .select()
+      .from(purchaseHistory)
+      .where(eq(purchaseHistory.userId, userId))
+      .orderBy(purchaseHistory.purchaseDate);
+  }
+
+  // Comprehensive Analytics Functions for Super-Admin Dashboard
+  async getRevenueOverview(startDate?: string, endDate?: string): Promise<any> {
+    try {
+      const dateFilter = this.buildDateFilter(startDate, endDate);
+      
+      // Main site revenue (from main site plan purchases)
+      const mainSiteRevenue = await db
+        .select({ 
+          totalRevenue: sql<number>`coalesce(sum(cast(${purchaseHistory.amount} as decimal)), 0)`,
+          totalSales: sql<number>`count(${purchaseHistory.id})`
+        })
+        .from(purchaseHistory)
+        .innerJoin(plans, eq(purchaseHistory.planId, plans.id))
+        .where(and(
+          eq(plans.isMainSitePlan, true),
+          eq(purchaseHistory.status, 'completed'),
+          dateFilter
+        ));
+
+      // White label revenue (from white label created plan purchases)
+      const whiteLabelRevenue = await db
+        .select({ 
+          totalRevenue: sql<number>`coalesce(sum(cast(${purchaseHistory.amount} as decimal)), 0)`,
+          totalSales: sql<number>`count(${purchaseHistory.id})`
+        })
+        .from(purchaseHistory)
+        .innerJoin(plans, eq(purchaseHistory.planId, plans.id))
+        .where(and(
+          eq(plans.isMainSitePlan, false),
+          eq(purchaseHistory.status, 'completed'),
+          dateFilter
+        ));
+
+      // Monthly revenue trend
+      const monthlyRevenue = await db
+        .select({
+          month: sql<string>`to_char(${purchaseHistory.createdAt}, 'YYYY-MM')`,
+          mainSiteRevenue: sql<number>`coalesce(sum(case when ${plans.isMainSitePlan} = true then cast(${purchaseHistory.amount} as decimal) else 0 end), 0)`,
+          whiteLabelRevenue: sql<number>`coalesce(sum(case when ${plans.isMainSitePlan} = false then cast(${purchaseHistory.amount} as decimal) else 0 end), 0)`
+        })
+        .from(purchaseHistory)
+        .innerJoin(plans, eq(purchaseHistory.planId, plans.id))
+        .where(and(
+          eq(purchaseHistory.status, 'completed'),
+          dateFilter
+        ))
+        .groupBy(sql`to_char(${purchaseHistory.createdAt}, 'YYYY-MM')`)
+        .orderBy(sql`to_char(${purchaseHistory.createdAt}, 'YYYY-MM')`);
+
+      return {
+        mainSiteRevenue: {
+          total: parseFloat(mainSiteRevenue[0]?.totalRevenue?.toString() || '0'),
+          sales: Number(mainSiteRevenue[0]?.totalSales || 0)
+        },
+        whiteLabelRevenue: {
+          total: parseFloat(whiteLabelRevenue[0]?.totalRevenue?.toString() || '0'),
+          sales: Number(whiteLabelRevenue[0]?.totalSales || 0)
+        },
+        monthlyTrend: monthlyRevenue.map(item => ({
+          month: item.month,
+          mainSiteRevenue: parseFloat(item.mainSiteRevenue?.toString() || '0'),
+          whiteLabelRevenue: parseFloat(item.whiteLabelRevenue?.toString() || '0')
+        }))
+      };
+    } catch (error) {
+      console.error('Error fetching revenue overview:', error);
+      return { mainSiteRevenue: { total: 0, sales: 0 }, whiteLabelRevenue: { total: 0, sales: 0 }, monthlyTrend: [] };
+    }
+  }
+
+  async getWhiteLabelMetrics(startDate?: string, endDate?: string): Promise<any> {
+    try {
+      const dateFilter = this.buildDateFilter(startDate, endDate);
+      
+      // Active white labels count
+      const activeWhiteLabels = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(whiteLabels)
+        .where(and(
+          eq(whiteLabels.isActive, true),
+          dateFilter ? gte(whiteLabels.createdAt, new Date(startDate!)) : undefined
+        ));
+
+      // New white labels in period
+      const newWhiteLabels = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(whiteLabels)
+        .where(dateFilter || sql`true`);
+
+      // White label performance
+      const whiteLabelPerformance = await db
+        .select({
+          whiteLabelId: whiteLabels.id,
+          businessName: whiteLabels.businessName,
+          totalRevenue: sql<number>`coalesce(sum(cast(${purchaseHistory.amount} as decimal)), 0)`,
+          totalSales: sql<number>`count(${purchaseHistory.id})`,
+          totalPlans: sql<number>`count(distinct ${plans.id})`
+        })
+        .from(whiteLabels)
+        .leftJoin(users, eq(whiteLabels.userId, users.id))
+        .leftJoin(plans, eq(plans.createdBy, users.id))
+        .leftJoin(purchaseHistory, and(
+          eq(purchaseHistory.planId, plans.id),
+          eq(purchaseHistory.status, 'completed'),
+          dateFilter
+        ))
+        .where(eq(whiteLabels.isActive, true))
+        .groupBy(whiteLabels.id, whiteLabels.businessName)
+        .orderBy(desc(sql<number>`coalesce(sum(cast(${purchaseHistory.amount} as decimal)), 0)`))
+        .limit(10);
+
+      return {
+        activeCount: Number(activeWhiteLabels[0]?.count || 0),
+        newCount: Number(newWhiteLabels[0]?.count || 0),
+        topPerformers: whiteLabelPerformance.map(wl => ({
+          id: wl.whiteLabelId,
+          businessName: wl.businessName,
+          totalRevenue: parseFloat(wl.totalRevenue?.toString() || '0'),
+          totalSales: Number(wl.totalSales || 0),
+          totalPlans: Number(wl.totalPlans || 0)
+        }))
+      };
+    } catch (error) {
+      console.error('Error fetching white label metrics:', error);
+      return { activeCount: 0, newCount: 0, topPerformers: [] };
+    }
+  }
+
+  async getPlanPerformance(startDate?: string, endDate?: string): Promise<any> {
+    try {
+      const dateFilter = this.buildDateFilter(startDate, endDate);
+      
+      // Main site plan performance
+      const mainSitePlans = await db
+        .select({
+          planId: plans.id,
+          planName: plans.name,
+          price: plans.price,
+          totalSales: sql<number>`count(${purchaseHistory.id})`,
+          totalRevenue: sql<number>`coalesce(sum(cast(${purchaseHistory.amount} as decimal)), 0)`
+        })
+        .from(plans)
+        .leftJoin(purchaseHistory, and(
+          eq(purchaseHistory.planId, plans.id),
+          eq(purchaseHistory.status, 'completed'),
+          dateFilter
+        ))
+        .where(and(
+          eq(plans.isMainSitePlan, true),
+          eq(plans.isActive, true)
+        ))
+        .groupBy(plans.id, plans.name, plans.price)
+        .orderBy(desc(sql<number>`coalesce(sum(cast(${purchaseHistory.amount} as decimal)), 0)`));
+
+      // Total plans count
+      const totalPlansCount = await db
+        .select({ 
+          mainSitePlans: sql<number>`count(case when ${plans.isMainSitePlan} = true then 1 end)`,
+          whiteLabelPlans: sql<number>`count(case when ${plans.isMainSitePlan} = false then 1 end)`
+        })
+        .from(plans)
+        .where(eq(plans.isActive, true));
+
+      return {
+        mainSitePlans: mainSitePlans.map(plan => ({
+          id: plan.planId,
+          name: plan.planName,
+          price: parseFloat(plan.price || '0'),
+          totalSales: Number(plan.totalSales || 0),
+          totalRevenue: parseFloat(plan.totalRevenue?.toString() || '0')
+        })),
+        totalCounts: {
+          mainSitePlans: Number(totalPlansCount[0]?.mainSitePlans || 0),
+          whiteLabelPlans: Number(totalPlansCount[0]?.whiteLabelPlans || 0)
+        }
+      };
+    } catch (error) {
+      console.error('Error fetching plan performance:', error);
+      return { mainSitePlans: [], totalCounts: { mainSitePlans: 0, whiteLabelPlans: 0 } };
+    }
+  }
+
+  async getPurchaseTrends(startDate?: string, endDate?: string): Promise<any> {
+    try {
+      const dateFilter = this.buildDateFilter(startDate, endDate);
+      
+      // Daily purchase trends
+      const dailyTrends = await db
+        .select({
+          date: sql<string>`date(${purchaseHistory.createdAt})`,
+          totalPurchases: sql<number>`count(${purchaseHistory.id})`,
+          totalRevenue: sql<number>`coalesce(sum(cast(${purchaseHistory.amount} as decimal)), 0)`,
+          mainSitePurchases: sql<number>`count(case when ${plans.isMainSitePlan} = true then 1 end)`,
+          whiteLabelPurchases: sql<number>`count(case when ${plans.isMainSitePlan} = false then 1 end)`
+        })
+        .from(purchaseHistory)
+        .innerJoin(plans, eq(purchaseHistory.planId, plans.id))
+        .where(and(
+          eq(purchaseHistory.status, 'completed'),
+          dateFilter
+        ))
+        .groupBy(sql`date(${purchaseHistory.createdAt})`)
+        .orderBy(sql`date(${purchaseHistory.createdAt})`);
+
+      // Recent purchases
+      const recentPurchases = await db
+        .select({
+          id: purchaseHistory.id,
+          amount: purchaseHistory.amount,
+          createdAt: purchaseHistory.createdAt,
+          planName: plans.name,
+          userEmail: users.email,
+          isMainSitePlan: plans.isMainSitePlan
+        })
+        .from(purchaseHistory)
+        .innerJoin(plans, eq(purchaseHistory.planId, plans.id))
+        .leftJoin(users, eq(purchaseHistory.userId, users.id))
+        .where(and(
+          eq(purchaseHistory.status, 'completed'),
+          dateFilter
+        ))
+        .orderBy(desc(purchaseHistory.createdAt))
+        .limit(20);
+
+      return {
+        dailyTrends: dailyTrends.map(trend => ({
+          date: trend.date,
+          totalPurchases: Number(trend.totalPurchases || 0),
+          totalRevenue: parseFloat(trend.totalRevenue?.toString() || '0'),
+          mainSitePurchases: Number(trend.mainSitePurchases || 0),
+          whiteLabelPurchases: Number(trend.whiteLabelPurchases || 0)
+        })),
+        recentPurchases: recentPurchases.map(purchase => ({
+          id: purchase.id,
+          amount: parseFloat(purchase.amount || '0'),
+          createdAt: purchase.createdAt,
+          planName: purchase.planName,
+          userEmail: purchase.userEmail,
+          isMainSitePlan: purchase.isMainSitePlan
+        }))
+      };
+    } catch (error) {
+      console.error('Error fetching purchase trends:', error);
+      return { dailyTrends: [], recentPurchases: [] };
+    }
+  }
+
+  async getComparisonData(startDate: string, endDate: string, compareStartDate: string, compareEndDate: string, metrics: string[]): Promise<any> {
+    try {
+      const currentPeriodFilter = this.buildDateFilter(startDate, endDate);
+      const comparePeriodFilter = this.buildDateFilter(compareStartDate, compareEndDate);
+      
+      const comparisonData: any = {};
+
+      if (metrics.includes('revenue')) {
+        // Current period revenue
+        const currentRevenue = await db
+          .select({ 
+            totalRevenue: sql<number>`coalesce(sum(cast(${purchaseHistory.amount} as decimal)), 0)`
+          })
+          .from(purchaseHistory)
+          .where(and(
+            eq(purchaseHistory.status, 'completed'),
+            currentPeriodFilter
+          ));
+
+        // Compare period revenue
+        const compareRevenue = await db
+          .select({ 
+            totalRevenue: sql<number>`coalesce(sum(cast(${purchaseHistory.amount} as decimal)), 0)`
+          })
+          .from(purchaseHistory)
+          .where(and(
+            eq(purchaseHistory.status, 'completed'),
+            comparePeriodFilter
+          ));
+
+        comparisonData.revenue = {
+          current: parseFloat(currentRevenue[0]?.totalRevenue?.toString() || '0'),
+          previous: parseFloat(compareRevenue[0]?.totalRevenue?.toString() || '0')
+        };
+      }
+
+      if (metrics.includes('sales')) {
+        // Current period sales
+        const currentSales = await db
+          .select({ 
+            totalSales: sql<number>`count(${purchaseHistory.id})`
+          })
+          .from(purchaseHistory)
+          .where(and(
+            eq(purchaseHistory.status, 'completed'),
+            currentPeriodFilter
+          ));
+
+        // Compare period sales
+        const compareSales = await db
+          .select({ 
+            totalSales: sql<number>`count(${purchaseHistory.id})`
+          })
+          .from(purchaseHistory)
+          .where(and(
+            eq(purchaseHistory.status, 'completed'),
+            comparePeriodFilter
+          ));
+
+        comparisonData.sales = {
+          current: Number(currentSales[0]?.totalSales || 0),
+          previous: Number(compareSales[0]?.totalSales || 0)
+        };
+      }
+
+      if (metrics.includes('whiteLabels')) {
+        // Current period new white labels
+        const currentWhiteLabels = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(whiteLabels)
+          .where(currentPeriodFilter);
+
+        // Compare period new white labels
+        const compareWhiteLabels = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(whiteLabels)
+          .where(comparePeriodFilter);
+
+        comparisonData.whiteLabels = {
+          current: Number(currentWhiteLabels[0]?.count || 0),
+          previous: Number(compareWhiteLabels[0]?.count || 0)
+        };
+      }
+
+      return comparisonData;
+    } catch (error) {
+      console.error('Error fetching comparison data:', error);
+      return {};
+    }
+  }
+
+  private buildDateFilter(startDate?: string, endDate?: string) {
+    if (!startDate && !endDate) return undefined;
+    
+    const conditions = [];
+    if (startDate) {
+      conditions.push(gte(purchaseHistory.createdAt, new Date(startDate)));
+    }
+    if (endDate) {
+      conditions.push(lte(purchaseHistory.createdAt, new Date(endDate)));
+    }
+    
+    return conditions.length > 1 ? and(...conditions) : conditions[0];
   }
 }
 

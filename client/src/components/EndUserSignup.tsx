@@ -237,11 +237,17 @@ export default function EndUserSignup({ onBack, domainPath }: EndUserSignupProps
       submitData.append('role', 'End-user');
       submitData.append('domainPath', domainPath);
       
+      // Include whitelabel_id from sessionStorage if available
+      const authWhiteLabelId = sessionStorage.getItem('authWhiteLabelId');
+      if (authWhiteLabelId) {
+        submitData.append('whitelabel_id', authWhiteLabelId);
+      }
+      
       if (formData.profileImage) {
         submitData.append('profileImage', formData.profileImage);
       }
 
-      const response = await fetch('/api/auth/signup-affiliate', {
+      const response = await fetch('/api/auth/signup', {
         method: 'POST',
         body: submitData,
       });

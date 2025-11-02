@@ -6,12 +6,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
 interface HeaderProps {
-  title: string;
+  title?: string;
   subtitle?: string;
   showCreatePlan?: boolean;
+  onMobileMenuToggle?: () => void;
 }
 
-export default function Header({ title, subtitle, showCreatePlan = false }: HeaderProps) {
+export default function Header({ title = "Dashboard", subtitle, showCreatePlan = false, onMobileMenuToggle }: HeaderProps) {
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -89,11 +90,24 @@ export default function Header({ title, subtitle, showCreatePlan = false }: Head
       )}
       
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">{title}</h1>
-          {subtitle && (
-            <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
+        <div className="flex items-center space-x-4">
+          {/* Mobile Menu Button */}
+          {onMobileMenuToggle && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onMobileMenuToggle}
+              className="lg:hidden p-2"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
           )}
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">{title}</h1>
+            {subtitle && (
+              <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
+            )}
+          </div>
         </div>
         <div className="flex items-center space-x-4">
           <Button variant="ghost" size="sm" className="relative p-2">
