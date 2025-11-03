@@ -1,0 +1,55 @@
+useUserPreferences Debug: {user: undefined, isAuthenticated: false, queryData: undefined, queryError: null, queryStatus: 'pending'}
+index-2_LRNEnL.js:980 Router rendering - isAuthenticated: false isLoading: true user: undefined domain: auth
+index-2_LRNEnL.js:980 Router - showing loading state
+index-2_LRNEnL.js:702 DomainPageWrapper mounted, setting up event listeners
+index-2_LRNEnL.js:702 Event listener setup complete
+index-2_LRNEnL.js:658  GET https://whitelabelportalsql-munibahmed12552.replit.app/api/auth/user?domain=auth 401 (Unauthorized)
+le.queryFn.K1.on401 @ index-2_LRNEnL.js:658
+i @ index-2_LRNEnL.js:48
+g @ index-2_LRNEnL.js:48
+start @ index-2_LRNEnL.js:48
+fetch @ index-2_LRNEnL.js:48
+Yu @ index-2_LRNEnL.js:48
+onSubscribe @ index-2_LRNEnL.js:48
+subscribe @ index-2_LRNEnL.js:48
+(anonymous) @ index-2_LRNEnL.js:48
+VO @ index-2_LRNEnL.js:38
+Ag @ index-2_LRNEnL.js:40
+jc @ index-2_LRNEnL.js:40
+SC @ index-2_LRNEnL.js:40
+bo @ index-2_LRNEnL.js:38
+g7 @ index-2_LRNEnL.js:40
+Mo @ index-2_LRNEnL.js:40
+N_ @ index-2_LRNEnL.js:40
+N @ index-2_LRNEnL.js:25
+O @ index-2_LRNEnL.js:25Understand this error
+index-2_LRNEnL.js:658 useUserPreferences Debug: {user: null, isAuthenticated: false, queryData: undefined, queryError: null, queryStatus: 'pending'}
+index-2_LRNEnL.js:980 Router rendering - isAuthenticated: false isLoading: false user: null domain: auth
+index-2_LRNEnL.js:702 Testing event system...
+index-2_LRNEnL.js:702 Test event received: test
+index-2_LRNEnL.js:824  POST https://whitelabelportalsql-munibahmed12552.replit.app/api/auth/login 401 (Unauthorized)
+z @ index-2_LRNEnL.js:824
+DF @ index-2_LRNEnL.js:37
+LF @ index-2_LRNEnL.js:37
+FF @ index-2_LRNEnL.js:37
+GS @ index-2_LRNEnL.js:37
+AO @ index-2_LRNEnL.js:37
+(anonymous) @ index-2_LRNEnL.js:37
+O1 @ index-2_LRNEnL.js:40
+JT @ index-2_LRNEnL.js:37
+jv @ index-2_LRNEnL.js:37
+a1 @ index-2_LRNEnL.js:37
+t9 @ index-2_LRNEnL.js:37Understand this error
+index-2_LRNEnL.js:824  POST https://whitelabelportalsql-munibahmed12552.replit.app/api/auth/login 401 (Unauthorized)
+z @ index-2_LRNEnL.js:824
+DF @ index-2_LRNEnL.js:37
+LF @ index-2_LRNEnL.js:37
+FF @ index-2_LRNEnL.js:37
+GS @ index-2_LRNEnL.js:37
+AO @ index-2_LRNEnL.js:37
+(anonymous) @ index-2_LRNEnL.js:37
+O1 @ index-2_LRNEnL.js:40
+JT @ index-2_LRNEnL.js:37
+jv @ index-2_LRNEnL.js:37
+a1 @ index-2_LRNEnL.js:37
+t9 @ index-2_LRNEnL.js:37Understand this error

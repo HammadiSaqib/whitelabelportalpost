@@ -1,0 +1,59 @@
+{
+  "timestamp": "2025-09-17T19:13:16.243Z",
+  "totalTables": 7,
+  "perfectMatches": 4,
+  "emptyAsExpected": 3,
+  "tablesWithIssues": 0,
+  "totalRealRecords": 83,
+  "details": [
+    {
+      "table": "affiliate_plan_visibility",
+      "current": 0,
+      "expected": 0,
+      "status": "EMPTY (as expected)",
+      "emoji": "⭕"
+    },
+    {
+      "table": "announcements",
+      "current": 52,
+      "expected": 52,
+      "status": "PERFECT MATCH",
+      "emoji": "✅"
+    },
+    {
+      "table": "announcement_comments",
+      "current": 13,
+      "expected": 13,
+      "status": "PERFECT MATCH",
+      "emoji": "✅"
+    },
+    {
+      "table": "announcement_likes",
+      "current": 11,
+      "expected": 11,
+      "status": "PERFECT MATCH",
+      "emoji": "✅"
+    },
+    {
+      "table": "commissions",
+      "current": 7,
+      "expected": 7,
+      "status": "PERFECT MATCH",
+      "emoji": "✅"
+    },
+    {
+      "table": "payment_accounts",
+      "current": 0,
+      "expected": 0,
+      "status": "EMPTY (as expected)",
+      "emoji": "⭕"
+    },
+    {
+      "table": "referral_commissions",
+      "current": 0,
+      "expected": 0,
+      "status": "EMPTY (as expected)",
+      "emoji": "⭕"
+    }
+  ]
+}

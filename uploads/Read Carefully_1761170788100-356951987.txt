@@ -1,0 +1,184 @@
+PS C:\Users\rehma\Downloads\testing github pull> npm run build      
+>> git add vite.config.ts vercel.json package.json
+>> git commit -m "Fix Vite root path and Vercel build configuration"    
+>> git push origin main
+>> vercel --prod
+   
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+vite v5.4.14 building for production...
+transforming (3) src\main.tsxBrowserslist: browsers data (caniuse-lite) 
+is 12 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 3357 modules transformed.
+../dist/public/index.html                              0.64 kB │ gzip:  
+ 0.39 kB
+../dist/public/assets/index-CkJbqNsh.css             157.65 kB │ gzip:  
+22.60 kB
+../dist/public/assets/purify.es-BFmuJLeH.js           21.93 kB │ gzip:  
+ 8.62 kB
+../dist/public/assets/index.es-CAket4jF.js           150.57 kB │ gzip:  
+51.51 kB
+../dist/public/assets/html2canvas.esm-CBrSDip1.js    201.42 kB │ gzip:  
+48.03 kB
+../dist/public/assets/jspdf.es.min-E5d5Gvsu.js       357.69 kB │ gzip: 117.99 kB
+../dist/public/assets/index-DBIGv5s-.js            1,648.61 kB │ gzip: 423.91 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:    
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 21.62s
+▲ [WARNING] Duplicate member "getSubscriptions" in class body [duplicate-class-member]
+
+    server/storage.ts:3583:8:
+      3583 │   async getSubscriptions(userId: string): Promise<any[]> { 
+           ╵         ~~~~~~~~~~~~~~~~
+
+  The original member "getSubscriptions" is here:
+
+    server/storage.ts:1290:8:
+      1290 │   async getSubscriptions(): Promise<Subscription[]> {      
+           ╵         ~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Duplicate member "trackReferralClick" in class body [duplicate-class-member]
+
+    server/storage.ts:3973:8:
+      3973 │   async trackReferralClick(referralCode: string, ipAddr... 
+           ╵         ~~~~~~~~~~~~~~~~~~
+
+  The original member "trackReferralClick" is here:
+
+    server/storage.ts:1435:8:
+      1435 │   async trackReferralClick(data: { affiliateId: string;... 
+           ╵         ~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Duplicate member "getEndUsersByWhiteLabel" in class body [duplicate-class-member]
+
+    server/storage.ts:4341:8:
+      4341 │   async getEndUsersByWhiteLabel(whiteLabelId: number): ... 
+           ╵         ~~~~~~~~~~~~~~~~~~~~~~~
+
+  The original member "getEndUsersByWhiteLabel" is here:
+
+    server/storage.ts:584:8:
+      584 │   async getEndUsersByWhiteLabel(whiteLabelId: number): P... 
+          ╵         ~~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Duplicate member "getPlanCategories" in class body [duplicate-class-member]
+
+    server/storage.ts:4588:8:
+      4588 │   async getPlanCategories(planId: number): Promise<Cate... 
+           ╵         ~~~~~~~~~~~~~~~~~
+
+  The original member "getPlanCategories" is here:
+
+    server/storage.ts:3384:8:
+      3384 │   async getPlanCategories(planId: number): Promise<Cate...
+           ╵         ~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Duplicate member "getPlanProducts" in class body [duplicate-class-member]
+
+    server/storage.ts:4639:8:
+      4639 │   async getPlanProducts(planId: number): Promise<Produc... 
+           ╵         ~~~~~~~~~~~~~~~
+
+  The original member "getPlanProducts" is here:
+
+    server/storage.ts:3329:8:
+      3329 │   async getPlanProducts(planId: number): Promise<Produc...
+           ╵         ~~~~~~~~~~~~~~~
+
+▲ [WARNING] Duplicate member "getAffiliatePlanVisibilitySettings" in class body [duplicate-class-member]
+
+    server/storage.ts:4964:8:
+      4964 │   async getAffiliatePlanVisibilitySettings(affiliateId:... 
+           ╵         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  The original member "getAffiliatePlanVisibilitySettings" is here:     
+
+    server/storage.ts:4952:8:
+      4952 │   async getAffiliatePlanVisibilitySettings(affiliateId:...
+           ╵         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+6 of 7 warnings shown (disable the message limit with --log-limit=0)    
+
+  dist\index.js  817.3kb
+
+Done in 180ms
+[main 9d07d30] Fix Vite root path and Vercel build configuration
+ 2 files changed, 11 insertions(+), 32 deletions(-)
+Enumerating objects: 7, done.
+Counting objects: 100% (7/7), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (4/4), done.
+Writing objects: 100% (4/4), 601 bytes | 601.00 KiB/s, done.
+Total 4 (delta 3), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (3/3), completed with 3 local objects.   
+To https://github.com/HammadiSaqib/whitelabelportalsql.git
+   3db0071..9d07d30  main -> main
+error: update_ref failed for ref 'refs/remotes/origin/main': cannot lock ref 'refs/remotes/origin/main': unable to resolve reference 'refs/remotes/origin/main': reference broken
+Vercel CLI 48.4.1
+🔍  Inspect: https://vercel.com/hammadisaqib-6423s-projects/testing-github-pull/5huhk6XUsLbL1bqNbCNmCWQrBNXA [6s]
+✅  Production: https://testing-github-pull-bqnjy09il-hammadisaqib-6423s-
+projects.vercel.app [6s]
+2025-10-20T08:27:04.935Z  Running build in Portland, USA (West) – pdx1
+2025-10-20T08:27:04.936Z  Build machine configuration: 4 cores, 8 GB
+2025-10-20T08:27:05.004Z  Retrieving list of deployment files...        
+2025-10-20T08:27:05.230Z  Previous build caches not available
+2025-10-20T08:27:05.795Z  Downloading 255 deployment files...
+2025-10-20T08:27:07.837Z  Running "vercel build"
+2025-10-20T08:27:08.204Z  Vercel CLI 48.2.9
+2025-10-20T08:27:08.361Z  WARN! Due to `builds` existing in your configuration file, the Build and Development Settings defined in your Project 
+Settings will not apply. Learn More: https://vercel.link/unused-build-settings
+2025-10-20T08:27:08.844Z  Installing dependencies...
+2025-10-20T08:27:17.063Z  npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+2025-10-20T08:27:18.267Z  npm warn deprecated lucia@3.2.2: This package 
+has been deprecated. Please see https://lucia-auth.com/lucia-v3/migrate.2025-10-20T08:27:29.928Z  npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+2025-10-20T08:27:30.369Z  npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+2025-10-20T08:27:36.244Z
+2025-10-20T08:27:36.245Z  > rest-express@1.0.0 postinstall
+2025-10-20T08:27:36.245Z  > echo Installation complete. Run 'npm run build' to build the project.
+2025-10-20T08:27:36.245Z
+2025-10-20T08:27:36.248Z  Installation complete. Run npm run build to build the project.
+2025-10-20T08:27:36.259Z
+2025-10-20T08:27:36.259Z  added 826 packages in 27s
+2025-10-20T08:27:36.259Z
+2025-10-20T08:27:36.259Z  95 packages are looking for funding
+2025-10-20T08:27:36.259Z    run `npm fund` for details
+2025-10-20T08:27:36.301Z  Running "npm run vercel-build"
+2025-10-20T08:27:36.400Z
+2025-10-20T08:27:36.401Z  > rest-express@1.0.0 vercel-build
+2025-10-20T08:27:36.401Z  > npm ci && npm run build
+2025-10-20T08:27:36.401Z
+2025-10-20T08:27:40.969Z  npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+2025-10-20T08:27:41.112Z  npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+2025-10-20T08:27:41.367Z  npm warn deprecated lucia@3.2.2: This package 
+has been deprecated. Please see https://lucia-auth.com/lucia-v3/migrate.2025-10-20T08:27:41.525Z  npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+2025-10-20T08:27:45.055Z
+2025-10-20T08:27:45.055Z  > rest-express@1.0.0 postinstall
+2025-10-20T08:27:45.055Z  > echo Installation complete. Run 'npm run build' to build the project.
+2025-10-20T08:27:45.055Z
+2025-10-20T08:27:45.068Z  Installation complete. Run npm run build to build the project.
+2025-10-20T08:27:45.084Z
+2025-10-20T08:27:45.084Z  added 826 packages in 9s
+2025-10-20T08:27:45.084Z
+2025-10-20T08:27:45.084Z  95 packages are looking for funding
+2025-10-20T08:27:45.084Z    run `npm fund` for details
+2025-10-20T08:27:45.212Z
+2025-10-20T08:27:45.212Z  > rest-express@1.0.0 build
+2025-10-20T08:27:45.212Z  > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist       
+2025-10-20T08:27:45.212Z
+2025-10-20T08:27:45.425Z  vite v5.4.14 building for production...       
+2025-10-20T08:27:45.453Z  ✓ 0 modules transformed.
+2025-10-20T08:27:45.455Z  x Build failed in 8ms
+2025-10-20T08:27:45.455Z  error during build:
+2025-10-20T08:27:45.455Z  Could not resolve entry module "client/index.html".
+2025-10-20T08:27:45.455Z      at getRollupError (file:///vercel/path1/node_modules/rollup/dist/es/shared/parseAst.js:396:41)
+2025-10-20T08:27:45.455Z      at error (file:///vercel/path1/node_modules/rollup/dist/es/shared/parseAst.js:392:42)
+2025-10-20T08:27:45.455Z      at ModuleLoader.loadEntryModule (file:///vercel/path1/node_modules/rollup/dist/es/shared/node-entry.js:20086:20)  
+2025-10-20T08:27:45.455Z      at async Promise.all (index 0)
+2025-10-20T08:27:45.473Z  Error: Command "npm run vercel-build" exited with 1
+PS C:\Users\rehma\Downloads\testing github pull> 

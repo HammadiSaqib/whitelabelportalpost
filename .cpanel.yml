@@ -1,0 +1,20 @@
+---
+deployment:
+  tasks:
+    # Copy files to application directory (not public_html)
+    - export DEPLOYPATH=/home/username/whitelabelportal/
+    - /bin/cp -R * $DEPLOYPATH
+    
+    # Install dependencies
+    - cd $DEPLOYPATH
+    - npm install --production
+    
+    # Build the application
+    - npm run build
+    
+    # Set correct permissions
+    - find $DEPLOYPATH -type d -exec chmod 755 {} \;
+    - find $DEPLOYPATH -type f -exec chmod 644 {} \;
+    
+    # Make sure node_modules/.bin files are executable
+    - chmod +x $DEPLOYPATH/node_modules/.bin/*

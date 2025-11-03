@@ -1,0 +1,864 @@
+-- =====================================================
+-- White Label Portal Database Creation Script
+-- =====================================================
+-- This script creates the complete database structure for the White Label Portal
+-- Based on: whitelabel_pro_mysql.sql
+-- Generated: January 2025
+-- Database Engine: MySQL/MariaDB
+-- Character Set: utf8mb4
+-- Collation: utf8mb4_unicode_ci
+-- =====================================================
+
+-- Create Database
+CREATE DATABASE IF NOT EXISTS `whitelabel_pro_mysql` 
+CHARACTER SET utf8mb4 
+COLLATE utf8mb4_unicode_ci;
+
+USE `whitelabel_pro_mysql`;
+
+-- Set SQL Mode and Configuration
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET time_zone = "+00:00";
+
+-- Character Set Configuration
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+-- =====================================================
+-- CORE TABLES
+-- =====================================================
+
+-- Table: activities
+CREATE TABLE `activities` (
+  `id` varchar(191) NOT NULL,
+  `userId` varchar(191) NOT NULL,
+  `type` varchar(191) NOT NULL,
+  `description` text NOT NULL,
+  `metadata` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`metadata`)),
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_activities_userId` (`userId`),
+  KEY `idx_activities_type` (`type`),
+  KEY `idx_activities_createdAt` (`createdAt`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: users
+CREATE TABLE `users` (
+  `id` varchar(191) NOT NULL,
+  `email` varchar(191) NOT NULL,
+  `password` varchar(191) DEFAULT NULL,
+  `name` varchar(191) DEFAULT NULL,
+  `role` varchar(191) DEFAULT 'user',
+  `isVerified` tinyint(1) DEFAULT 0,
+  `verificationToken` varchar(191) DEFAULT NULL,
+  `resetToken` varchar(191) DEFAULT NULL,
+  `resetTokenExpiry` datetime DEFAULT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `lastLogin` timestamp NULL DEFAULT NULL,
+  `isActive` tinyint(1) DEFAULT 1,
+  `profileImage` varchar(500) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  `dateOfBirth` date DEFAULT NULL,
+  `gender` varchar(20) DEFAULT NULL,
+  `timezone` varchar(100) DEFAULT 'UTC',
+  `language` varchar(10) DEFAULT 'en',
+  `twoFactorEnabled` tinyint(1) DEFAULT 0,
+  `twoFactorSecret` varchar(191) DEFAULT NULL,
+  `loginAttempts` int(11) DEFAULT 0,
+  `lockoutUntil` timestamp NULL DEFAULT NULL,
+  `emailNotifications` tinyint(1) DEFAULT 1,
+  `smsNotifications` tinyint(1) DEFAULT 0,
+  `marketingEmails` tinyint(1) DEFAULT 1,
+  `referralCode` varchar(50) DEFAULT NULL,
+  `referredBy` varchar(191) DEFAULT NULL,
+  `totalReferrals` int(11) DEFAULT 0,
+  `accountType` varchar(50) DEFAULT 'free',
+  `subscriptionStatus` varchar(50) DEFAULT 'inactive',
+  `trialEndsAt` timestamp NULL DEFAULT NULL,
+  `billingAddress` text DEFAULT NULL,
+  `taxId` varchar(100) DEFAULT NULL,
+  `companyName` varchar(255) DEFAULT NULL,
+  `jobTitle` varchar(255) DEFAULT NULL,
+  `website` varchar(500) DEFAULT NULL,
+  `socialLinks` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`socialLinks`)),
+  `preferences` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`preferences`)),
+  `metadata` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`metadata`)),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`),
+  UNIQUE KEY `referralCode` (`referralCode`),
+  KEY `idx_users_email` (`email`),
+  KEY `idx_users_role` (`role`),
+  KEY `idx_users_isActive` (`isActive`),
+  KEY `idx_users_createdAt` (`createdAt`),
+  KEY `idx_users_referredBy` (`referredBy`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- AFFILIATE SYSTEM TABLES
+-- =====================================================
+
+-- Table: affiliates
+CREATE TABLE `affiliates` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` varchar(255) NOT NULL,
+  `referral_code` varchar(255) NOT NULL,
+  `commission_rate` decimal(5,2) DEFAULT 10.00,
+  `total_earnings` decimal(10,2) DEFAULT 0.00,
+  `total_referrals` int(11) DEFAULT 0,
+  `is_active` tinyint(1) DEFAULT 1,
+  `bank_name` varchar(255) DEFAULT NULL,
+  `account_number` varchar(255) DEFAULT NULL,
+  `account_owner_name` varchar(255) DEFAULT NULL,
+  `account_type` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `affiliate_type` varchar(255) DEFAULT NULL,
+  `parent_id` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `referral_code` (`referral_code`),
+  KEY `idx_affiliates_user_id` (`user_id`),
+  KEY `idx_affiliates_is_active` (`is_active`),
+  KEY `idx_affiliates_parent_id` (`parent_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: affiliate_payments
+CREATE TABLE `affiliate_payments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `affiliate_id` varchar(255) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `currency` varchar(3) DEFAULT 'USD',
+  `payment_method` varchar(50) DEFAULT NULL,
+  `transaction_id` varchar(255) DEFAULT NULL,
+  `notes` varchar(1000) DEFAULT NULL,
+  `status` varchar(50) DEFAULT 'completed',
+  `metadata` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`metadata`)),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `paid_by_user_id` varchar(255) DEFAULT NULL,
+  `transaction_proof_url` varchar(255) DEFAULT NULL,
+  `description` varchar(1000) DEFAULT NULL,
+  `historical_bank_name` varchar(255) DEFAULT NULL,
+  `historical_account_number` varchar(255) DEFAULT NULL,
+  `historical_account_owner_name` varchar(255) DEFAULT NULL,
+  `historical_account_type` varchar(255) DEFAULT NULL,
+  `paid_by` varchar(255) DEFAULT NULL,
+  `receipt_image_url` text DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_affiliate_payments_affiliate_id` (`affiliate_id`),
+  KEY `idx_affiliate_payments_status` (`status`),
+  KEY `idx_affiliate_payments_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: affiliate_plan_visibility
+CREATE TABLE `affiliate_plan_visibility` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- AI & CONTENT TABLES
+-- =====================================================
+
+-- Table: ai_content_optimizations
+CREATE TABLE `ai_content_optimizations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: ai_generated_content
+CREATE TABLE `ai_generated_content` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` varchar(255) NOT NULL,
+  `content_type` varchar(50) NOT NULL,
+  `prompt` text NOT NULL,
+  `generated_content` text NOT NULL,
+  `tokens_used` int(11) DEFAULT NULL,
+  `model_used` varchar(100) DEFAULT NULL,
+  `quality_score` int(11) DEFAULT NULL,
+  `is_approved` tinyint(1) DEFAULT 0,
+  `metadata` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`metadata`)),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `type` varchar(255) DEFAULT NULL,
+  `usage_count` int(11) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_ai_content_user_id` (`user_id`),
+  KEY `idx_ai_content_type` (`content_type`),
+  KEY `idx_ai_content_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: ai_recommendations
+CREATE TABLE `ai_recommendations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- ANALYTICS TABLES
+-- =====================================================
+
+-- Table: analytics_events
+CREATE TABLE `analytics_events` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: analytics_metrics
+CREATE TABLE `analytics_metrics` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- ANNOUNCEMENT SYSTEM TABLES
+-- =====================================================
+
+-- Table: announcements
+CREATE TABLE `announcements` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `white_label_id` int(11) DEFAULT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `type` varchar(50) DEFAULT 'general',
+  `priority` varchar(50) DEFAULT 'normal',
+  `is_published` tinyint(1) DEFAULT 0,
+  `published_at` timestamp NULL DEFAULT NULL,
+  `targeting_type` varchar(50) DEFAULT 'everyone',
+  `targeted_plan_ids` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT json_array() CHECK (json_valid(`targeted_plan_ids`)),
+  `expires_at` timestamp NULL DEFAULT NULL,
+  `target_audience` varchar(50) DEFAULT 'all',
+  `metadata` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`metadata`)),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `scheduled_at` timestamp NULL DEFAULT NULL,
+  `status` varchar(50) DEFAULT 'draft',
+  `is_active` tinyint(1) DEFAULT 1,
+  `user_id` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_announcements_white_label_id` (`white_label_id`),
+  KEY `idx_announcements_is_published` (`is_published`),
+  KEY `idx_announcements_created_at` (`created_at`),
+  KEY `idx_announcements_user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: announcement_analytics
+CREATE TABLE `announcement_analytics` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: announcement_comments
+CREATE TABLE `announcement_comments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: announcement_likes
+CREATE TABLE `announcement_likes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: announcement_shares
+CREATE TABLE `announcement_shares` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- PRODUCT & CATEGORY TABLES
+-- =====================================================
+
+-- Table: categories
+CREATE TABLE `categories` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `parent_id` int(11) DEFAULT NULL,
+  `sort_order` int(11) DEFAULT 0,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `slug` varchar(255) DEFAULT NULL,
+  `image_url` varchar(500) DEFAULT NULL,
+  `metadata` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`metadata`)),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `slug` (`slug`),
+  KEY `idx_categories_parent_id` (`parent_id`),
+  KEY `idx_categories_is_active` (`is_active`),
+  KEY `idx_categories_sort_order` (`sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: products
+CREATE TABLE `products` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `sku` varchar(100) DEFAULT NULL,
+  `stock_quantity` int(11) DEFAULT 0,
+  `weight` decimal(8,2) DEFAULT NULL,
+  `dimensions` varchar(100) DEFAULT NULL,
+  `image_urls` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`image_urls`)),
+  `tags` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`tags`)),
+  `metadata` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`metadata`)),
+  `featured` tinyint(1) DEFAULT 0,
+  `sale_price` decimal(10,2) DEFAULT NULL,
+  `sale_start_date` timestamp NULL DEFAULT NULL,
+  `sale_end_date` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `sku` (`sku`),
+  KEY `idx_products_category_id` (`category_id`),
+  KEY `idx_products_is_active` (`is_active`),
+  KEY `idx_products_featured` (`featured`),
+  KEY `idx_products_price` (`price`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- SUBSCRIPTION & PLAN TABLES
+-- =====================================================
+
+-- Table: plans
+CREATE TABLE `plans` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `billing_cycle` varchar(50) DEFAULT 'monthly',
+  `features` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`features`)),
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `trial_days` int(11) DEFAULT 0,
+  `setup_fee` decimal(10,2) DEFAULT 0.00,
+  `currency` varchar(3) DEFAULT 'USD',
+  `max_users` int(11) DEFAULT NULL,
+  `max_storage_gb` int(11) DEFAULT NULL,
+  `priority_support` tinyint(1) DEFAULT 0,
+  `custom_branding` tinyint(1) DEFAULT 0,
+  `api_access` tinyint(1) DEFAULT 0,
+  `metadata` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`metadata`)),
+  PRIMARY KEY (`id`),
+  KEY `idx_plans_is_active` (`is_active`),
+  KEY `idx_plans_price` (`price`),
+  KEY `idx_plans_billing_cycle` (`billing_cycle`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: plan_categories
+CREATE TABLE `plan_categories` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: plan_products
+CREATE TABLE `plan_products` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: subscriptions
+CREATE TABLE `subscriptions` (
+  `id` varchar(191) NOT NULL,
+  `userId` varchar(191) NOT NULL,
+  `planId` int(11) NOT NULL,
+  `status` varchar(50) DEFAULT 'active',
+  `startDate` timestamp NOT NULL DEFAULT current_timestamp(),
+  `endDate` timestamp NULL DEFAULT NULL,
+  `nextBillingDate` timestamp NULL DEFAULT NULL,
+  `cancelledAt` timestamp NULL DEFAULT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `paymentMethod` varchar(100) DEFAULT NULL,
+  `billingAddress` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`billingAddress`)),
+  `metadata` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`metadata`)),
+  PRIMARY KEY (`id`),
+  KEY `idx_subscriptions_userId` (`userId`),
+  KEY `idx_subscriptions_planId` (`planId`),
+  KEY `idx_subscriptions_status` (`status`),
+  KEY `idx_subscriptions_nextBillingDate` (`nextBillingDate`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- PAYMENT & BILLING TABLES
+-- =====================================================
+
+-- Table: purchase_history
+CREATE TABLE `purchase_history` (
+  `id` varchar(191) NOT NULL,
+  `userId` varchar(191) NOT NULL,
+  `planId` int(11) DEFAULT NULL,
+  `productId` int(11) DEFAULT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `currency` varchar(3) DEFAULT 'USD',
+  `status` varchar(50) DEFAULT 'pending',
+  `paymentMethod` varchar(100) DEFAULT NULL,
+  `transactionId` varchar(255) DEFAULT NULL,
+  `billingAddress` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`billingAddress`)),
+  `metadata` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`metadata`)),
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `refundedAt` timestamp NULL DEFAULT NULL,
+  `refundAmount` decimal(10,2) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_purchase_history_userId` (`userId`),
+  KEY `idx_purchase_history_planId` (`planId`),
+  KEY `idx_purchase_history_status` (`status`),
+  KEY `idx_purchase_history_createdAt` (`createdAt`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: payment_accounts
+CREATE TABLE `payment_accounts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: nmi_credentials
+CREATE TABLE `nmi_credentials` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `white_label_id` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `security_key` varchar(255) NOT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `environment` varchar(50) DEFAULT 'sandbox',
+  `webhook_url` varchar(500) DEFAULT NULL,
+  `metadata` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`metadata`)),
+  PRIMARY KEY (`id`),
+  KEY `idx_nmi_credentials_white_label_id` (`white_label_id`),
+  KEY `idx_nmi_credentials_is_active` (`is_active`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- REFERRAL SYSTEM TABLES
+-- =====================================================
+
+-- Table: referral_clicks
+CREATE TABLE `referral_clicks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: referral_commissions
+CREATE TABLE `referral_commissions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: referral_links
+CREATE TABLE `referral_links` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: referral_signups
+CREATE TABLE `referral_signups` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: referral_tracking
+CREATE TABLE `referral_tracking` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- COMMISSION SYSTEM TABLES
+-- =====================================================
+
+-- Table: commissions
+CREATE TABLE `commissions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- TEMPLATE & THEME TABLES
+-- =====================================================
+
+-- Table: templates
+CREATE TABLE `templates` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `category` varchar(100) DEFAULT NULL,
+  `preview_image` varchar(500) DEFAULT NULL,
+  `template_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`template_data`)),
+  `is_active` tinyint(1) DEFAULT 1,
+  `is_premium` tinyint(1) DEFAULT 0,
+  `price` decimal(10,2) DEFAULT 0.00,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `created_by` varchar(191) DEFAULT NULL,
+  `tags` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`tags`)),
+  `metadata` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`metadata`)),
+  PRIMARY KEY (`id`),
+  KEY `idx_templates_category` (`category`),
+  KEY `idx_templates_is_active` (`is_active`),
+  KEY `idx_templates_is_premium` (`is_premium`),
+  KEY `idx_templates_created_by` (`created_by`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: themes
+CREATE TABLE `themes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- WHITE LABEL & CUSTOMIZATION TABLES
+-- =====================================================
+
+-- Table: white_labels
+CREATE TABLE `white_labels` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` varchar(191) NOT NULL,
+  `business_name` varchar(255) NOT NULL,
+  `domain` varchar(255) DEFAULT NULL,
+  `logo_url` varchar(500) DEFAULT NULL,
+  `primary_color` varchar(7) DEFAULT '#000000',
+  `secondary_color` varchar(7) DEFAULT '#ffffff',
+  `accent_color` varchar(7) DEFAULT '#007bff',
+  `font_family` varchar(100) DEFAULT 'Inter',
+  `custom_css` text DEFAULT NULL,
+  `favicon_url` varchar(500) DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `contact_email` varchar(255) DEFAULT NULL,
+  `contact_phone` varchar(50) DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  `social_links` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`social_links`)),
+  `seo_settings` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`seo_settings`)),
+  `email_settings` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`email_settings`)),
+  `payment_settings` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`payment_settings`)),
+  `metadata` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`metadata`)),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `domain` (`domain`),
+  KEY `idx_white_labels_user_id` (`user_id`),
+  KEY `idx_white_labels_is_active` (`is_active`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: client_template_customizations
+CREATE TABLE `client_template_customizations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- LANDING PAGE & CONTENT TABLES
+-- =====================================================
+
+-- Table: landing_pages
+CREATE TABLE `landing_pages` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `white_label_id` int(11) DEFAULT NULL,
+  `title` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `content` longtext DEFAULT NULL,
+  `meta_title` varchar(255) DEFAULT NULL,
+  `meta_description` text DEFAULT NULL,
+  `is_published` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `template_id` int(11) DEFAULT NULL,
+  `custom_css` text DEFAULT NULL,
+  `custom_js` text DEFAULT NULL,
+  `featured_image` varchar(500) DEFAULT NULL,
+  `metadata` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`metadata`)),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `slug` (`slug`),
+  KEY `idx_landing_pages_white_label_id` (`white_label_id`),
+  KEY `idx_landing_pages_is_published` (`is_published`),
+  KEY `idx_landing_pages_template_id` (`template_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: link_meta_images
+CREATE TABLE `link_meta_images` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- SYSTEM & CONFIGURATION TABLES
+-- =====================================================
+
+-- Table: platform_settings
+CREATE TABLE `platform_settings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: custom_domains
+CREATE TABLE `custom_domains` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- SESSION & AUTHENTICATION TABLES
+-- =====================================================
+
+-- Table: sessions
+CREATE TABLE `sessions` (
+  `id` varchar(191) NOT NULL,
+  `userId` varchar(191) NOT NULL,
+  `expiresAt` timestamp NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_sessions_userId` (`userId`),
+  KEY `idx_sessions_expiresAt` (`expiresAt`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: user_sessions
+CREATE TABLE `user_sessions` (
+  `id` varchar(191) NOT NULL,
+  `userId` varchar(191) NOT NULL,
+  `sessionToken` varchar(191) NOT NULL,
+  `expiresAt` timestamp NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `ipAddress` varchar(45) DEFAULT NULL,
+  `userAgent` text DEFAULT NULL,
+  `isActive` tinyint(1) DEFAULT 1,
+  `lastActivity` timestamp NULL DEFAULT NULL,
+  `deviceInfo` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`deviceInfo`)),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `sessionToken` (`sessionToken`),
+  KEY `idx_user_sessions_userId` (`userId`),
+  KEY `idx_user_sessions_expiresAt` (`expiresAt`),
+  KEY `idx_user_sessions_isActive` (`isActive`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: domain_user_sessions
+CREATE TABLE `domain_user_sessions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: password_reset_tokens
+CREATE TABLE `password_reset_tokens` (
+  `id` varchar(191) NOT NULL,
+  `userId` varchar(191) NOT NULL,
+  `token` varchar(191) NOT NULL,
+  `expiresAt` timestamp NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `usedAt` timestamp NULL DEFAULT NULL,
+  `isUsed` tinyint(1) DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `token` (`token`),
+  KEY `idx_password_reset_tokens_userId` (`userId`),
+  KEY `idx_password_reset_tokens_expiresAt` (`expiresAt`),
+  KEY `idx_password_reset_tokens_isUsed` (`isUsed`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- USER PREFERENCES & SETTINGS TABLES
+-- =====================================================
+
+-- Table: user_preferences
+CREATE TABLE `user_preferences` (
+  `id` varchar(191) NOT NULL,
+  `userId` varchar(191) NOT NULL,
+  `theme` varchar(50) DEFAULT 'light',
+  `language` varchar(10) DEFAULT 'en',
+  `timezone` varchar(100) DEFAULT 'UTC',
+  `emailNotifications` tinyint(1) DEFAULT 1,
+  `smsNotifications` tinyint(1) DEFAULT 0,
+  `marketingEmails` tinyint(1) DEFAULT 1,
+  `twoFactorEnabled` tinyint(1) DEFAULT 0,
+  `dashboardLayout` varchar(50) DEFAULT 'default',
+  `dateFormat` varchar(20) DEFAULT 'YYYY-MM-DD',
+  `timeFormat` varchar(10) DEFAULT '24h',
+  `currency` varchar(3) DEFAULT 'USD',
+  `logoUrl` varchar(500) DEFAULT NULL,
+  `primaryColor` varchar(7) DEFAULT '#007bff',
+  `secondaryColor` varchar(7) DEFAULT '#6c757d',
+  `fontFamily` varchar(100) DEFAULT 'Inter',
+  `customCss` text DEFAULT NULL,
+  `metadata` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`metadata`)),
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `userId` (`userId`),
+  KEY `idx_user_preferences_theme` (`theme`),
+  KEY `idx_user_preferences_language` (`language`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: user_theme_preferences
+CREATE TABLE `user_theme_preferences` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- INTEGRATION & LOGGING TABLES
+-- =====================================================
+
+-- Table: integrations
+CREATE TABLE `integrations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: integration_logs
+CREATE TABLE `integration_logs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: end_user_activities
+CREATE TABLE `end_user_activities` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- FOREIGN KEY CONSTRAINTS
+-- =====================================================
+
+-- Add foreign key constraints
+ALTER TABLE `activities` ADD CONSTRAINT `fk_activities_userId` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+ALTER TABLE `affiliates` ADD CONSTRAINT `fk_affiliates_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+ALTER TABLE `ai_generated_content` ADD CONSTRAINT `fk_ai_content_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+ALTER TABLE `announcements` ADD CONSTRAINT `fk_announcements_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+ALTER TABLE `products` ADD CONSTRAINT `fk_products_category_id` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL;
+ALTER TABLE `subscriptions` ADD CONSTRAINT `fk_subscriptions_userId` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+ALTER TABLE `subscriptions` ADD CONSTRAINT `fk_subscriptions_planId` FOREIGN KEY (`planId`) REFERENCES `plans` (`id`) ON DELETE CASCADE;
+ALTER TABLE `purchase_history` ADD CONSTRAINT `fk_purchase_history_userId` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+ALTER TABLE `purchase_history` ADD CONSTRAINT `fk_purchase_history_planId` FOREIGN KEY (`planId`) REFERENCES `plans` (`id`) ON DELETE SET NULL;
+ALTER TABLE `white_labels` ADD CONSTRAINT `fk_white_labels_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+ALTER TABLE `landing_pages` ADD CONSTRAINT `fk_landing_pages_white_label_id` FOREIGN KEY (`white_label_id`) REFERENCES `white_labels` (`id`) ON DELETE CASCADE;
+ALTER TABLE `landing_pages` ADD CONSTRAINT `fk_landing_pages_template_id` FOREIGN KEY (`template_id`) REFERENCES `templates` (`id`) ON DELETE SET NULL;
+ALTER TABLE `sessions` ADD CONSTRAINT `fk_sessions_userId` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+ALTER TABLE `user_sessions` ADD CONSTRAINT `fk_user_sessions_userId` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+ALTER TABLE `password_reset_tokens` ADD CONSTRAINT `fk_password_reset_tokens_userId` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+ALTER TABLE `user_preferences` ADD CONSTRAINT `fk_user_preferences_userId` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+-- =====================================================
+-- INDEXES FOR PERFORMANCE
+-- =====================================================
+
+-- Additional performance indexes
+CREATE INDEX `idx_users_subscription_status` ON `users` (`subscriptionStatus`);
+CREATE INDEX `idx_users_account_type` ON `users` (`accountType`);
+CREATE INDEX `idx_affiliates_commission_rate` ON `affiliates` (`commission_rate`);
+CREATE INDEX `idx_affiliate_payments_amount` ON `affiliate_payments` (`amount`);
+CREATE INDEX `idx_plans_currency` ON `plans` (`currency`);
+CREATE INDEX `idx_subscriptions_endDate` ON `subscriptions` (`endDate`);
+CREATE INDEX `idx_purchase_history_amount` ON `purchase_history` (`amount`);
+CREATE INDEX `idx_announcements_published_at` ON `announcements` (`published_at`);
+CREATE INDEX `idx_categories_name` ON `categories` (`name`);
+CREATE INDEX `idx_products_name` ON `products` (`name`);
+CREATE INDEX `idx_templates_name` ON `templates` (`name`);
+CREATE INDEX `idx_white_labels_business_name` ON `white_labels` (`business_name`);
+
+-- =====================================================
+-- INITIAL DATA SETUP (Optional)
+-- =====================================================
+
+-- Insert default categories
+INSERT INTO `categories` (`name`, `description`, `slug`, `is_active`) VALUES
+('General', 'General category for uncategorized items', 'general', 1),
+('Premium', 'Premium category for high-value items', 'premium', 1),
+('Basic', 'Basic category for starter items', 'basic', 1);
+
+-- Insert default plans
+INSERT INTO `plans` (`name`, `description`, `price`, `billing_cycle`, `is_active`, `trial_days`) VALUES
+('Free Plan', 'Basic features for getting started', 0.00, 'monthly', 1, 14),
+('Pro Plan', 'Advanced features for professionals', 29.99, 'monthly', 1, 14),
+('Enterprise Plan', 'Full features for large organizations', 99.99, 'monthly', 1, 30);
+
+-- Insert default templates
+INSERT INTO `templates` (`name`, `description`, `category`, `is_active`, `is_premium`) VALUES
+('Default Landing Page', 'Standard landing page template', 'landing', 1, 0),
+('Premium Business', 'Professional business template', 'business', 1, 1),
+('Simple Portfolio', 'Clean portfolio template', 'portfolio', 1, 0);
+
+-- =====================================================
+-- COMPLETION MESSAGE
+-- =====================================================
+
+-- Database creation completed successfully
+-- Total Tables: 44
+-- Features Included:
+-- - User Management & Authentication
+-- - Subscription & Billing System
+-- - Affiliate & Referral System
+-- - White Label Customization
+-- - Content Management
+-- - Analytics & Reporting
+-- - Payment Processing
+-- - Template System
+-- - AI Content Generation
+-- - Announcement System
+-- - Multi-tenant Architecture
+
+SELECT 'White Label Portal Database Created Successfully!' as Status;

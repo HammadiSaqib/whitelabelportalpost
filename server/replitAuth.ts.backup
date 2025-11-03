@@ -1,0 +1,570 @@
+import * as client from "openid-client";
+import { Strategy, type VerifyFunction } from "openid-client/passport";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+
+import passport from "passport";
+import session from "express-session";
+import type { Express, RequestHandler } from "express";
+import memoize from "memoizee";
+import connectPg from "connect-pg-simple";
+import { storage } from "./storage";
+
+if (!process.env.REPLIT_DOMAINS) {
+  throw new Error("Environment variable REPLIT_DOMAINS not provided");
+}
+
+const getOidcConfig = memoize(
+  async () => {
+    return await client.discovery(
+      new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
+      process.env.REPL_ID!
+    );
+  },
+  { maxAge: 3600 * 1000 }
+);
+
+export function getSession() {
+  const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
+  const pgStore = connectPg(session);
+  const sessionStore = new pgStore({
+    conString: process.env.DATABASE_URL,
+    createTableIfMissing: false,
+    ttl: sessionTtl,
+    tableName: "sessions",
+  });
+  return session({
+    secret: process.env.SESSION_SECRET!,
+    store: sessionStore,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: sessionTtl,
+    },
+  });
+}
+
+function updateUserSession(
+  user: any,
+  tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers
+) {
+  user.claims = tokens.claims();
+  user.access_token = tokens.access_token;
+  user.refresh_token = tokens.refresh_token;
+  user.expires_at = user.claims?.exp;
+}
+
+async function upsertUser(
+  claims: any,
+  req?: any
+) {
+  // Check if this is an end-user registration from a landing page
+  const endUserDomainPath = req?.session?.endUserDomainPath;
+  const whiteLabelId = req?.session?.whiteLabelId;
+  console.log(`upsertUser called with session data: domain=${endUserDomainPath}, whiteLabelId=${whiteLabelId}`);
+  
+  let userRole: "super_admin" | "super_admin_affiliate" | "white_label_client" | "white_label_affiliate" | "end_user" = 'white_label_client';
+  let associatedWhiteLabelId: number | null = null;
+  
+  // CRITICAL FIX: Check if user already exists and preserve their existing role
+  const existingUser = await storage.getUserById(claims.sub);
+  
+  // Check for role preference from session storage for other user types
+  const pendingRole = req?.session?.pendingUserRole;
+  if (pendingRole && (pendingRole === 'super_admin' || pendingRole === 'super_admin_affiliate' || 
+      pendingRole === 'white_label_client' || pendingRole === 'white_label_affiliate' || 
+      pendingRole === 'end_user')) {
+    userRole = pendingRole;
+  } else if (endUserDomainPath && whiteLabelId) {
+    // If registering from a domain-specific landing page
+    associatedWhiteLabelId = whiteLabelId;
+    userRole = 'end_user';
+  } else if (existingUser && existingUser.role) {
+    // PRESERVE EXISTING USER ROLE - don't overwrite existing users with default role
+    userRole = existingUser.role as any;
+    associatedWhiteLabelId = existingUser.whiteLabelId;
+    console.log(`Preserving existing user role: ${userRole} for user ${claims.sub}`);
+  } else {
+    // If no pending role and not from domain, default to white_label_client for NEW main site users only
+    userRole = 'white_label_client';
+  }
+
+  // CRITICAL FIX: For end-users from domain-specific landing pages, assign correct white-label ID
+  if (userRole === 'end_user' && endUserDomainPath && whiteLabelId) {
+    console.log(`FIXING: End-user ${claims.sub} registering from domain: ${endUserDomainPath} with whiteLabelId: ${whiteLabelId}`);
+    
+    const existingUser = await storage.getUserById(claims.sub);
+    if (existingUser && existingUser.whiteLabelId !== whiteLabelId) {
+      // User exists but with different white-label association - this is cross-domain isolation
+      console.log(`User ${claims.sub} already exists with different domain association. Creating domain-specific session.`);
+      
+      // Create domain-specific session tracking
+      try {
+        await storage.createDomainUserSession(claims.sub, endUserDomainPath, req.sessionID);
+        console.log(`Created domain-specific session for ${claims.sub} on domain: ${endUserDomainPath}`);
+        
+        // IMPORTANT: Don't return here - let the callback handle the redirect
+        // The callback needs to know about the domain context
+        console.log(`Continuing to callback with domain context: ${endUserDomainPath}`);
+      } catch (error) {
+        console.error('Error creating domain session:', error);
+      }
+      
+      // Continue to upsert to ensure user data is fresh, but don't change their white-label association
+      // The domain session is what matters for access control
+    }
+  }
+
+  // Personal domain system removed - no longer generating personal domains
+
+  await storage.upsertUser({
+    id: claims["sub"],
+    email: claims["email"],
+    firstName: claims["first_name"],
+    lastName: claims["last_name"],
+    profileImageUrl: claims["profile_image_url"],
+    role: userRole,
+    whiteLabelId: associatedWhiteLabelId,
+  });
+  
+  console.log(`User ${claims.sub} upserted with role: ${userRole}, whiteLabelId: ${associatedWhiteLabelId}, domain: ${endUserDomainPath}`);
+  
+  // Don't clear ANY session data here - let the callback handle it
+  // This ensures the callback has access to all the session data it needs
+  console.log('User upserted with role:', userRole, 'keeping session data for callback');
+  
+  // For end-users, create domain-specific session tracking
+  if (userRole === 'end_user' && endUserDomainPath) {
+    try {
+      await storage.createDomainUserSession(claims.sub, endUserDomainPath, req.sessionID);
+      console.log(`End-user ${claims.sub} associated with domain: ${endUserDomainPath}`);
+      
+      // Check if this is an affiliate domain (user joined through affiliate landing page)
+      const whiteLabel = await storage.getWhiteLabelByDomainPath(endUserDomainPath);
+      if (whiteLabel) {
+        const domainOwner = await storage.getUserById(whiteLabel.userId);
+        
+        // If domain owner has a whiteLabelId, this is an affiliate domain
+        if (domainOwner && domainOwner.whiteLabelId) {
+          console.log(`Affiliate domain detected! User ${claims.sub} joined through affiliate ${domainOwner.id}'s landing page`);
+          
+          // Create referral tracking record
+          await storage.createReferralTracking({
+            affiliateId: domainOwner.id, // The affiliate who owns the domain
+            referredUserId: claims.sub, // The new end-user
+            whiteLabelId: domainOwner.whiteLabelId, // The white-label client associated with the affiliate
+            domainPath: endUserDomainPath,
+            referralSource: 'landing_page'
+          });
+          
+          console.log(`Referral tracking created: Affiliate ${domainOwner.id} referred user ${claims.sub} for white-label client ${domainOwner.whiteLabelId}`);
+        }
+      }
+    } catch (error) {
+      console.error('Error creating domain session or referral tracking:', error);
+    }
+  }
+}
+
+export async function setupAuth(app: Express) {
+  app.set("trust proxy", 1);
+  app.use(getSession());
+  app.use(passport.initialize());
+  app.use(passport.session());
+
+  const config = await getOidcConfig();
+
+  const verify = async (
+    req: any,
+    tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
+    verified: passport.AuthenticateCallback
+  ) => {
+    const user = {};
+    updateUserSession(user, tokens);
+    await upsertUser(tokens.claims(), req);
+    verified(null, user);
+  };
+
+  for (const domain of process.env
+    .REPLIT_DOMAINS!.split(",")) {
+    const strategy = new Strategy(
+      {
+        name: `replitauth:${domain}`,
+        config,
+        scope: "openid email profile offline_access",
+        callbackURL: `https://${domain}/api/callback`,
+        passReqToCallback: true,
+      },
+      verify,
+    );
+    passport.use(strategy);
+  }
+
+  // Add Google OAuth strategy for affiliate authentication
+  // Note: Strategy will be registered even without credentials for development
+  // The actual OAuth flow will only work when credentials are provided
+  console.log('Google OAuth credentials check:', {
+    clientId: !!process.env.GOOGLE_CLIENT_ID,
+    clientSecret: !!process.env.GOOGLE_CLIENT_SECRET
+  });
+  
+  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    passport.use(new GoogleStrategy({
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "/api/auth/google/callback",
+      passReqToCallback: true
+    }, async (req: any, accessToken: string, refreshToken: string, profile: any, done: any) => {
+      try {
+        const whiteLabelId = req.session?.affiliateWhiteLabelId;
+        
+        // Check if user already exists
+        let user = await storage.getUserByEmail(profile.emails[0].value);
+        
+        if (!user) {
+          // Create new affiliate user
+          user = await storage.createUser({
+            id: profile.id,
+            email: profile.emails[0].value,
+            firstName: profile.name.givenName,
+            lastName: profile.name.familyName,
+            name: profile.displayName,
+            profileImageUrl: profile.photos[0]?.value,
+            role: 'white_label_affiliate',
+            whiteLabelId: whiteLabelId,
+            isActive: true
+          });
+        }
+        
+        return done(null, user);
+      } catch (error) {
+        return done(error, null);
+      }
+    }));
+  } else {
+    // Register a fallback Google strategy for development
+    passport.use(new GoogleStrategy({
+      clientID: 'development-client-id',
+      clientSecret: 'development-client-secret',
+      callbackURL: "/api/auth/google/callback",
+      passReqToCallback: true
+    }, async (req: any, accessToken: string, refreshToken: string, profile: any, done: any) => {
+      // This will only be called if credentials are somehow provided
+      return done(new Error('Google OAuth credentials not configured'), null);
+    }));
+  }
+
+  passport.serializeUser((user: Express.User, cb) => {
+    cb(null, user);
+  });
+  
+  passport.deserializeUser(async (user: Express.User, cb) => {
+    try {
+      // Get the user from database to ensure we have the latest role information
+      const userClaims = (user as any).claims;
+      if (userClaims?.sub) {
+        const dbUser = await storage.getUserById(userClaims.sub);
+        if (dbUser) {
+          // Merge database user info with session user
+          (user as any).role = dbUser.role;
+          (user as any).id = dbUser.id;
+          (user as any).email = dbUser.email;
+          (user as any).username = dbUser.firstName && dbUser.lastName ? `${dbUser.firstName} ${dbUser.lastName}` : dbUser.email;
+          (user as any).whiteLabelId = dbUser.whiteLabelId;
+          
+          // CRITICAL: For end-users, mark that they need domain-specific validation
+          if (dbUser.role === 'end_user') {
+            (user as any).requiresDomainAuth = true;
+          }
+        }
+      }
+      cb(null, user);
+    } catch (error) {
+      console.error('Error deserializing user:', error);
+      cb(null, user);
+    }
+  });
+
+  app.get("/api/login", async (req, res, next) => {
+    // Check for role-based login parameters
+    const roleParam = req.query.role as string;
+    const isEndUser = req.query.enduser === 'true';
+    const domainParam = req.query.domain as string;
+    const returnTo = req.query.returnTo as string || req.get('Referer');
+    
+    // Store return URL in session to redirect back after authentication
+    if (returnTo && !returnTo.includes('/api/')) {
+      console.log('Storing return URL in session:', returnTo);
+      (req.session as any).returnTo = returnTo;
+    }
+    
+    // Save session before redirecting to OAuth provider
+    req.session.save((err) => {
+      if (err) {
+        console.error('Error saving session:', err);
+      }
+    });
+    
+    // Store role preference in session based on login type
+    if (roleParam) {
+      if (roleParam === 'affiliate') {
+        (req.session as any).pendingUserRole = 'super_admin_affiliate';
+        console.log('Setting role to super_admin_affiliate');
+      } else if (roleParam === 'whitelabel') {
+        (req.session as any).pendingUserRole = 'white_label_client';
+        console.log('Setting role to white_label_client');
+      } else if (roleParam === 'superadmin') {
+        (req.session as any).pendingUserRole = 'super_admin';
+        console.log('Setting role to super_admin');
+      }
+    }
+    
+    // If this is an end-user registration with domain parameter, store it in session
+    if (domainParam) {
+      try {
+        // Find the white-label client by domain path to get whiteLabelId
+        const whiteLabelClient = await storage.getWhiteLabelByDomainPath(domainParam);
+        if (whiteLabelClient) {
+          (req.session as any).endUserDomainPath = domainParam;
+          (req.session as any).whiteLabelId = whiteLabelClient.id;
+          console.log(`Storing end-user session data: domain=${domainParam}, whiteLabelId=${whiteLabelClient.id}`);
+          
+          // Save session to ensure it persists
+          req.session.save((err) => {
+            if (err) {
+              console.error('Error saving session with domain data:', err);
+            }
+          });
+        } else {
+          console.log(`No white-label client found for domain: ${domainParam}`);
+        }
+      } catch (error) {
+        console.error('Error setting up end-user session:', error);
+      }
+    }
+    
+    // Use the first domain from REPLIT_DOMAINS for authentication
+    const domain = process.env.REPLIT_DOMAINS!.split(",")[0];
+    passport.authenticate(`replitauth:${domain}`, {
+      prompt: "login consent",
+      scope: ["openid", "email", "profile", "offline_access"],
+    })(req, res, next);
+  });
+
+  app.get("/api/callback", (req, res, next) => {
+    // Use the first domain from REPLIT_DOMAINS for authentication
+    const domain = process.env.REPLIT_DOMAINS!.split(",")[0];
+    passport.authenticate(`replitauth:${domain}`, {
+      failureRedirect: "/api/login",
+    })(req, res, async (err) => {
+      if (err) {
+        return next(err);
+      }
+      
+      // Simple authentication without complex tracking
+      const session = req.session as any;
+      console.log('Callback session data:', { 
+        endUserDomainPath: session?.endUserDomainPath,
+        whiteLabelId: session?.whiteLabelId,
+        returnTo: session?.returnTo,
+        pendingUserRole: session?.pendingUserRole
+      });
+      
+      if (session?.endUserDomainPath) {
+        const domainPath = session.endUserDomainPath;
+        const whiteLabelId = session?.whiteLabelId;
+        const returnTo = session?.returnTo;
+        const user = req.user as any;
+        console.log(`End-user from domain path: /${domainPath}, returnTo: ${returnTo}, userId: ${user?.claims?.sub}`);
+        
+        // Create domain session for end-user - CRITICAL FIX
+        if (user?.claims?.sub && whiteLabelId) {
+          try {
+            await storage.createDomainUserSession(user.claims.sub, domainPath, req.sessionID);
+            console.log(`Created domain session for user ${user.claims.sub} on domain: ${domainPath}`);
+          } catch (error) {
+            console.error('Error creating domain session in callback:', error);
+          }
+        }
+        
+        // Store the redirect URL before clearing session data
+        const redirectUrl = returnTo && typeof returnTo === 'string' && returnTo.startsWith('http') ? returnTo : `/${domainPath}/user`;
+        
+        // Clear session data after successful authentication
+        delete session.endUserDomainPath;
+        delete session.whiteLabelId;
+        delete session.returnTo;
+        
+        // CRITICAL FIX: Ensure session is saved synchronously before redirecting
+        req.session.save((err) => {
+          if (err) {
+            console.error('Error saving session:', err);
+            return res.redirect('/');
+          }
+          
+          console.log('Session saved successfully for end-user, redirecting to:', redirectUrl);
+          
+          // Parse and redirect appropriately
+          if (redirectUrl.startsWith('http')) {
+            try {
+              const url = new URL(redirectUrl);
+              const redirectPath = url.pathname + url.search + url.hash;
+              console.log('Redirecting end-user to pricing page:', redirectPath);
+              res.redirect(redirectPath);
+            } catch {
+              console.log('Failed to parse returnTo URL, redirecting to domain user dashboard');
+              res.redirect(`/${domainPath}/user`);
+            }
+          } else {
+            // Default redirect for end-users should be to their domain-specific dashboard
+            res.redirect(redirectUrl);
+          }
+        });
+      } else {
+        // For role-based authentication, redirect to appropriate dashboard
+        const userRole = session?.pendingUserRole;
+        console.log('User authenticated with role:', userRole);
+        
+        // Check if there's a return URL stored in session
+        const returnTo = session?.returnTo;
+        console.log('Found return URL in session:', returnTo);
+        
+        // Clear session data
+        delete session.pendingUserRole;
+        delete session.returnTo;
+        
+        // Get the authenticated user to check their role and white-label association
+        const user = req.user as any;
+        if (user && user.claims && user.claims.sub) {
+          try {
+            const dbUser = await storage.getUserById(user.claims.sub);
+            console.log('Database user:', { role: dbUser?.role, whiteLabelId: dbUser?.whiteLabelId });
+            
+            // REMOVED: Automatic redirect to domain for end-users
+            // End-users should be able to access main page and choose their path
+            // Only redirect if they specifically came from a domain-specific login
+            
+            // CRITICAL: This was causing the /hammad domain hierarchy issue!
+            // Don't automatically redirect end-users to any domain
+          } catch (error) {
+            console.error('Error getting user info for redirect:', error);
+          }
+        }
+        
+        // Redirect based on user role or return URL
+        if (returnTo && typeof returnTo === 'string' && returnTo.startsWith('http')) {
+          // Extract the path from the full URL
+          try {
+            const url = new URL(returnTo);
+            const redirectPath = url.pathname + url.search + url.hash;
+            console.log('Redirecting to extracted path:', redirectPath);
+            res.redirect(redirectPath);
+          } catch {
+            console.log('Failed to parse URL, redirecting based on role');
+            // Redirect based on user role
+            if (userRole === 'super_admin_affiliate') {
+              res.redirect('/super-admin-affiliate');
+            } else if (userRole === 'white_label_client') {
+              res.redirect('/white-label-client');
+            } else if (userRole === 'super_admin') {
+              res.redirect('/super-admin');
+            } else {
+              res.redirect('/');
+            }
+          }
+        } else if (returnTo && typeof returnTo === 'string' && returnTo.startsWith('/')) {
+          console.log('Redirecting to path:', returnTo);
+          res.redirect(returnTo);
+        } else {
+          console.log('No valid return URL, redirecting based on role');
+          // Redirect based on user role
+          if (userRole === 'super_admin_affiliate') {
+            res.redirect('/super-admin-affiliate');
+          } else if (userRole === 'white_label_client') {
+            res.redirect('/white-label-client');
+          } else if (userRole === 'super_admin') {
+            res.redirect('/super-admin');
+          } else {
+            res.redirect('/');
+          }
+        }
+      }
+    });
+  });
+
+  // GET logout route
+  app.get("/api/logout", (req, res) => {
+    req.logout(() => {
+      res.redirect(
+        client.buildEndSessionUrl(config, {
+          client_id: process.env.REPL_ID!,
+          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
+        }).href
+      );
+    });
+  });
+
+  // POST logout route for JavaScript calls
+  app.post("/api/logout", (req, res) => {
+    req.logout(() => {
+      req.session.destroy((err) => {
+        if (err) {
+          console.error('Session destruction error:', err);
+        }
+        res.clearCookie('connect.sid');
+        res.json({ success: true, message: 'Logged out successfully' });
+      });
+    });
+  });
+
+  // Google OAuth routes for affiliate authentication
+  app.get("/api/auth/google", (req, res, next) => {
+    // Store white-label ID in session for affiliate association
+    const whiteLabelId = req.query.whiteLabelId as string;
+    if (whiteLabelId) {
+      (req.session as any).affiliateWhiteLabelId = parseInt(whiteLabelId);
+    }
+    
+    passport.authenticate('google', { 
+      scope: ['profile', 'email'] 
+    })(req, res, next);
+  });
+
+  app.get("/api/auth/google/callback", 
+    passport.authenticate('google', { failureRedirect: '/login' }),
+    (req, res) => {
+      // Successful authentication, redirect to dashboard
+      res.redirect('/');
+    }
+  );
+}
+
+export const isAuthenticated: RequestHandler = async (req, res, next) => {
+  const user = req.user as any;
+
+  if (!req.isAuthenticated() || !user.expires_at) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  if (now <= user.expires_at) {
+    return next();
+  }
+
+  const refreshToken = user.refresh_token;
+  if (!refreshToken) {
+    res.status(401).json({ message: "Unauthorized" });
+    return;
+  }
+
+  try {
+    const config = await getOidcConfig();
+    const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
+    updateUserSession(user, tokenResponse);
+    return next();
+  } catch (error) {
+    res.status(401).json({ message: "Unauthorized" });
+    return;
+  }
+};

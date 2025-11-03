@@ -1,0 +1,1190 @@
+{
+  "timestamp": "2025-09-17T18:57:43.732Z",
+  "tablesWithRealData": [
+    {
+      "name": "activities",
+      "postgresqlRecords": 124,
+      "sampleData": [
+        {
+          "id": 1,
+          "user_id": "43537113",
+          "type": "category_created",
+          "description": "Created category: test",
+          "metadata": null,
+          "created_at": "2025-06-09T18:29:05.309Z"
+        },
+        {
+          "id": 2,
+          "user_id": "43537113",
+          "type": "category_updated",
+          "description": "Updated category: Hammad",
+          "metadata": null,
+          "created_at": "2025-06-09T18:30:06.159Z"
+        }
+      ]
+    },
+    {
+      "name": "affiliate_payments",
+      "postgresqlRecords": 16,
+      "sampleData": [
+        {
+          "id": 3,
+          "affiliate_id": "test_affiliate_001",
+          "paid_by": "43537113",
+          "amount": "50.00",
+          "payment_method": "bank_transfer",
+          "receipt_image_url": null,
+          "notes": null,
+          "status": "completed",
+          "metadata": null,
+          "created_at": "2025-08-23T18:45:50.200Z",
+          "updated_at": "2025-08-23T18:45:50.200Z",
+          "paid_by_user_id": null,
+          "transaction_proof_url": null,
+          "description": null,
+          "historical_bank_name": null,
+          "historical_account_number": null,
+          "historical_account_owner_name": null,
+          "historical_account_type": null
+        },
+        {
+          "id": 4,
+          "affiliate_id": "db4k9owwms65bna",
+          "paid_by": "43537113",
+          "amount": "0.84",
+          "payment_method": "bank_transfer",
+          "receipt_image_url": null,
+          "notes": null,
+          "status": "completed",
+          "metadata": null,
+          "created_at": "2025-08-23T18:46:04.949Z",
+          "updated_at": "2025-08-23T18:46:04.949Z",
+          "paid_by_user_id": null,
+          "transaction_proof_url": null,
+          "description": null,
+          "historical_bank_name": null,
+          "historical_account_number": null,
+          "historical_account_owner_name": null,
+          "historical_account_type": null
+        }
+      ]
+    },
+    {
+      "name": "affiliates",
+      "postgresqlRecords": 4,
+      "sampleData": [
+        {
+          "id": 2,
+          "user_id": "affiliate_1",
+          "affiliate_type": "white_label_affiliate",
+          "parent_id": null,
+          "commission_rate": "10.00",
+          "total_earnings": "850.00",
+          "is_active": true,
+          "created_at": "2025-06-09T20:08:25.398Z",
+          "updated_at": "2025-06-09T20:08:25.398Z"
+        },
+        {
+          "id": 1,
+          "user_id": "43537113",
+          "affiliate_type": "super_admin_affiliate",
+          "parent_id": 8,
+          "commission_rate": "15.00",
+          "total_earnings": "2500.00",
+          "is_active": true,
+          "created_at": "2025-06-09T20:08:25.398Z",
+          "updated_at": "2025-06-09T20:08:25.398Z"
+        }
+      ]
+    },
+    {
+      "name": "ai_generated_content",
+      "postgresqlRecords": 115,
+      "sampleData": [
+        {
+          "id": 1,
+          "user_id": "43537113",
+          "type": "product_description",
+          "prompt": "Hello",
+          "generated_content": "Experience premium quality with our innovative solution. Designed for professionals who demand excellence, this product delivers outstanding performance and reliability. Key features include advanced functionality, user-friendly interface, and comprehensive support. Perfect for businesses looking to enhance their operations and achieve better results.",
+          "metadata": {
+            "tone": "professional",
+            "length": "medium",
+            "audience": "",
+            "keywords": [],
+            "suggestions": [
+              "Add specific technical specifications",
+              "Include customer testimonials",
+              "Mention warranty and support details",
+              "Add pricing and availability information"
+            ]
+          },
+          "is_approved": false,
+          "usage_count": 0,
+          "created_at": "2025-06-22T08:39:26.550Z",
+          "updated_at": "2025-06-22T08:39:26.550Z"
+        },
+        {
+          "id": 2,
+          "user_id": "43537113",
+          "type": "product_description",
+          "prompt": "Hello",
+          "generated_content": "Experience premium quality with our innovative solution. Designed for professionals who demand excellence, this product delivers outstanding performance and reliability. Key features include advanced functionality, user-friendly interface, and comprehensive support. Perfect for businesses looking to enhance their operations and achieve better results.",
+          "metadata": {
+            "tone": "professional",
+            "length": "medium",
+            "audience": "",
+            "keywords": [],
+            "suggestions": [
+              "Add specific technical specifications",
+              "Include customer testimonials",
+              "Mention warranty and support details",
+              "Add pricing and availability information"
+            ]
+          },
+          "is_approved": false,
+          "usage_count": 0,
+          "created_at": "2025-06-22T08:39:40.017Z",
+          "updated_at": "2025-06-22T08:39:40.017Z"
+        }
+      ]
+    },
+    {
+      "name": "announcement_comments",
+      "postgresqlRecords": 13,
+      "sampleData": [
+        {
+          "id": 1,
+          "announcement_id": 7,
+          "user_id": "43537113",
+          "content": "Testing comments after server restart - should work now!",
+          "parent_comment_id": null,
+          "is_active": true,
+          "created_at": "2025-06-20T20:01:59.684Z",
+          "updated_at": "2025-06-20T20:01:59.684Z"
+        },
+        {
+          "id": 2,
+          "announcement_id": 7,
+          "user_id": "43537113",
+          "content": "asdasda",
+          "parent_comment_id": null,
+          "is_active": true,
+          "created_at": "2025-06-20T20:03:06.046Z",
+          "updated_at": "2025-06-20T20:03:06.046Z"
+        }
+      ]
+    },
+    {
+      "name": "announcement_likes",
+      "postgresqlRecords": 11,
+      "sampleData": [
+        {
+          "id": 1,
+          "announcement_id": 6,
+          "user_id": "43537113",
+          "created_at": "2025-06-20T19:56:43.095Z"
+        },
+        {
+          "id": 2,
+          "announcement_id": 7,
+          "user_id": "43537113",
+          "created_at": "2025-06-21T08:57:58.615Z"
+        }
+      ]
+    },
+    {
+      "name": "announcements",
+      "postgresqlRecords": 52,
+      "sampleData": [
+        {
+          "id": 1,
+          "user_id": "43537113",
+          "white_label_id": null,
+          "title": "Test Announcement - Storage Fix",
+          "content": "Testing the corrected database storage methods for announcements.",
+          "attachments": [],
+          "visibility": "public",
+          "is_pinned": false,
+          "is_active": true,
+          "created_at": "2025-06-20T19:51:27.912Z",
+          "updated_at": "2025-06-20T19:51:27.912Z",
+          "status": "published",
+          "scheduled_at": null,
+          "published_at": null
+        },
+        {
+          "id": 2,
+          "user_id": "43537113",
+          "white_label_id": null,
+          "title": "Test Announcement - Database Fix",
+          "content": "Testing announcements persistence after fixing all database access issues.",
+          "attachments": [],
+          "visibility": "public",
+          "is_pinned": false,
+          "is_active": true,
+          "created_at": "2025-06-20T19:51:39.234Z",
+          "updated_at": "2025-06-20T19:51:39.234Z",
+          "status": "published",
+          "scheduled_at": null,
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "name": "categories",
+      "postgresqlRecords": 33,
+      "sampleData": [
+        {
+          "id": 1,
+          "white_label_id": 2,
+          "name": "Hammad",
+          "description": "tretd",
+          "is_active": true,
+          "created_at": "2025-06-09T18:29:05.284Z",
+          "updated_at": "2025-06-09T18:30:06.071Z",
+          "parent_category_id": null
+        },
+        {
+          "id": 6,
+          "white_label_id": 2,
+          "name": "Announcements",
+          "description": "System and community announcements",
+          "is_active": true,
+          "created_at": "2025-06-21T09:03:34.523Z",
+          "updated_at": "2025-06-21T09:03:34.523Z",
+          "parent_category_id": null
+        }
+      ]
+    },
+    {
+      "name": "commissions",
+      "postgresqlRecords": 7,
+      "sampleData": [
+        {
+          "id": 7,
+          "affiliate_id": 1,
+          "subscription_id": 2,
+          "amount": "89.25",
+          "commission_type": "subscription",
+          "status": "pending",
+          "paid_at": null,
+          "created_at": "2025-06-16T17:34:39.275Z"
+        },
+        {
+          "id": 8,
+          "affiliate_id": 1,
+          "subscription_id": 2,
+          "amount": "234.75",
+          "commission_type": "one_time",
+          "status": "processing",
+          "paid_at": null,
+          "created_at": "2025-06-17T17:34:39.275Z"
+        }
+      ]
+    },
+    {
+      "name": "domain_user_sessions",
+      "postgresqlRecords": 146,
+      "sampleData": [
+        {
+          "id": 2,
+          "user_id": "44915301",
+          "domain_path": "hammad",
+          "white_label_id": 2,
+          "session_id": "system_created",
+          "is_active": false,
+          "last_activity": "2025-07-12T11:00:55.619Z",
+          "created_at": "2025-07-12T11:00:55.619Z",
+          "updated_at": "2025-07-12T11:00:55.619Z"
+        },
+        {
+          "id": 4,
+          "user_id": "44915301",
+          "domain_path": "hammad",
+          "white_label_id": 2,
+          "session_id": "6gPEsq6lzFilUYPGlxdvMnWqZPVZA_nA",
+          "is_active": false,
+          "last_activity": "2025-07-12T11:25:35.093Z",
+          "created_at": "2025-07-12T11:25:35.101Z",
+          "updated_at": "2025-07-12T11:25:35.101Z"
+        }
+      ]
+    },
+    {
+      "name": "end_user_activities",
+      "postgresqlRecords": 74,
+      "sampleData": [
+        {
+          "id": 1,
+          "user_id": "munibahmed125521@gmail.com",
+          "white_label_id": 1,
+          "activity_type": "signup",
+          "description": "User signed up via hammad domain",
+          "metadata": {
+            "ipAddress": "127.0.0.1",
+            "userAgent": "Mozilla/5.0",
+            "domainPath": "hammad"
+          },
+          "created_at": "2025-07-03T10:54:13.664Z"
+        },
+        {
+          "id": 2,
+          "user_id": "munibahmed125521@gmail.com",
+          "white_label_id": 1,
+          "activity_type": "login",
+          "description": "User logged in via hammad domain",
+          "metadata": {
+            "ipAddress": "127.0.0.1",
+            "userAgent": "Mozilla/5.0",
+            "domainPath": "hammad"
+          },
+          "created_at": "2025-07-04T10:54:13.664Z"
+        }
+      ]
+    },
+    {
+      "name": "integration_logs",
+      "postgresqlRecords": 1,
+      "sampleData": [
+        {
+          "id": 1,
+          "integration_id": 1,
+          "action": "connect",
+          "status": "success",
+          "message": "Successfully connected stripe",
+          "error_details": null,
+          "metadata": null,
+          "created_at": "2025-06-09T18:54:50.233Z"
+        }
+      ]
+    },
+    {
+      "name": "integrations",
+      "postgresqlRecords": 1,
+      "sampleData": [
+        {
+          "id": 1,
+          "service_name": "nmi",
+          "display_name": "NMI Payment Gateway",
+          "description": "Secure payment processing and merchant services platform",
+          "category": "payment",
+          "is_active": true,
+          "is_connected": true,
+          "api_key_encrypted": "7917c8d8a12688dfb65fedfa97af70be:a51edb11db8a531ca7e3351322db5cf3d4f0fec8032e092f60cc9d01f41908392d7cc77ec1d907ee09e0035ea651f7b27d25b947b5a33c9dc96cb58c024f27867463f0c77e77490df9ffdd949e4bf86eecac0de143067c4edd0b6b5b2ee695d9d3b4379095473b266b08d156ff9958e1",
+          "webhook_url": null,
+          "settings": {},
+          "last_sync_at": "2025-06-09T18:54:50.202Z",
+          "user_id": "43537113",
+          "white_label_id": null,
+          "created_at": "2025-06-09T18:54:50.205Z",
+          "updated_at": "2025-06-09T18:54:50.205Z"
+        }
+      ]
+    },
+    {
+      "name": "landing_pages",
+      "postgresqlRecords": 163,
+      "sampleData": [
+        {
+          "id": 2,
+          "user_id": "43537113",
+          "name": "My Landing Page",
+          "elements": [],
+          "settings": {
+            "zoom": 1,
+            "viewMode": "desktop",
+            "canvasHeight": 1200
+          },
+          "is_published": false,
+          "published_at": null,
+          "created_at": "2025-06-24T16:02:55.874Z",
+          "updated_at": "2025-06-28T18:05:58.876Z",
+          "domain_path": null
+        },
+        {
+          "id": 87,
+          "user_id": "44187263",
+          "name": "My Business - Landing Page",
+          "elements": [
+            {
+              "id": "hero-section",
+              "name": "Hero Section",
+              "type": "hero",
+              "style": {
+                "color": "#ffffff",
+                "width": "100%",
+                "height": 600,
+                "display": "flex",
+                "padding": 80,
+                "position": "relative",
+                "textAlign": "center",
+                "alignItems": "center",
+                "background": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                "flexDirection": "column",
+                "backgroundSize": "cover",
+                "justifyContent": "center",
+                "backgroundImage": "url('https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&auto=format&fit=crop&w=2850&q=80')",
+                "backgroundPosition": "center",
+                "backgroundBlendMode": "overlay"
+              },
+              "locked": false,
+              "content": {
+                "title": "Transform Your Business My Business",
+                "subtitle": "We help businesses grow with cutting-edge strategies and proven results. Join thousands of successful companies who trust our platform.",
+                "buttonUrl": "#pricing",
+                "buttonText": "View Our Plans"
+              },
+              "visible": true
+            },
+            {
+              "id": "features-section",
+              "name": "Features Section",
+              "type": "features",
+              "style": {
+                "width": "100%",
+                "height": 500,
+                "display": "flex",
+                "padding": 80,
+                "position": "relative",
+                "textAlign": "center",
+                "alignItems": "center",
+                "flexDirection": "column",
+                "justifyContent": "center",
+                "backgroundColor": "#f8fafc"
+              },
+              "locked": false,
+              "content": {
+                "title": "Why Choose Our Platform",
+                "features": [
+                  {
+                    "icon": "🚀",
+                    "title": "Expert-Driven Solutions",
+                    "description": "Our team of professionals delivers results that exceed expectations"
+                  },
+                  {
+                    "icon": "📈",
+                    "title": "Proven Track Record",
+                    "description": "Thousands of successful implementations and satisfied clients"
+                  },
+                  {
+                    "icon": "🛡️",
+                    "title": "24/7 Premium Support",
+                    "description": "Round-the-clock assistance to ensure your success"
+                  },
+                  {
+                    "icon": "💰",
+                    "title": "Money-Back Guarantee",
+                    "description": "Risk-free investment with our satisfaction guarantee"
+                  }
+                ],
+                "subtitle": "Discover the features that make us the preferred choice for businesses world"
+              },
+              "visible": true
+            },
+            {
+              "id": "pricing-section",
+              "name": "Pricing Section",
+              "type": "pricing",
+              "style": {
+                "width": "100%",
+                "height": 600,
+                "display": "flex",
+                "padding": 80,
+                "position": "relative",
+                "textAlign": "center",
+                "alignItems": "center",
+                "flexDirection": "column",
+                "justifyContent": "center",
+                "backgroundColor": "#ffffff"
+              },
+              "locked": false,
+              "content": {
+                "plans": [
+                  {
+                    "name": "Starter",
+                    "price": "$29",
+                    "period": "/month",
+                    "features": [
+                      "✓ Basic Features",
+                      "✓ Email Support",
+                      "✓ 5 Projects",
+                      "✓ Monthly Reports"
+                    ],
+                    "buttonUrl": "#contact",
+                    "buttonText": "Get Started",
+                    "highlighted": false
+                  },
+                  {
+                    "name": "Professional",
+                    "price": "$79",
+                    "period": "/month",
+                    "features": [
+                      "✓ Advanced Features",
+                      "✓ Priority Support",
+                      "✓ Unlimited Projects",
+                      "✓ Weekly Reports",
+                      "✓ Custom Integrations"
+                    ],
+                    "buttonUrl": "#contact",
+                    "buttonText": "Get Started",
+                    "highlighted": true
+                  },
+                  {
+                    "name": "Enterprise",
+                    "price": "$199",
+                    "period": "/month",
+                    "features": [
+                      "✓ All Features",
+                      "✓ Dedicated Support",
+                      "✓ White Label",
+                      "✓ Daily Reports",
+                      "✓ API Access"
+                    ],
+                    "buttonUrl": "#contact",
+                    "buttonText": "Contact Sales",
+                    "highlighted": false
+                  }
+                ],
+                "title": "Choose Your Plan",
+                "subtitle": "Select the perfect plan for your business needs"
+              },
+              "visible": true
+            },
+            {
+              "id": "testimonials-section",
+              "name": "Testimonials Section",
+              "type": "testimonial",
+              "style": {
+                "width": "100%",
+                "height": 400,
+                "display": "flex",
+                "padding": 80,
+                "position": "relative",
+                "textAlign": "center",
+                "alignItems": "center",
+                "flexDirection": "column",
+                "justifyContent": "center",
+                "backgroundColor": "#f1f5f9"
+              },
+              "locked": false,
+              "content": {
+                "title": "What Our Clients Say",
+                "testimonials": [
+                  {
+                    "name": "Sarah Johnson",
+                    "role": "CEO, TechCorp",
+                    "text": "This platform transformed our business operations. The results exceeded our expectations and the support team is exceptional.",
+                    "image": "https://images.unsplash.com/photo-1494790108755-2616b612b5bb?w=150&h=150&fit=crop&crop=face"
+                  },
+                  {
+                    "name": "Michael Chen",
+                    "role": "Founder, StartupX",
+                    "text": "Outstanding service and incredible value. We've seen a 300% increase in efficiency since implementing their solutions.",
+                    "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"
+                  },
+                  {
+                    "name": "Emily Rodriguez",
+                    "role": "Director, GrowthLab",
+                    "text": "Professional, reliable, and results-driven. This platform is exactly what our business needed to scale effectively.",
+                    "image": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face"
+                  }
+                ]
+              },
+              "visible": true
+            },
+            {
+              "id": "contact-section",
+              "name": "Contact Section",
+              "type": "contact",
+              "style": {
+                "color": "#ffffff",
+                "width": "100%",
+                "height": 400,
+                "display": "flex",
+                "padding": 80,
+                "position": "relative",
+                "textAlign": "center",
+                "alignItems": "center",
+                "background": "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
+                "flexDirection": "column",
+                "justifyContent": "center"
+              },
+              "locked": false,
+              "content": {
+                "title": "Ready to Get Started?",
+                "subtitle": "Join thousands of businesses already growing with our platform",
+                "buttonUrl": "#signup",
+                "buttonText": "Start Your Free Trial",
+                "contactInfo": {
+                  "email": "hello@yourbusiness.com",
+                  "phone": "+1 (555) 123-4567",
+                  "address": "123 Business St, City, State 12345"
+                }
+              },
+              "visible": true
+            },
+            {
+              "id": "footer-section",
+              "name": "Footer Section",
+              "type": "footer",
+              "style": {
+                "color": "#9ca3af",
+                "width": "100%",
+                "height": 200,
+                "display": "flex",
+                "padding": 40,
+                "position": "relative",
+                "textAlign": "center",
+                "alignItems": "center",
+                "flexDirection": "column",
+                "justifyContent": "center",
+                "backgroundColor": "#1f2937"
+              },
+              "locked": false,
+              "content": {
+                "links": [
+                  {
+                    "url": "#privacy",
+                    "text": "Privacy Policy"
+                  },
+                  {
+                    "url": "#terms",
+                    "text": "Terms of Service"
+                  },
+                  {
+                    "url": "#contact",
+                    "text": "Contact Us"
+                  }
+                ],
+                "copyright": "© 2024 My Business. All rights reserved.",
+                "companyName": "My Business",
+                "socialLinks": [
+                  {
+                    "url": "#",
+                    "platform": "twitter"
+                  },
+                  {
+                    "url": "#",
+                    "platform": "linkedin"
+                  },
+                  {
+                    "url": "#",
+                    "platform": "facebook"
+                  }
+                ]
+              },
+              "visible": true
+            }
+          ],
+          "settings": {
+            "zoom": 1,
+            "viewMode": "desktop",
+            "canvasHeight": 800
+          },
+          "is_published": true,
+          "published_at": "2025-07-01T09:10:30.420Z",
+          "created_at": "2025-07-01T09:10:30.049Z",
+          "updated_at": "2025-07-01T09:10:30.385Z",
+          "domain_path": null
+        }
+      ]
+    },
+    {
+      "name": "password_reset_tokens",
+      "postgresqlRecords": 1,
+      "sampleData": [
+        {
+          "id": 7,
+          "user_id": "43537113",
+          "hashed_token": "495aef7a50a6bca61f3eaf7ded58d601949d8d1770755d2a322b4ee888a30c64",
+          "expires_at": "2025-09-13T18:29:57.642Z",
+          "used": false,
+          "created_at": "2025-09-13T17:29:57.708Z"
+        }
+      ]
+    },
+    {
+      "name": "plans",
+      "postgresqlRecords": 55,
+      "sampleData": [
+        {
+          "id": 4,
+          "name": "Starter Plan",
+          "description": "Perfect for small businesses getting started",
+          "monthly_price": "29.99",
+          "affiliate_commission_percentage": "10.0",
+          "max_users": 5,
+          "features": {
+            "features": [
+              "Basic Dashboard",
+              "Email Support",
+              "5 User Accounts"
+            ]
+          },
+          "is_active": true,
+          "created_by": "super_admin_1",
+          "created_at": "2025-06-09T20:08:33.814Z",
+          "updated_at": "2025-06-09T20:08:33.814Z",
+          "selected_categories": [],
+          "selected_products": [],
+          "is_public": false,
+          "accesses": [],
+          "is_main_site_plan": false,
+          "status": "published",
+          "scheduled_at": null,
+          "published_at": null,
+          "allow_affiliate_promotion": false
+        },
+        {
+          "id": 5,
+          "name": "Professional Plan",
+          "description": "Ideal for growing businesses",
+          "monthly_price": "79.99",
+          "affiliate_commission_percentage": "15.0",
+          "max_users": 25,
+          "features": {
+            "features": [
+              "Advanced Analytics",
+              "Priority Support",
+              "25 User Accounts",
+              "Custom Branding"
+            ]
+          },
+          "is_active": true,
+          "created_by": "super_admin_1",
+          "created_at": "2025-06-09T20:08:33.814Z",
+          "updated_at": "2025-06-09T20:08:33.814Z",
+          "selected_categories": [],
+          "selected_products": [],
+          "is_public": false,
+          "accesses": [],
+          "is_main_site_plan": false,
+          "status": "published",
+          "scheduled_at": null,
+          "published_at": null,
+          "allow_affiliate_promotion": false
+        }
+      ]
+    },
+    {
+      "name": "products",
+      "postgresqlRecords": 34,
+      "sampleData": [
+        {
+          "id": 51,
+          "white_label_id": 7,
+          "name": "asalllll",
+          "description": "ass",
+          "price": "22.00",
+          "image_url": "",
+          "is_active": true,
+          "created_at": "2025-07-13T16:46:58.367Z",
+          "updated_at": "2025-07-13T16:46:58.367Z",
+          "category_id": null,
+          "type": "document",
+          "content_url": "entry_A22B11111_1747581455551_1752443217361-399200082.pdf",
+          "access_duration": null,
+          "created_by": "44187263",
+          "metadata": null,
+          "attachments": []
+        },
+        {
+          "id": 13,
+          "white_label_id": 2,
+          "name": "React.js",
+          "description": "React is a free and open-source front-end JavaScript library that aims to make building user interfaces based on components more \"seamless\". It is maintained by Meta and a community of individual developers and companies.",
+          "price": "5.00",
+          "image_url": "",
+          "is_active": true,
+          "created_at": "2025-06-21T17:16:45.129Z",
+          "updated_at": "2025-07-14T09:15:07.352Z",
+          "category_id": 32,
+          "type": "video",
+          "content_url": "If you google which city never sleeps, it says New York but I kept staring out of my window one _1752502507003-364534185.mp4",
+          "access_duration": null,
+          "created_by": "43537113",
+          "metadata": null,
+          "attachments": []
+        }
+      ]
+    },
+    {
+      "name": "purchase_history",
+      "postgresqlRecords": 161,
+      "sampleData": [
+        {
+          "id": 1,
+          "user_id": "munibahmed125521@gmail.com",
+          "white_label_id": 1,
+          "plan_id": 1,
+          "amount": "69.00",
+          "transaction_id": "txn_12345",
+          "payment_method": "NMI Gateway",
+          "status": "completed",
+          "metadata": {
+            "planName": "YouTube",
+            "domainPath": "hammad"
+          },
+          "created_at": "2025-07-04T10:54:21.480Z"
+        },
+        {
+          "id": 2,
+          "user_id": "test@example.com",
+          "white_label_id": 1,
+          "plan_id": 1,
+          "amount": "5.00",
+          "transaction_id": "txn_12346",
+          "payment_method": "NMI Gateway",
+          "status": "completed",
+          "metadata": {
+            "planName": "YouTube",
+            "domainPath": "hammad"
+          },
+          "created_at": "2025-07-03T10:54:21.480Z"
+        }
+      ]
+    },
+    {
+      "name": "referral_links",
+      "postgresqlRecords": 2,
+      "sampleData": [
+        {
+          "id": 1,
+          "affiliate_id": "43537113",
+          "referral_code": "REF_43537113_1751064252353",
+          "is_active": true,
+          "total_clicks": 0,
+          "total_signups": 0,
+          "created_at": "2025-06-27T17:44:12.361Z",
+          "updated_at": "2025-06-27T17:44:12.361Z"
+        },
+        {
+          "id": 2,
+          "affiliate_id": "44187263",
+          "referral_code": "REF_44187263_1751156741217",
+          "is_active": true,
+          "total_clicks": 0,
+          "total_signups": 0,
+          "created_at": "2025-06-28T19:25:41.225Z",
+          "updated_at": "2025-06-28T19:25:41.225Z"
+        }
+      ]
+    },
+    {
+      "name": "referral_signups",
+      "postgresqlRecords": 2,
+      "sampleData": [
+        {
+          "id": 2,
+          "referral_link_id": 1,
+          "affiliate_id": "43537113",
+          "signup_user_id": "test-wl-client-1",
+          "ip_address": null,
+          "user_agent": null,
+          "created_at": "2025-06-27T18:32:08.597Z"
+        },
+        {
+          "id": 3,
+          "referral_link_id": 1,
+          "affiliate_id": "43537113",
+          "signup_user_id": "test-wl-client-2",
+          "ip_address": null,
+          "user_agent": null,
+          "created_at": "2025-06-27T18:32:25.368Z"
+        }
+      ]
+    },
+    {
+      "name": "referral_tracking",
+      "postgresqlRecords": 40,
+      "sampleData": [
+        {
+          "id": 2,
+          "affiliate_id": "44377090",
+          "referred_user_id": "44443117",
+          "white_label_id": 11,
+          "domain_path": "epicaffiliate",
+          "status": null,
+          "created_at": "2025-07-16T09:30:00.000Z",
+          "updated_at": "2025-07-17T17:18:43.780Z",
+          "referral_source": "landing_page"
+        },
+        {
+          "id": 1,
+          "affiliate_id": "44377090",
+          "referred_user_id": "43537113",
+          "white_label_id": 11,
+          "domain_path": "epicaffiliate",
+          "status": null,
+          "created_at": "2025-07-17T05:15:00.000Z",
+          "updated_at": "2025-07-17T17:18:43.780Z",
+          "referral_source": "landing_page"
+        }
+      ]
+    },
+    {
+      "name": "sessions",
+      "postgresqlRecords": 6,
+      "sampleData": [
+        {
+          "sid": "MFzE_P07CP-m6TL2I_IAFnJqE0hGGlCU",
+          "sess": {
+            "cookie": {
+              "path": "/",
+              "secure": true,
+              "expires": "2025-09-21T16:01:31.477Z",
+              "httpOnly": true,
+              "originalMaxAge": 604800000
+            },
+            "passport": {
+              "user": "6e5cb5fb-6b38-41fb-88e5-fcf235f39fc5"
+            }
+          },
+          "expire": "2025-09-21T11:10:20.000Z"
+        },
+        {
+          "sid": "5DLxgKAwxiO4xMgSTSRlWwQK8JyxmFBv",
+          "sess": {
+            "cookie": {
+              "path": "/",
+              "secure": false,
+              "expires": "2025-09-20T17:18:38.969Z",
+              "httpOnly": true,
+              "originalMaxAge": 604800000
+            },
+            "passport": {
+              "user": "43537113"
+            }
+          },
+          "expire": "2025-09-20T17:03:12.000Z"
+        }
+      ]
+    },
+    {
+      "name": "subscriptions",
+      "postgresqlRecords": 158,
+      "sampleData": [
+        {
+          "id": 26,
+          "white_label_id": 7,
+          "plan_id": 59,
+          "status": "cancelled",
+          "billing_cycle": "monthly",
+          "amount": "2.00",
+          "next_billing_date": "2025-08-11T10:23:33.621Z",
+          "created_at": "2025-07-12T10:23:33.630Z",
+          "updated_at": "2025-07-22T19:45:15.394Z",
+          "referral_code": null
+        },
+        {
+          "id": 27,
+          "white_label_id": 7,
+          "plan_id": 59,
+          "status": "cancelled",
+          "billing_cycle": "monthly",
+          "amount": "2.00",
+          "next_billing_date": "2025-08-11T11:30:37.308Z",
+          "created_at": "2025-07-12T11:30:37.315Z",
+          "updated_at": "2025-07-22T19:45:15.394Z",
+          "referral_code": null
+        }
+      ]
+    },
+    {
+      "name": "templates",
+      "postgresqlRecords": 1,
+      "sampleData": [
+        {
+          "id": 1,
+          "name": "test",
+          "description": "test",
+          "type": "dashboard",
+          "category": "business",
+          "preview_url": "https://analytics.google.com/",
+          "thumbnail_url": "https://analytics.google.com/",
+          "config_schema": null,
+          "default_config": null,
+          "is_active": true,
+          "is_premium": true,
+          "created_by": "43537113",
+          "created_at": "2025-06-09T19:41:41.725Z",
+          "updated_at": "2025-06-09T19:41:41.725Z"
+        }
+      ]
+    },
+    {
+      "name": "user_preferences",
+      "postgresqlRecords": 23,
+      "sampleData": [
+        {
+          "id": 4,
+          "user_id": "5qa8llwaph4fhut",
+          "theme": "dark",
+          "language": "en",
+          "timezone": "UTC",
+          "currency": "USD",
+          "primary_color": "#ff0000",
+          "secondary_color": "#ffff00",
+          "logo_url": null,
+          "email_notifications": true,
+          "marketing_emails": false,
+          "created_at": "2025-08-14T12:47:04.145Z",
+          "updated_at": "2025-08-14T12:53:02.024Z"
+        },
+        {
+          "id": 1,
+          "user_id": "44187263",
+          "theme": "light",
+          "language": "en",
+          "timezone": "UTC",
+          "currency": "USD",
+          "primary_color": "#0000FF",
+          "secondary_color": "#ffffff",
+          "logo_url": null,
+          "email_notifications": false,
+          "marketing_emails": false,
+          "created_at": "2025-08-14T06:52:21.313Z",
+          "updated_at": "2025-08-31T13:46:28.833Z"
+        }
+      ]
+    },
+    {
+      "name": "user_sessions",
+      "postgresqlRecords": 79,
+      "sampleData": [
+        {
+          "id": 1,
+          "user_id": "j756dzpftjionpa",
+          "white_label_id": 51,
+          "session_token": "GXrcq_Tsu_mCYbIC-gKsYAO6mgRcERP2",
+          "is_active": true,
+          "ip_address": "10.82.4.66",
+          "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+          "last_active_at": "2025-08-20T17:50:57.477Z",
+          "created_at": "2025-08-20T17:50:57.477Z",
+          "expires_at": null
+        },
+        {
+          "id": 2,
+          "user_id": "62b7hiatqx20iaj",
+          "white_label_id": 50,
+          "session_token": "Ng_HgJNNRHxdR8849gNVRRC23kKR41fE",
+          "is_active": true,
+          "ip_address": "10.82.0.185",
+          "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+          "last_active_at": "2025-08-20T17:57:21.726Z",
+          "created_at": "2025-08-20T17:57:21.726Z",
+          "expires_at": null
+        }
+      ]
+    },
+    {
+      "name": "users",
+      "postgresqlRecords": 114,
+      "sampleData": [
+        {
+          "id": "c3082ce4-1026-4d8a-a517-e2366d0e9164",
+          "email": "faizanfezii7@gmail.com",
+          "first_name": "faizan",
+          "last_name": "ahmed",
+          "profile_image_url": null,
+          "role": "white_label_client",
+          "created_at": "2025-09-13T12:26:52.856Z",
+          "updated_at": "2025-09-13T12:26:52.888Z",
+          "is_active": true,
+          "white_label_id": 69,
+          "name": null,
+          "phone": null,
+          "company": null,
+          "password": "$2b$10$G5VeseSWzqXeRwnzNchewONpTWFzQvoYj1DY1hNDh1B3leQvmi5C.",
+          "referral_code": null,
+          "username": "faizan",
+          "google_id": null,
+          "auth_provider": "local"
+        },
+        {
+          "id": "aff_003",
+          "email": "lisa.rodriguez@salesforce.com",
+          "first_name": "Lisa",
+          "last_name": "Rodriguez",
+          "profile_image_url": null,
+          "role": "super_admin_affiliate",
+          "created_at": "2024-11-24T16:28:52.245Z",
+          "updated_at": "2025-07-24T16:28:52.245Z",
+          "is_active": true,
+          "white_label_id": null,
+          "name": "Lisa Rodriguez",
+          "phone": "+1-555-0103",
+          "company": "SalesForce Elite",
+          "password": null,
+          "referral_code": "LISA2025",
+          "username": null,
+          "google_id": null,
+          "auth_provider": "local"
+        }
+      ]
+    },
+    {
+      "name": "white_labels",
+      "postgresqlRecords": 74,
+      "sampleData": [
+        {
+          "id": 3,
+          "user_id": "client_1",
+          "plan_id": null,
+          "business_name": "Example Business Solutions",
+          "domain": "example.whitelabelpro.com",
+          "logo_url": null,
+          "primary_color": "#3B82F6",
+          "secondary_color": "#1E40AF",
+          "is_active": true,
+          "invited_by": null,
+          "created_at": "2025-06-09T20:08:09.593Z",
+          "updated_at": "2025-06-09T20:08:09.593Z",
+          "domain_path": null,
+          "default_landing_page_id": 139
+        },
+        {
+          "id": 4,
+          "user_id": "test-wl-client-1",
+          "plan_id": null,
+          "business_name": "Smith Digital Solutions",
+          "domain": "smithdigital.com",
+          "logo_url": null,
+          "primary_color": "#2563EB",
+          "secondary_color": "#64748B",
+          "is_active": true,
+          "invited_by": null,
+          "created_at": "2025-06-27T18:32:02.768Z",
+          "updated_at": "2025-06-27T18:32:02.768Z",
+          "domain_path": null,
+          "default_landing_page_id": 152
+        }
+      ]
+    }
+  ],
+  "emptyTablesInPostgreSQL": [
+    "affiliate_plan_visibility",
+    "ai_content_optimizations",
+    "ai_recommendations",
+    "analytics_events",
+    "analytics_metrics",
+    "announcement_analytics",
+    "announcement_shares",
+    "client_template_customizations",
+    "custom_domains",
+    "link_meta_images",
+    "payment_accounts",
+    "plan_categories",
+    "plan_products",
+    "platform_settings",
+    "referral_clicks",
+    "referral_commissions",
+    "themes",
+    "user_theme_preferences"
+  ],
+  "totalRealDataTables": 28,
+  "totalEmptyTables": 18,
+  "totalPostgreSQLRecords": 1510
+}

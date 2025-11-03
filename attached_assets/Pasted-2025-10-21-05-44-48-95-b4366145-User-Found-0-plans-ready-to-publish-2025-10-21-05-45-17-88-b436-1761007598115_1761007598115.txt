@@ -1,0 +1,112 @@
+2025-10-21 05:44:48.95
+b4366145
+User
+Found 0 plans ready to publish
+2025-10-21 05:45:17.88
+b4366145
+User
+Checking for scheduled plans to publish at: 2025-10-21T00:45:17.879Z
+2025-10-21 05:45:17.88
+b4366145
+User
+Querying for scheduled plans where scheduledAt <= 2025-10-21T00:45:17.879Z
+2025-10-21 05:45:18.35
+b4366145
+User
+Error getting scheduled plans ready to publish: NeonDbError: relation "plans" does not exist
+2025-10-21 05:45:18.35
+b4366145
+User
+at execute (file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1556:55)
+2025-10-21 05:45:18.35
+b4366145
+User
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-10-21 05:45:18.35
+b4366145
+User
+at async NeonHttpPreparedQuery.execute (file:///home/runner/workspace/node_modules/drizzle-orm/neon-http/session.js:40:20)
+2025-10-21 05:45:18.35
+b4366145
+User
+at async DatabaseStorage.getScheduledPlansReadyToPublish (file:///home/runner/workspace/dist/index.js:5011:34)
+2025-10-21 05:45:18.35
+b4366145
+User
+at async Timeout.publishScheduledPlans [as _onTimeout] (file:///home/runner/workspace/dist/index.js:17646:30) {
+2025-10-21 05:45:18.35
+b4366145
+User
+severity: 'ERROR',
+2025-10-21 05:45:18.35
+b4366145
+User
+code: '42P01',
+2025-10-21 05:45:18.35
+b4366145
+User
+detail: undefined,
+2025-10-21 05:45:18.35
+b4366145
+User
+hint: undefined,
+2025-10-21 05:45:18.35
+b4366145
+User
+position: '334',
+2025-10-21 05:45:18.35
+b4366145
+User
+internalPosition: undefined,
+2025-10-21 05:45:18.35
+b4366145
+User
+internalQuery: undefined,
+2025-10-21 05:45:18.35
+b4366145
+User
+where: undefined,
+2025-10-21 05:45:18.35
+b4366145
+User
+schema: undefined,
+2025-10-21 05:45:18.35
+b4366145
+User
+table: undefined,
+2025-10-21 05:45:18.35
+b4366145
+User
+column: undefined,
+2025-10-21 05:45:18.35
+b4366145
+User
+dataType: undefined,
+2025-10-21 05:45:18.35
+b4366145
+User
+constraint: undefined,
+2025-10-21 05:45:18.35
+b4366145
+User
+file: 'parse_relation.c',
+2025-10-21 05:45:18.35
+b4366145
+User
+line: '1449',
+2025-10-21 05:45:18.35
+b4366145
+User
+routine: 'parserOpenTable',
+2025-10-21 05:45:18.35
+b4366145
+User
+sourceError: undefined
+2025-10-21 05:45:18.35
+b4366145
+User
+}
+2025-10-21 05:45:18.35
+b4366145
+User
+Found 0 plans ready to publish
