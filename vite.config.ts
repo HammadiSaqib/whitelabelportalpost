@@ -23,6 +23,7 @@ export default defineConfig({
       "@": path.resolve(__dirname, "client", "src"),
       "@shared": path.resolve(__dirname, "shared"),
       "@assets": path.resolve(__dirname, "attached_assets"),
+      "dompurify": path.resolve(__dirname, "node_modules/dompurify/dist/purify.cjs.js"),
     },
   },
   root: path.resolve(__dirname, "client"),
@@ -32,6 +33,9 @@ export default defineConfig({
     rollupOptions: {
       input: path.resolve(__dirname, "client", "index.html")
     }
+  },
+  optimizeDeps: {
+    exclude: ['dompurify']
   },
   server: {
     fs: {
