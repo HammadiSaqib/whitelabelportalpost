@@ -24,7 +24,14 @@ export function getSession() {
   });
   
   console.log('✅ In-memory session store initialized');
-  
+  // In production, cookies marked secure require HTTPS. When running locally
+  // with `npm start` over HTTP, using `secure: true` prevents the browser from
+  // setting the session cookie which makes login appear to "not persist".
+  // To support local production testing, allow opting into secure cookies via env.
+  const isProd = process.env.NODE_ENV === "production";
+  const useSecureCookies = isProd && process.env.SESSION_COOKIE_SECURE === 'true';
+  const sameSite: "lax" | "none" = useSecureCookies ? "none" : "lax";
+
   return session({
     secret: process.env.SESSION_SECRET || "your-secret-key-here",
     store: sessionStore,
@@ -32,7 +39,8 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: useSecureCookies,
+      sameSite,
       maxAge: sessionTtl,
     },
   });

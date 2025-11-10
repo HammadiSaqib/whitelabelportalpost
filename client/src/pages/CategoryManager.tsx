@@ -323,14 +323,30 @@ function CategoryManager() {
   };
 
   // Build unlimited depth hierarchical tree (VS Code style)
-  const buildCategoryTree = (parentId: number | null = null, depth: number = 0): (Category & { children: any[]; depth: number })[] => {
+  const buildCategoryTree = (
+    parentId: number | null = null,
+    depth: number = 0,
+    path: Set<number> = new Set()
+  ): (Category & { children: any[]; depth: number })[] => {
     return categories
       .filter(cat => cat.parentCategoryId === parentId)
-      .map(category => ({
-        ...category,
-        children: buildCategoryTree(category.id, depth + 1),
-        depth
-      }));
+      .map(category => {
+        // Guard against cycles: if we encounter a category already in the path, stop recursing
+        if (path.has(category.id)) {
+          return {
+            ...category,
+            children: [],
+            depth
+          };
+        }
+        const nextPath = new Set(path);
+        nextPath.add(category.id);
+        return {
+          ...category,
+          children: buildCategoryTree(category.id, depth + 1, nextPath),
+          depth
+        };
+      });
   };
 
   const categoryTree = buildCategoryTree();

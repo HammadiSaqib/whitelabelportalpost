@@ -441,7 +441,7 @@ export interface IStorage {
   getUserPreferences(userId: string): Promise<UserPreferences | undefined>;
   createUserPreferences(preferences: InsertUserPreferences): Promise<UserPreferences>;
   updateUserPreferences(userId: string, preferences: Partial<InsertUserPreferences>): Promise<UserPreferences>;
-  getScheduledPlansReadyToPublish(currentTime: Date): Promise<Plan[]>;
+  getScheduledPlansReadyToPublish(currentTime: string): Promise<Plan[]>;
   
   // Payment account operations
   getPaymentAccount(userId: string): Promise<PaymentAccount | undefined>;
@@ -1333,9 +1333,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getReferralCommissionsByAffiliate(affiliateId: string): Promise<any[]> {
-    return db
+    // Fetch raw commission rows
+    const rows = await db
       .select({
         id: referralCommissions.id,
+        subscriptionId: referralCommissions.subscriptionId,
         planId: referralCommissions.planId,
         planName: plans.name,
         commissionAmount: referralCommissions.commissionAmount,
@@ -1352,20 +1354,45 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(users, eq(referralCommissions.purchaserUserId, users.id))
       .where(eq(referralCommissions.affiliateId, affiliateId))
       .orderBy(desc(referralCommissions.createdAt));
+
+    // Deduplicate by subscriptionId when available (unique purchase)
+    const seenSubs = new Set<number | string>();
+    const deduped = rows.filter((r) => {
+      if (r.subscriptionId == null) return true; // no subscription id, keep
+      if (seenSubs.has(r.subscriptionId)) return false;
+      seenSubs.add(r.subscriptionId);
+      return true;
+    });
+
+    return deduped;
   }
 
   async getTotalReferralCommissions(affiliateId: string): Promise<{ totalCommissions: string; totalReferrals: number }> {
-    const [result] = await db
+    // Pull commission rows and deduplicate by subscriptionId
+    const rows = await db
       .select({
-        totalCommissions: sql<string>`coalesce(sum(${referralCommissions.commissionAmount}), '0')`,
-        totalReferrals: sql<number>`count(*)`,
+        subscriptionId: referralCommissions.subscriptionId,
+        commissionAmount: referralCommissions.commissionAmount,
       })
       .from(referralCommissions)
       .where(eq(referralCommissions.affiliateId, affiliateId));
-    
+
+    const seenSubs = new Set<number | string>();
+    let totalCommissionNum = 0;
+    let totalReferralsNum = 0;
+
+    for (const r of rows) {
+      const key = r.subscriptionId ?? Symbol('no-sub');
+      if (r.subscriptionId == null || !seenSubs.has(key)) {
+        if (r.subscriptionId != null) seenSubs.add(key);
+        totalCommissionNum += parseFloat(r.commissionAmount || '0');
+        totalReferralsNum += 1;
+      }
+    }
+
     return {
-      totalCommissions: result.totalCommissions || '0',
-      totalReferrals: result.totalReferrals || 0,
+      totalCommissions: totalCommissionNum.toFixed(2),
+      totalReferrals: totalReferralsNum,
     };
   }
 
@@ -2293,7 +2320,7 @@ export class DatabaseStorage implements IStorage {
   async updateProduct(id: number, productData: Partial<InsertProduct>): Promise<Product> {
     const [updatedProduct] = await db
       .update(products)
-      .set({ ...productData, updatedAt: new Date() })
+      .set({ ...productData, updatedAt: new Date().toISOString() })
       .where(eq(products.id, id))
       .returning();
     
@@ -2503,7 +2530,8 @@ export class DatabaseStorage implements IStorage {
 
   async autoPublishScheduledAnnouncements() {
     const now = new Date();
-    console.log('Auto-publish check at:', now.toISOString());
+    const nowIso = now.toISOString();
+    console.log('Auto-publish check at:', nowIso);
     
     // First, find announcements that should be published
     const scheduledAnnouncements = await db
@@ -2517,7 +2545,7 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(announcements.status, 'scheduled'),
-          sql`${announcements.scheduledAt} <= ${now}`,
+          sql`${announcements.scheduledAt} <= ${nowIso}`,
           eq(announcements.isActive, true)
         )
       );
@@ -2534,13 +2562,13 @@ export class DatabaseStorage implements IStorage {
         .update(announcements)
         .set({
           status: 'published',
-          publishedAt: now,
-          updatedAt: now
+          publishedAt: nowIso,
+          updatedAt: nowIso
         })
         .where(
           and(
             eq(announcements.status, 'scheduled'),
-            sql`${announcements.scheduledAt} <= ${now}`,
+            sql`${announcements.scheduledAt} <= ${nowIso}`,
             eq(announcements.isActive, true)
           )
         );
@@ -3651,7 +3679,7 @@ export class DatabaseStorage implements IStorage {
           .update(announcements)
           .set({
             ...updateData,
-            updatedAt: new Date(),
+            updatedAt: new Date().toISOString(),
           })
           .where(eq(announcements.id, id));
         
@@ -3670,7 +3698,7 @@ export class DatabaseStorage implements IStorage {
             .update(announcements)
             .set({
               ...safeData,
-              updatedAt: new Date(),
+              updatedAt: new Date().toISOString(),
             })
             .where(eq(announcements.id, id));
           
@@ -4563,6 +4591,7 @@ export class DatabaseStorage implements IStorage {
     const rawReferrals = await db
       .select({
         id: referralCommissions.id,
+        subscriptionId: referralCommissions.subscriptionId,
         purchaserUserId: referralCommissions.purchaserUserId,
         planId: referralCommissions.planId,
         referralCode: referralCommissions.referralCode,
@@ -4597,8 +4626,17 @@ export class DatabaseStorage implements IStorage {
       .where(eq(referralCommissions.affiliateId, affiliateId))
       .orderBy(desc(referralCommissions.createdAt));
 
+    // Deduplicate by subscriptionId (unique purchase)
+    const seenSubs = new Set<number | string>();
+    const dedupedReferrals = rawReferrals.filter((r: any) => {
+      if (r.subscriptionId == null) return true; // keep if no subscription id
+      if (seenSubs.has(r.subscriptionId)) return false;
+      seenSubs.add(r.subscriptionId);
+      return true;
+    });
+
     // Group by purchaser user ID to aggregate purchases per client
-    const groupedReferrals = rawReferrals.reduce((acc: any, referral: any) => {
+    const groupedReferrals = dedupedReferrals.reduce((acc: any, referral: any) => {
       const userId = referral.purchaserUserId;
       
       if (!acc[userId]) {
@@ -4607,7 +4645,7 @@ export class DatabaseStorage implements IStorage {
           business: referral.business,
           totalCommission: 0,
           totalPurchases: 0,
-          plans: {},
+          plans: {}, // { [planId]: { name, count } }
           lastPurchaseDate: referral.createdAt,
         };
       }
@@ -4617,8 +4655,12 @@ export class DatabaseStorage implements IStorage {
       acc[userId].totalPurchases += 1;
       
       // Track plan purchases
+      const planId = referral.planId;
       const planName = referral.plan?.name || 'Unknown Plan';
-      acc[userId].plans[planName] = (acc[userId].plans[planName] || 0) + 1;
+      if (!acc[userId].plans[planId]) {
+        acc[userId].plans[planId] = { name: planName, count: 0 };
+      }
+      acc[userId].plans[planId].count += 1;
       
       // Update last purchase date
       if (new Date(referral.createdAt) > new Date(acc[userId].lastPurchaseDate)) {
@@ -4634,8 +4676,8 @@ export class DatabaseStorage implements IStorage {
       business: group.business,
       totalCommission: group.totalCommission.toFixed(2),
       totalPurchases: group.totalPurchases,
-      planSummary: Object.entries(group.plans)
-        .map(([planName, count]) => `${planName}(${count})`)
+      planSummary: Object.values(group.plans)
+        .map((p: any) => `${p.name}(${p.count})`)
         .join(', '),
       lastPurchaseDate: group.lastPurchaseDate,
     }));
@@ -5693,7 +5735,7 @@ export class DatabaseStorage implements IStorage {
   async updateUserPreferences(userId: string, updates: Partial<InsertUserPreferences>): Promise<UserPreferences> {
     await db
       .update(userPreferences)
-      .set({ ...updates, updatedAt: new Date() })
+      .set({ ...updates, updatedAt: new Date().toISOString() })
       .where(eq(userPreferences.userId, userId));
     
     // MySQL doesn't support .returning(), so we need to fetch the updated record
@@ -5706,9 +5748,9 @@ export class DatabaseStorage implements IStorage {
     return updatedPreferences[0];
   }
 
-  async getScheduledPlansReadyToPublish(currentTime: Date): Promise<Plan[]> {
+  async getScheduledPlansReadyToPublish(currentTime: string): Promise<Plan[]> {
     try {
-      console.log('Querying for scheduled plans where scheduledAt <=', currentTime.toISOString());
+      console.log('Querying for scheduled plans where scheduledAt <=', currentTime);
       const scheduledPlans = await db
         .select()
         .from(plans)
@@ -6441,20 +6483,26 @@ export class DatabaseStorage implements IStorage {
     try {
       const dateFilter = this.buildDateFilter(startDate, endDate);
       
+      // Build date filter for whiteLabels.createdAt (timestamps stored as strings)
+      const wlConditions: any[] = [];
+      if (startDate) wlConditions.push(gte(whiteLabels.createdAt, new Date(startDate).toISOString()));
+      if (endDate) wlConditions.push(lte(whiteLabels.createdAt, new Date(endDate).toISOString()));
+      const wlDateFilter = wlConditions.length > 1 ? and(...wlConditions) : wlConditions[0];
+      
       // Active white labels count
       const activeWhiteLabels = await db
         .select({ count: sql<number>`count(*)` })
         .from(whiteLabels)
         .where(and(
           eq(whiteLabels.isActive, true),
-          dateFilter ? gte(whiteLabels.createdAt, new Date(startDate!)) : undefined
+          wlDateFilter ? wlDateFilter : undefined
         ));
 
       // New white labels in period
       const newWhiteLabels = await db
         .select({ count: sql<number>`count(*)` })
         .from(whiteLabels)
-        .where(dateFilter || sql`true`);
+        .where(wlDateFilter || sql`true`);
 
       // White label performance
       const whiteLabelPerformance = await db
@@ -6684,13 +6732,13 @@ export class DatabaseStorage implements IStorage {
         const currentWhiteLabels = await db
           .select({ count: sql<number>`count(*)` })
           .from(whiteLabels)
-          .where(currentPeriodFilter);
+          .where(currentPeriodWlFilter || sql`true`);
 
         // Compare period new white labels
         const compareWhiteLabels = await db
           .select({ count: sql<number>`count(*)` })
           .from(whiteLabels)
-          .where(comparePeriodFilter);
+          .where(comparePeriodWlFilter || sql`true`);
 
         comparisonData.whiteLabels = {
           current: Number(currentWhiteLabels[0]?.count || 0),
@@ -6708,12 +6756,12 @@ export class DatabaseStorage implements IStorage {
   private buildDateFilter(startDate?: string, endDate?: string) {
     if (!startDate && !endDate) return undefined;
     
-    const conditions = [];
+    const conditions: any[] = [];
     if (startDate) {
-      conditions.push(gte(purchaseHistory.createdAt, new Date(startDate)));
+      conditions.push(gte(purchaseHistory.createdAt, new Date(startDate).toISOString()));
     }
     if (endDate) {
-      conditions.push(lte(purchaseHistory.createdAt, new Date(endDate)));
+      conditions.push(lte(purchaseHistory.createdAt, new Date(endDate).toISOString()));
     }
     
     return conditions.length > 1 ? and(...conditions) : conditions[0];

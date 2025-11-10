@@ -21,14 +21,29 @@ export default function TreeCategorySelector({
   const [isOpen, setIsOpen] = useState(false);
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
 
-  const buildTree = (parentId: number | null = null): (Category & { children: any[]; depth: number })[] => {
+  const buildTree = (
+    parentId: number | null = null,
+    path: Set<number> = new Set()
+  ): (Category & { children: any[]; depth: number })[] => {
     return categories
       .filter(cat => cat.parentCategoryId === parentId && cat.id !== excludeId)
-      .map(category => ({
-        ...category,
-        children: buildTree(category.id),
-        depth: parentId === null ? 0 : 1
-      }));
+      .map(category => {
+        // Prevent cycles in category tree
+        if (path.has(category.id)) {
+          return {
+            ...category,
+            children: [],
+            depth: parentId === null ? 0 : 1
+          };
+        }
+        const nextPath = new Set(path);
+        nextPath.add(category.id);
+        return {
+          ...category,
+          children: buildTree(category.id, nextPath),
+          depth: parentId === null ? 0 : 1
+        };
+      });
   };
 
   const tree = buildTree();

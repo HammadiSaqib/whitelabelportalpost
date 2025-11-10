@@ -2308,8 +2308,9 @@ var init_storage = __esm({
         });
       }
       async getReferralCommissionsByAffiliate(affiliateId) {
-        return db.select({
+        const rows = await db.select({
           id: referralCommissions.id,
+          subscriptionId: referralCommissions.subscriptionId,
           planId: referralCommissions.planId,
           planName: plans.name,
           commissionAmount: referralCommissions.commissionAmount,
@@ -2321,15 +2322,34 @@ var init_storage = __esm({
           status: referralCommissions.status,
           createdAt: referralCommissions.createdAt
         }).from(referralCommissions).leftJoin(plans, eq(referralCommissions.planId, plans.id)).leftJoin(users, eq(referralCommissions.purchaserUserId, users.id)).where(eq(referralCommissions.affiliateId, affiliateId)).orderBy(desc(referralCommissions.createdAt));
+        const seenSubs = /* @__PURE__ */ new Set();
+        const deduped = rows.filter((r) => {
+          if (r.subscriptionId == null) return true;
+          if (seenSubs.has(r.subscriptionId)) return false;
+          seenSubs.add(r.subscriptionId);
+          return true;
+        });
+        return deduped;
       }
       async getTotalReferralCommissions(affiliateId) {
-        const [result] = await db.select({
-          totalCommissions: sql`coalesce(sum(${referralCommissions.commissionAmount}), '0')`,
-          totalReferrals: sql`count(*)`
+        const rows = await db.select({
+          subscriptionId: referralCommissions.subscriptionId,
+          commissionAmount: referralCommissions.commissionAmount
         }).from(referralCommissions).where(eq(referralCommissions.affiliateId, affiliateId));
+        const seenSubs = /* @__PURE__ */ new Set();
+        let totalCommissionNum = 0;
+        let totalReferralsNum = 0;
+        for (const r of rows) {
+          const key = r.subscriptionId ?? Symbol("no-sub");
+          if (r.subscriptionId == null || !seenSubs.has(key)) {
+            if (r.subscriptionId != null) seenSubs.add(key);
+            totalCommissionNum += parseFloat(r.commissionAmount || "0");
+            totalReferralsNum += 1;
+          }
+        }
         return {
-          totalCommissions: result.totalCommissions || "0",
-          totalReferrals: result.totalReferrals || 0
+          totalCommissions: totalCommissionNum.toFixed(2),
+          totalReferrals: totalReferralsNum
         };
       }
       // Methods for new affiliate commission system
@@ -2895,7 +2915,7 @@ var init_storage = __esm({
         return newProduct;
       }
       async updateProduct(id, productData) {
-        const [updatedProduct] = await db.update(products).set({ ...productData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(products.id, id)).returning();
+        const [updatedProduct] = await db.update(products).set({ ...productData, updatedAt: (/* @__PURE__ */ new Date()).toISOString() }).where(eq(products.id, id)).returning();
         return updatedProduct;
       }
       async deleteProduct(id) {
@@ -3058,7 +3078,8 @@ var init_storage = __esm({
       }
       async autoPublishScheduledAnnouncements() {
         const now = /* @__PURE__ */ new Date();
-        console.log("Auto-publish check at:", now.toISOString());
+        const nowIso = now.toISOString();
+        console.log("Auto-publish check at:", nowIso);
         const scheduledAnnouncements = await db.select({
           id: announcements.id,
           title: announcements.title,
@@ -3067,7 +3088,7 @@ var init_storage = __esm({
         }).from(announcements).where(
           and(
             eq(announcements.status, "scheduled"),
-            sql`${announcements.scheduledAt} <= ${now}`,
+            sql`${announcements.scheduledAt} <= ${nowIso}`,
             eq(announcements.isActive, true)
           )
         );
@@ -3078,12 +3099,12 @@ var init_storage = __esm({
           });
           await db.update(announcements).set({
             status: "published",
-            publishedAt: now,
-            updatedAt: now
+            publishedAt: nowIso,
+            updatedAt: nowIso
           }).where(
             and(
               eq(announcements.status, "scheduled"),
-              sql`${announcements.scheduledAt} <= ${now}`,
+              sql`${announcements.scheduledAt} <= ${nowIso}`,
               eq(announcements.isActive, true)
             )
           );
@@ -3834,7 +3855,7 @@ var init_storage = __esm({
           try {
             await db.update(announcements).set({
               ...updateData,
-              updatedAt: /* @__PURE__ */ new Date()
+              updatedAt: (/* @__PURE__ */ new Date()).toISOString()
             }).where(eq(announcements.id, id));
             const [updated] = await db.select().from(announcements).where(eq(announcements.id, id)).limit(1);
             return updated;
@@ -3843,7 +3864,7 @@ var init_storage = __esm({
               console.log("Targeting columns not yet available, updating without targeting data");
               await db.update(announcements).set({
                 ...safeData,
-                updatedAt: /* @__PURE__ */ new Date()
+                updatedAt: (/* @__PURE__ */ new Date()).toISOString()
               }).where(eq(announcements.id, id));
               const [updated] = await db.select().from(announcements).where(eq(announcements.id, id)).limit(1);
               return updated;
@@ -4395,6 +4416,7 @@ var init_storage = __esm({
       async getReferralsByAffiliate(affiliateId) {
         const rawReferrals = await db.select({
           id: referralCommissions.id,
+          subscriptionId: referralCommissions.subscriptionId,
           purchaserUserId: referralCommissions.purchaserUserId,
           planId: referralCommissions.planId,
           referralCode: referralCommissions.referralCode,
@@ -4422,7 +4444,14 @@ var init_storage = __esm({
             domainPath: whiteLabels.domainPath
           }
         }).from(referralCommissions).leftJoin(users, eq(referralCommissions.purchaserUserId, users.id)).leftJoin(plans, eq(referralCommissions.planId, plans.id)).leftJoin(whiteLabels, eq(users.id, whiteLabels.userId)).where(eq(referralCommissions.affiliateId, affiliateId)).orderBy(desc(referralCommissions.createdAt));
-        const groupedReferrals = rawReferrals.reduce((acc, referral) => {
+        const seenSubs = /* @__PURE__ */ new Set();
+        const dedupedReferrals = rawReferrals.filter((r) => {
+          if (r.subscriptionId == null) return true;
+          if (seenSubs.has(r.subscriptionId)) return false;
+          seenSubs.add(r.subscriptionId);
+          return true;
+        });
+        const groupedReferrals = dedupedReferrals.reduce((acc, referral) => {
           const userId = referral.purchaserUserId;
           if (!acc[userId]) {
             acc[userId] = {
@@ -4431,13 +4460,18 @@ var init_storage = __esm({
               totalCommission: 0,
               totalPurchases: 0,
               plans: {},
+              // { [planId]: { name, count } }
               lastPurchaseDate: referral.createdAt
             };
           }
           acc[userId].totalCommission += parseFloat(referral.commissionAmount || "0");
           acc[userId].totalPurchases += 1;
+          const planId = referral.planId;
           const planName = referral.plan?.name || "Unknown Plan";
-          acc[userId].plans[planName] = (acc[userId].plans[planName] || 0) + 1;
+          if (!acc[userId].plans[planId]) {
+            acc[userId].plans[planId] = { name: planName, count: 0 };
+          }
+          acc[userId].plans[planId].count += 1;
           if (new Date(referral.createdAt) > new Date(acc[userId].lastPurchaseDate)) {
             acc[userId].lastPurchaseDate = referral.createdAt;
           }
@@ -4448,7 +4482,7 @@ var init_storage = __esm({
           business: group.business,
           totalCommission: group.totalCommission.toFixed(2),
           totalPurchases: group.totalPurchases,
-          planSummary: Object.entries(group.plans).map(([planName, count]) => `${planName}(${count})`).join(", "),
+          planSummary: Object.values(group.plans).map((p) => `${p.name}(${p.count})`).join(", "),
           lastPurchaseDate: group.lastPurchaseDate
         }));
       }
@@ -5110,13 +5144,13 @@ var init_storage = __esm({
         return newPreferences[0];
       }
       async updateUserPreferences(userId, updates) {
-        await db.update(userPreferences).set({ ...updates, updatedAt: /* @__PURE__ */ new Date() }).where(eq(userPreferences.userId, userId));
+        await db.update(userPreferences).set({ ...updates, updatedAt: (/* @__PURE__ */ new Date()).toISOString() }).where(eq(userPreferences.userId, userId));
         const updatedPreferences = await db.select().from(userPreferences).where(eq(userPreferences.userId, userId)).limit(1);
         return updatedPreferences[0];
       }
       async getScheduledPlansReadyToPublish(currentTime) {
         try {
-          console.log("Querying for scheduled plans where scheduledAt <=", currentTime.toISOString());
+          console.log("Querying for scheduled plans where scheduledAt <=", currentTime);
           const scheduledPlans = await db.select().from(plans).where(
             and(
               eq(plans.status, "scheduled"),
@@ -5551,11 +5585,15 @@ var init_storage = __esm({
       async getWhiteLabelMetrics(startDate, endDate) {
         try {
           const dateFilter = this.buildDateFilter(startDate, endDate);
+          const wlConditions = [];
+          if (startDate) wlConditions.push(gte(whiteLabels.createdAt, new Date(startDate).toISOString()));
+          if (endDate) wlConditions.push(lte(whiteLabels.createdAt, new Date(endDate).toISOString()));
+          const wlDateFilter = wlConditions.length > 1 ? and(...wlConditions) : wlConditions[0];
           const activeWhiteLabels = await db.select({ count: sql`count(*)` }).from(whiteLabels).where(and(
             eq(whiteLabels.isActive, true),
-            dateFilter ? gte(whiteLabels.createdAt, new Date(startDate)) : void 0
+            wlDateFilter ? wlDateFilter : void 0
           ));
-          const newWhiteLabels = await db.select({ count: sql`count(*)` }).from(whiteLabels).where(dateFilter || sql`true`);
+          const newWhiteLabels = await db.select({ count: sql`count(*)` }).from(whiteLabels).where(wlDateFilter || sql`true`);
           const whiteLabelPerformance = await db.select({
             whiteLabelId: whiteLabels.id,
             businessName: whiteLabels.businessName,
@@ -5710,8 +5748,8 @@ var init_storage = __esm({
             };
           }
           if (metrics.includes("whiteLabels")) {
-            const currentWhiteLabels = await db.select({ count: sql`count(*)` }).from(whiteLabels).where(currentPeriodFilter);
-            const compareWhiteLabels = await db.select({ count: sql`count(*)` }).from(whiteLabels).where(comparePeriodFilter);
+            const currentWhiteLabels = await db.select({ count: sql`count(*)` }).from(whiteLabels).where(currentPeriodWlFilter || sql`true`);
+            const compareWhiteLabels = await db.select({ count: sql`count(*)` }).from(whiteLabels).where(comparePeriodWlFilter || sql`true`);
             comparisonData.whiteLabels = {
               current: Number(currentWhiteLabels[0]?.count || 0),
               previous: Number(compareWhiteLabels[0]?.count || 0)
@@ -5727,10 +5765,10 @@ var init_storage = __esm({
         if (!startDate && !endDate) return void 0;
         const conditions = [];
         if (startDate) {
-          conditions.push(gte(purchaseHistory.createdAt, new Date(startDate)));
+          conditions.push(gte(purchaseHistory.createdAt, new Date(startDate).toISOString()));
         }
         if (endDate) {
-          conditions.push(lte(purchaseHistory.createdAt, new Date(endDate)));
+          conditions.push(lte(purchaseHistory.createdAt, new Date(endDate).toISOString()));
         }
         return conditions.length > 1 ? and(...conditions) : conditions[0];
       }
@@ -7143,6 +7181,9 @@ function getSession() {
     // Prune expired entries every 24h
   });
   console.log("\u2705 In-memory session store initialized");
+  const isProd = process.env.NODE_ENV === "production";
+  const useSecureCookies = isProd && process.env.SESSION_COOKIE_SECURE === "true";
+  const sameSite = useSecureCookies ? "none" : "lax";
   return session({
     secret: process.env.SESSION_SECRET || "your-secret-key-here",
     store: sessionStore,
@@ -7150,7 +7191,8 @@ function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: useSecureCookies,
+      sameSite,
       maxAge: sessionTtl
     }
   });
@@ -19890,7 +19932,8 @@ var vite_config_default = defineConfig({
     alias: {
       "@": path3.resolve(__dirname2, "client", "src"),
       "@shared": path3.resolve(__dirname2, "shared"),
-      "@assets": path3.resolve(__dirname2, "attached_assets")
+      "@assets": path3.resolve(__dirname2, "attached_assets"),
+      "dompurify": path3.resolve(__dirname2, "node_modules/dompurify/dist/purify.cjs.js")
     }
   },
   root: path3.resolve(__dirname2, "client"),
@@ -19900,6 +19943,9 @@ var vite_config_default = defineConfig({
     rollupOptions: {
       input: path3.resolve(__dirname2, "client", "index.html")
     }
+  },
+  optimizeDeps: {
+    exclude: ["dompurify"]
   },
   server: {
     fs: {
@@ -20041,7 +20087,7 @@ async function setupVite(app2, server) {
   });
 }
 function serveStatic(app2) {
-  const distPath = path4.resolve(import.meta.dirname, "public");
+  const distPath = path4.resolve(import.meta.dirname, "..", "dist", "public");
   if (!fs3.existsSync(distPath)) {
     throw new Error(
       `Could not find the build directory: ${distPath}, make sure to build the client first`
